@@ -10,6 +10,7 @@ import { JwtAuthGuard } from 'src/middlewares/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/middlewares/guards/role.guard';
 import { RoleModule } from 'src/role/role.module';
 import { AuthModule } from 'src/auth/auth.module';
+import { MailerModule } from 'src/mailer/mailer.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { AuthModule } from 'src/auth/auth.module';
     UserModule,
     RoleModule,
     AuthModule,
+    MailerModule,
   ],
   controllers: [AppController],
   providers: [

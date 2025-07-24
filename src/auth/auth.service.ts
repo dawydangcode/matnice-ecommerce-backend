@@ -18,6 +18,7 @@ import { UserService } from 'src/user/user.service';
 import { throwError } from 'src/common/utils/functions';
 import { UserModel } from 'src/user/models/user.model';
 import { UserDetailService } from 'src/user/modules/user-detail/user-detail.service';
+import { MailerService } from 'src/mailer/mailer.service';
 
 @Injectable()
 export class AuthService {
@@ -28,6 +29,7 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly userDetailService: UserDetailService,
     private readonly roleService: RoleService,
+    private readonly mailerService: MailerService,
     private readonly sessionService: SessionService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
