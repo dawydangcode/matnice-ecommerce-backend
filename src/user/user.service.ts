@@ -145,7 +145,7 @@ export class UserService {
     return await this.getUserById(user.id, true);
   }
 
-  async deleteUser(user: UserModel): Promise<boolean> {
+  async deleteUser(user: UserModel, reqAccountId: number): Promise<boolean> {
     await this.userRepository.update(
       {
         id: user.id,
@@ -153,7 +153,7 @@ export class UserService {
       },
       {
         deletedAt: new Date(),
-        deletedBy: 1,
+        deletedBy: reqAccountId,
       },
     );
     return true;
