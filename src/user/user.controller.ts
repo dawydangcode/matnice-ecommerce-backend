@@ -56,7 +56,7 @@ export class UserController {
       body.password,
       body.email,
       body.roleId,
-      req.user.id,
+      req.user.userId,
     );
   }
 
@@ -72,7 +72,7 @@ export class UserController {
       body.username,
       body.password,
       body.roleId,
-      req.user.id,
+      req.user.userId,
     );
   }
 
@@ -82,6 +82,6 @@ export class UserController {
     @Param() params: DeleteUserParamsDto,
   ) {
     const user = await this.userService.getUserById(params.userId, true);
-    return await this.userService.deleteUser(user, req.user.id);
+    return await this.userService.deleteUser(user, req.user.userId);
   }
 }
