@@ -17,10 +17,10 @@ import {
 } from './dtos/email-template.dto';
 import { TemplateService } from './template.service';
 import { ApiTags } from '@nestjs/swagger';
-import { Roles } from 'src/role/decorator/roles.decorator';
 import { RoleType } from 'src/role/enum/role.enum';
 import { RequestModel } from 'src/common/models/request.model';
 import { EmailTemplateModel } from './models/email-template.model';
+import { Roles } from 'src/role/decorators/roles.decorator';
 
 @Controller('api/v1')
 @ApiTags('Mail Template')
@@ -45,7 +45,7 @@ export class TemplateController {
       body.subject,
       body.description,
       body.html,
-      req.user.accountId,
+      req.user.userId,
     );
   }
 
@@ -61,7 +61,7 @@ export class TemplateController {
       body.subject,
       body.description,
       body.html,
-      req.user.accountId,
+      req.user.userId,
     );
   }
 
@@ -72,7 +72,7 @@ export class TemplateController {
   ) {
     await this.templateService.deleteTemplate(
       params.templateId,
-      req.user.accountId,
+      req.user.userId,
     );
   }
 }

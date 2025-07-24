@@ -6,7 +6,7 @@ import { UserDetailService } from './user-detail.service';
 import { UserDetailController } from './user-detail.controller';
 
 @Module({
-  imports: [AuthModule, TypeOrmModule.forFeature([UserDetailEntity])],
+  imports: [TypeOrmModule.forFeature([UserDetailEntity])],
   controllers: [UserDetailController],
   providers: [UserDetailService],
   exports: [UserDetailService],
