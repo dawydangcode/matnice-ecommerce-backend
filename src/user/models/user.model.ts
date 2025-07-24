@@ -3,7 +3,7 @@ export class UserModel {
   public readonly username: string;
   public readonly roleId: number;
   public readonly email: string;
-  public readonly passwordHash: string;
+  public readonly password: string;
   public readonly createdAt: Date | undefined;
   public readonly createdBy: number | undefined;
   public readonly updatedAt: Date | undefined;
@@ -16,7 +16,7 @@ export class UserModel {
     username: string,
     roleId: number,
     email: string,
-    passwordHash: string,
+    password: string,
     createdAt: Date | undefined,
     createdBy: number | undefined,
     updatedAt: Date | undefined,
@@ -28,7 +28,7 @@ export class UserModel {
     this.username = username;
     this.roleId = roleId;
     this.email = email;
-    this.passwordHash = passwordHash;
+    this.password = password;
     this.createdAt = createdAt;
     this.createdBy = createdBy;
     this.updatedAt = updatedAt;

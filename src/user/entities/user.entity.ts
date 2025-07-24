@@ -13,7 +13,7 @@ export class UserEntity {
   username!: string;
 
   @Column({ name: 'password' })
-  passwordHash!: string;
+  password!: string;
 
   @Column({ name: 'email' })
   email!: string;
@@ -42,7 +42,7 @@ export class UserEntity {
       this.username,
       this.roleId,
       this.email,
-      this.passwordHash,
+      this.password,
       this.createdAt,
       this.createdBy,
       this.updatedAt,
