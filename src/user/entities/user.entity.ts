@@ -1,5 +1,12 @@
-import { Column, Entity, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  PrimaryColumn,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { UserModel } from '../models/user.model';
+import { RoleEntity } from 'src/role/entities/role.entity';
 
 @Entity('user')
 export class UserEntity {
@@ -36,13 +43,16 @@ export class UserEntity {
   @Column({ name: 'deleted_by' })
   deletedBy!: number;
 
-  toModel(): UserModel {
+  @JoinColumn([{ name: 'role_id', referencedColumnName: 'id' }])
+  role: RoleEntity | undefined;
+
+  toModel(isHiddenPassword: boolean): UserModel {
     return new UserModel(
       this.id,
       this.username,
       this.roleId,
       this.email,
-      this.password,
+      !isHiddenPassword ? this.password : undefined,
       this.createdAt,
       this.createdBy,
       this.updatedAt,

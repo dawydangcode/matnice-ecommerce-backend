@@ -3,7 +3,7 @@ export class UserModel {
   public readonly username: string;
   public readonly roleId: number;
   public readonly email: string;
-  public readonly password: string;
+  public readonly password: string | undefined;
   public readonly createdAt: Date | undefined;
   public readonly createdBy: number | undefined;
   public readonly updatedAt: Date | undefined;
@@ -16,7 +16,7 @@ export class UserModel {
     username: string,
     roleId: number,
     email: string,
-    password: string,
+    password: string | undefined,
     createdAt: Date | undefined,
     createdBy: number | undefined,
     updatedAt: Date | undefined,
