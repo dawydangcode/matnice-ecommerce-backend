@@ -17,6 +17,8 @@ import { RequestModel } from 'src/common/models/request.model';
 import {
   CreateUserDetailBodyDto,
   DeleteUserDetailParamsDto,
+  GetUserDetailParamsDto,
+  GetUserDetailsQueryDto,
   UpdateUserDetailBodyDto,
   UpdateUserDetailParamsDto,
 } from './dtos/user-detail.dto';
@@ -27,18 +29,20 @@ export class UserDetailController {
   constructor(private readonly userDetailService: UserDetailService) {}
 
   @Get('user-detail/list')
-  async getUserDetails(@Query() query: any) {
+  async getUserDetails(@Query() query: GetUserDetailsQueryDto) {
     return await this.userDetailService.getUserDetails(
       undefined,
       undefined,
-      new PaginationParamsModel(),
+      new PaginationParamsModel(query.page, query.limit),
       undefined,
       undefined,
     );
   }
 
   @Get('user-detail/:userDetailId/detail')
-  async getUserDetail(@Param() params: any): Promise<UserDetailModel> {
+  async getUserDetail(
+    @Param() params: GetUserDetailParamsDto,
+  ): Promise<UserDetailModel> {
     return await this.userDetailService.getUserDetail(params.userDetailId);
   }
 
