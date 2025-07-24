@@ -7,12 +7,15 @@ import { UserModel } from './models/user.model';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
 import * as bcrypt from 'bcrypt';
 import { SALT_OR_ROUNDS } from 'src/common/utils/constant';
+import { RoleService } from 'src/role/role.service';
+import { RoleType } from 'src/role/enum/role.enum';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    private readonly roleService: RoleService,
   ) {}
 
   async getUsers(
@@ -64,7 +67,7 @@ export class UserService {
     password: string,
     email: string,
     roleId: number,
-    reqAccountId: number | undefined,
+    reqAccountId: number,
   ): Promise<UserModel> {
     const existingUser = await this.getUsers(
       undefined,
@@ -95,7 +98,7 @@ export class UserService {
     const hashedPassword = await bcrypt.hash(password, SALT_OR_ROUNDS);
     const defaultRole = await this.roleService.getRoleByName(RoleType.User);
 
-    const entity = new AccountEntity();
+    const entity = new UserEntity();
     entity.username = username;
     entity.password = hashedPassword;
     entity.email = email;
@@ -103,13 +106,56 @@ export class UserService {
     entity.createdAt = new Date();
     entity.createdBy = reqAccountId;
 
-    const newAccount = await this.accountRepository.save(entity);
+    const newAccount = await this.userRepository.save(entity);
     if (!reqAccountId) {
-      await this.accountRepository.update(newAccount.id, {
+      await this.userRepository.update(newAccount.id, {
         createdBy: newAccount.id,
       });
     }
 
-    return await this.getAccount(newAccount.id, true);
+    return await this.getUserById(newAccount.id, true);
+  }
+
+  async updateUser(
+    user: UserModel,
+    username: string | undefined,
+    password: string | undefined,
+    roleId: number | undefined,
+    reqAccountId: number,
+  ): Promise<UserModel> {
+    let hashedPassword = password;
+    if (password) {
+      hashedPassword = await bcrypt.hash(password, SALT_OR_ROUNDS);
+    }
+
+    await this.userRepository.update(
+      {
+        id: user.id,
+        deletedAt: IsNull(),
+      },
+      {
+        username: username,
+        password: hashedPassword,
+        roleId: roleId,
+        updatedAt: new Date(),
+        updatedBy: reqAccountId,
+      },
+    );
+
+    return await this.getUserById(user.id, true);
+  }
+
+  async deleteUser(user: UserModel): Promise<boolean> {
+    await this.userRepository.update(
+      {
+        id: user.id,
+        deletedAt: IsNull(),
+      },
+      {
+        deletedAt: new Date(),
+        deletedBy: 1,
+      },
+    );
+    return true;
   }
 }
