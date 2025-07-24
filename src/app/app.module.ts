@@ -6,6 +6,10 @@ import database from 'src/config/database';
 import { TypeOrmModule, TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
 import app from 'src/config/app';
 import { UserModule } from 'src/user/user.module';
+import { JwtAuthGuard } from 'src/middlewares/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/middlewares/guards/role.guard';
+import { RoleModule } from 'src/role/role.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
@@ -20,8 +24,20 @@ import { UserModule } from 'src/user/user.module';
       },
     }),
     UserModule,
+    RoleModule,
+    AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: 'APP_GUARD',
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: 'APP_GUARD',
+      useClass: RolesGuard,
+    },
+  ],
 })
 export class AppModule {}

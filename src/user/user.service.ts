@@ -158,4 +158,40 @@ export class UserService {
     );
     return true;
   }
+
+  async getUserByUsername(
+    username: string,
+    isHiddenPassword: boolean,
+  ): Promise<UserModel> {
+    const userEntity = await this.userRepository.findOne({
+      where: {
+        username: username,
+        deletedAt: IsNull(),
+      },
+    });
+
+    if (!userEntity) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    return userEntity.toModel(isHiddenPassword);
+  }
+
+  async getUserByEmail(
+    email: string,
+    isHiddenPassword: boolean,
+  ): Promise<UserModel> {
+    const userEntity = await this.userRepository.findOne({
+      where: {
+        email: email,
+        deletedAt: IsNull(),
+      },
+    });
+
+    if (!userEntity) {
+      throw new HttpException('Email not found', HttpStatus.NOT_FOUND);
+    }
+
+    return userEntity.toModel(isHiddenPassword);
+  }
 }
