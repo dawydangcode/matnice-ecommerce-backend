@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsNumber, IsPositive, IsString } from 'class-validator';
 
@@ -36,3 +36,7 @@ export class UserDto {
   @IsString()
   q!: string;
 }
+
+export class GetUsersQueryDto extends PartialType(
+  PickType(UserDto, ['limit', 'page', 'q']),
+) {}
