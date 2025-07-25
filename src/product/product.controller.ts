@@ -1,10 +1,23 @@
-import { Body, Controller, Get, Param, Post, Query, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  Req,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ProductService } from './product.service';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
 import {
   CreateProductBodyDto,
+  DeleteProductParamsDto,
   GetProductByIdParamsDto,
+  UpdateProductBodyDto,
+  UpdateProductParamsDto,
 } from './dtos/product.dto';
 import { RequestModel } from 'src/common/models/request.model';
 
@@ -44,6 +57,38 @@ export class ProductController {
       body.color,
       body.stock,
       body.description,
-      req.user.userId,);
+      req.user.userId,
+    );
+  }
+
+  @Put('product/:productId/update')
+  async updateProduct(
+    @Req() req: RequestModel,
+    @Param() params: UpdateProductParamsDto,
+    @Body() body: UpdateProductBodyDto,
+  ) {
+    const product = await this.productService.getProductById(params.productId);
+    return await this.productService.updateProduct(
+      product,
+      body.productType,
+      body.productName,
+      body.categoryId,
+      body.brandId,
+      body.color,
+      body.gender,
+      body.price,
+      body.stock,
+      body.description,
+      req.user.userId,
+    );
+  }
+
+  @Delete('product/:productId/delete')
+  async deleteProduct(
+    @Req() req: RequestModel,
+    @Param() params: DeleteProductParamsDto,
+  ) {
+    const product = await this.productService.getProductById(params.productId);
+    return await this.productService.deleteProduct(product, req.user.userId);
   }
 }

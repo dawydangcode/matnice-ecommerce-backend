@@ -5,7 +5,7 @@ import { In, IsNull, Like, Repository } from 'typeorm';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
 import { PageList } from 'src/common/models/page-list.model';
 import { ProductModel } from './models/product.model';
-import { ProductGenderType } from './enum/product.type';
+import { ProductGenderType, ProductType } from './enum/product.type';
 
 @Injectable()
 export class ProductService {
@@ -83,20 +83,29 @@ export class ProductService {
 
   async updateProduct(
     product: ProductModel,
+    productType: ProductType | undefined,
+    productName: string | undefined,
+    categoryId: number | undefined,
+    brandId: number | undefined,
+    color: string | undefined,
+    gender: ProductGenderType | undefined,
+    price: number | undefined,
+    stock: number | undefined,
+    description: string | undefined,
     reqUserId: number,
   ): Promise<ProductModel> {
     await this.productRepository.update(
       { id: product.id, deletedAt: IsNull() },
       {
-        productType: product.productType,
-        productName: product.productName,
-        categoryId: product.categoryId,
-        brandId: product.brandId,
-        color: product.color,
-        gender: product.gender,
-        price: product.price,
-        stock: product.stock,
-        description: product.description,
+        productType: productType,
+        productName: productName,
+        categoryId: categoryId,
+        brandId: brandId,
+        color: color,
+        gender: gender,
+        price: price,
+        stock: stock,
+        description: description,
         updatedAt: new Date(),
         updatedBy: reqUserId,
       },
