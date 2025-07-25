@@ -11,6 +11,7 @@ import { RolesGuard } from 'src/middlewares/guards/role.guard';
 import { RoleModule } from 'src/role/role.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { MailerModule } from 'src/mailer/mailer.module';
+import { ProductModule } from 'src/product/product.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { MailerModule } from 'src/mailer/mailer.module';
     RoleModule,
     AuthModule,
     MailerModule,
+    ProductModule,
   ],
   controllers: [AppController],
   providers: [

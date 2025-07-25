@@ -76,7 +76,7 @@ export class UserService {
     password: string,
     email: string,
     roleId: number,
-    reqAccountId: number,
+    reqUserId: number,
   ): Promise<UserModel> {
     const existingUser = await this.getUsers(
       undefined,
@@ -113,10 +113,10 @@ export class UserService {
     entity.email = email;
     entity.roleId = roleId ?? defaultRole.id;
     entity.createdAt = new Date();
-    entity.createdBy = reqAccountId;
+    entity.createdBy = reqUserId;
 
     const newAccount = await this.userRepository.save(entity);
-    if (!reqAccountId) {
+    if (!reqUserId) {
       await this.userRepository.update(newAccount.id, {
         createdBy: newAccount.id,
       });
@@ -131,7 +131,7 @@ export class UserService {
     password: string | undefined,
     email: string | undefined,
     roleId: number | undefined,
-    reqAccountId: number | undefined,
+    reqUserId: number | undefined,
   ): Promise<UserModel> {
     let hashedPassword = password;
     if (password) {
@@ -149,14 +149,14 @@ export class UserService {
         email: email,
         roleId: roleId,
         updatedAt: new Date(),
-        updatedBy: reqAccountId,
+        updatedBy: reqUserId,
       },
     );
 
     return await this.getUserById(user.id, true);
   }
 
-  async deleteUser(user: UserModel, reqAccountId: number): Promise<boolean> {
+  async deleteUser(user: UserModel, reqUserId: number): Promise<boolean> {
     await this.userRepository.update(
       {
         id: user.id,
@@ -164,7 +164,7 @@ export class UserService {
       },
       {
         deletedAt: new Date(),
-        deletedBy: reqAccountId,
+        deletedBy: reqUserId,
       },
     );
     return true;

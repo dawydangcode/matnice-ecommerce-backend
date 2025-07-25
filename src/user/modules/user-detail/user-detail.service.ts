@@ -73,7 +73,7 @@ export class UserDetailService {
     name: string | undefined,
     dob: Date | undefined,
     gender: GenderType | undefined,
-    reqAccountId: number | undefined,
+    reqUserId: number | undefined,
   ): Promise<UserDetailModel> {
     const entity = new UserDetailEntity();
     entity.userId = userId;
@@ -81,7 +81,7 @@ export class UserDetailService {
     entity.dob = dob;
     entity.gender = gender;
     entity.createdAt = new Date();
-    entity.createdBy = reqAccountId || userId;
+    entity.createdBy = reqUserId || userId;
     const newUserDetail = await this.userDetailRepository.save(entity);
 
     return await this.getUserDetail(newUserDetail.id);
@@ -93,7 +93,7 @@ export class UserDetailService {
     dob: Date | undefined,
     gender: GenderType | undefined,
     userId: number | undefined,
-    reqAccountId: number,
+    reqUserId: number,
   ): Promise<UserDetailModel> {
     await this.userDetailRepository.update(
       {
@@ -106,7 +106,7 @@ export class UserDetailService {
         gender: gender,
         userId: userId,
         updatedAt: new Date(),
-        updatedBy: reqAccountId || userDetail.userId,
+        updatedBy: reqUserId || userDetail.userId,
       },
     );
     return this.getUserDetail(userDetail.id);

@@ -42,7 +42,7 @@ export class AuthDto {
   @ApiProperty({ required: false })
   @Type(() => Number)
   @IsNumber()
-  reqAccountId?: number;
+  reqUserId?: number;
 
   @ApiProperty()
   @IsString()

@@ -114,13 +114,13 @@ export class AuthService {
     return await this.generateToken(payload);
   }
 
-  async logout(session: SessionModel, reqAccountId: number): Promise<boolean> {
+  async logout(session: SessionModel, reqUserId: number): Promise<boolean> {
     const sessionType = SessionType.LOGOUT;
     await this.sessionService.updateSession(
       session,
       false,
       sessionType,
-      reqAccountId,
+      reqUserId,
     );
     return true;
   }
@@ -130,14 +130,14 @@ export class AuthService {
     password: string,
     email: string,
     role: RoleModel,
-    reqAccountId: number,
+    reqUserId: number,
   ): Promise<UserModel> {
     const newUser = await this.userService.createUser(
       username,
       password,
       email,
       role.id,
-      reqAccountId || 0,
+      reqUserId || 0,
     );
     if (!newUser) {
       throw new UnauthorizedException('Failed to create user');

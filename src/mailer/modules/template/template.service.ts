@@ -64,7 +64,7 @@ export class TemplateService {
     subject: string,
     description: string,
     html: string,
-    reqAccountId: number | undefined,
+    reqUserId: number | undefined,
   ): Promise<EmailTemplateModel> {
     const entity = this.emailTemplateRepository.create({
       name: name,
@@ -72,10 +72,10 @@ export class TemplateService {
       description: description,
       html: html,
       createdAt: new Date(),
-      createdBy: reqAccountId,
+      createdBy: reqUserId,
     });
     const template = await this.emailTemplateRepository.save(entity);
-    if (!reqAccountId) {
+    if (!reqUserId) {
       await this.emailTemplateRepository.update(template.id, {
         createdBy: template.id,
       });
@@ -89,7 +89,7 @@ export class TemplateService {
     subject: string | undefined,
     description: string | undefined,
     html: string | undefined,
-    reqAccountId: number | undefined,
+    reqUserId: number | undefined,
   ): Promise<EmailTemplateModel> {
     await this.emailTemplateRepository.update(
       { id: templateId },
@@ -99,7 +99,7 @@ export class TemplateService {
         description: description,
         html: html,
         updatedAt: new Date(),
-        updatedBy: reqAccountId,
+        updatedBy: reqUserId,
       },
     );
     return await this.getTemplateById(templateId);
@@ -107,13 +107,13 @@ export class TemplateService {
 
   async deleteTemplate(
     templateId: number,
-    reqAccountId: number,
+    reqUserId: number,
   ): Promise<boolean> {
     await this.emailTemplateRepository.update(
       { id: templateId },
       {
         deletedAt: new Date(),
-        deletedBy: reqAccountId,
+        deletedBy: reqUserId,
       },
     );
     return true;
