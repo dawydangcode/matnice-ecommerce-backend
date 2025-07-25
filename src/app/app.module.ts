@@ -12,6 +12,8 @@ import { RoleModule } from 'src/role/role.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { MailerModule } from 'src/mailer/mailer.module';
 import { ProductModule } from 'src/product/product.module';
+import { Category } from 'src/category/models/category.model';
+import { CategoryModule } from 'src/category/category.module';
 
 @Module({
   imports: [
@@ -30,6 +32,7 @@ import { ProductModule } from 'src/product/product.module';
     AuthModule,
     MailerModule,
     ProductModule,
+    CategoryModule,
   ],
   controllers: [AppController],
   providers: [
