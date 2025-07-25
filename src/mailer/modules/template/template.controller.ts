@@ -69,10 +69,12 @@ export class TemplateController {
   async delete(
     @Req() req: RequestModel,
     @Param() params: DeleteEmailTemplateDto,
-  ) {
+  ): Promise<boolean> {
     await this.templateService.deleteTemplate(
       params.templateId,
       req.user.userId,
     );
+
+    return true;
   }
 }

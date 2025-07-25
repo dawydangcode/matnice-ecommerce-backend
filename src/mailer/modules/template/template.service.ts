@@ -1,4 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import {
+  HttpCode,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { EmailTemplateEntity } from './entities/email-template.entity';
 import { In, IsNull, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -45,8 +50,9 @@ export class TemplateService {
     });
 
     if (!template) {
-      throw new Error(
+      throw new HttpException(
         `EmailTemplateEntity with name '${templateName}' not found`,
+        HttpStatus.NOT_FOUND,
       );
     }
 

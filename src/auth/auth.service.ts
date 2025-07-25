@@ -205,25 +205,32 @@ export class AuthService {
     );
     return true;
   }
-  async resetPassword(
-    token: string,
-    newPassword: string,
-    reqAccountId: number,
-  ): Promise<boolean> {
-    const payload = await this.jwtService.verifyAsync(token, {
-      secret: this.verifyTokenConfig.secret,
-    });
+  async resetPassword(token: string, newPassword: string): Promise<boolean> {
+    try {
+      console.log('Reset token:', token);
+      console.log('Verify secret:', this.verifyTokenConfig.secret);
 
-    const user = await this.userService.getUserById(payload.userId, false);
-    await this.userService.updateUser(
-      user,
-      undefined,
-      newPassword,
-      undefined,
-      reqAccountId,
-    );
-    await this.sessionService.invalidateAllSessionsForUser(user.id);
-    return true;
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: this.verifyTokenConfig.secret,
+      });
+
+      console.log('Decoded payload:', payload);
+
+      const user = await this.userService.getUserById(payload.userId, false);
+      await this.userService.updateUser(
+        user,
+        undefined,
+        newPassword,
+        undefined,
+        undefined,
+        undefined,
+      );
+      await this.sessionService.invalidateAllSessionsForUser(user.id);
+      return true;
+    } catch (error) {
+      console.error('Reset password error:', error);
+      throw error;
+    }
   }
 
   async changePassword(
@@ -242,6 +249,7 @@ export class AuthService {
       user,
       undefined,
       newPassword,
+      undefined,
       undefined,
       user.id,
     );

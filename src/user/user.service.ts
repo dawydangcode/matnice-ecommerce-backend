@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
 import { In, IsNull, Like, Repository, DataSource } from 'typeorm';
@@ -10,6 +16,7 @@ import { SALT_OR_ROUNDS } from 'src/common/utils/constant';
 import { RoleService } from 'src/role/role.service';
 import { RoleType } from 'src/role/enum/role.enum';
 import { UserDetailEntity } from './modules/user-detail/entities/user-detail.entity';
+import { HttpErrorByCode } from '@nestjs/common/utils/http-error-by-code.util';
 
 @Injectable()
 export class UserService {
@@ -58,7 +65,7 @@ export class UserService {
       },
     });
     if (!user) {
-      throw new Error('User not found');
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
     return user.toModel(isHiddenPassword);
@@ -122,8 +129,9 @@ export class UserService {
     user: UserModel,
     username: string | undefined,
     password: string | undefined,
+    email: string | undefined,
     roleId: number | undefined,
-    reqAccountId: number,
+    reqAccountId: number | undefined,
   ): Promise<UserModel> {
     let hashedPassword = password;
     if (password) {
@@ -138,6 +146,7 @@ export class UserService {
       {
         username: username,
         password: hashedPassword,
+        email: email,
         roleId: roleId,
         updatedAt: new Date(),
         updatedBy: reqAccountId,

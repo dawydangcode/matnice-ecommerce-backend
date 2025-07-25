@@ -50,7 +50,7 @@ export class UserDetailService {
       where: { id: userDetailId, deletedAt: IsNull() },
     });
     if (!userDetail) {
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      throw new HttpException('User detail not found', HttpStatus.NOT_FOUND);
     }
     return userDetail.toModel();
   }
