@@ -16,18 +16,22 @@ import {
   CreateProductBodyDto,
   DeleteProductParamsDto,
   GetProductByIdParamsDto,
+  GetProductsQueryDto,
   UpdateProductBodyDto,
   UpdateProductParamsDto,
 } from './dtos/product.dto';
 import { RequestModel } from 'src/common/models/request.model';
+import { RoleType } from 'src/role/enum/role.enum';
+import { Roles } from 'src/role/decorators/roles.decorator';
 
 @Controller('api/v1/')
 @ApiTags('Product')
+@Roles(RoleType.Admin)
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Get('products')
-  async getProducts(@Query() query: PaginationParamsModel) {
+  async getProducts(@Query() query: GetProductsQueryDto) {
     return await this.productService.getProducts(
       undefined,
       undefined,
