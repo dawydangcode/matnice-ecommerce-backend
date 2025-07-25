@@ -77,15 +77,15 @@ export class AuthService {
 
     try {
       if (isEmail) {
+        account = await this.userService.getUserByEmail(usernameOrEmail, false);
+      } else {
         account = await this.userService.getUserByUsername(
           usernameOrEmail,
           false,
         );
-      } else {
-        account = await this.userService.getUserByEmail(usernameOrEmail, false);
       }
     } catch (error) {
-      throw new UnauthorizedException('Username/Email or password is invalid');
+      throw new UnauthorizedException('Username is invalid');
     }
 
     const role = await this.roleService.getRole(account.roleId);
@@ -132,21 +132,26 @@ export class AuthService {
     role: RoleModel,
     reqAccountId: number,
   ): Promise<UserModel> {
-    const newAccount = await this.userService.createUser(
+    const newUser = await this.userService.createUser(
       username,
       password,
       email,
       role.id,
-      reqAccountId,
+      reqAccountId || 0,
     );
+    if (!newUser) {
+      throw new UnauthorizedException('Failed to create user');
+    }
+
     await this.userDetailService.createUserDetail(
-      newAccount.id,
+      newUser.id,
       undefined,
       undefined,
       undefined,
       undefined,
     );
-    return await this.userService.getUserById(newAccount.id, true);
+
+    return await this.userService.getUserById(newUser.id, true);
   }
 
   async generateToken(payload: PayloadModel): Promise<LoginTokenModel> {

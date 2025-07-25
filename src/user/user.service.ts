@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
-import { In, IsNull, Like, Repository } from 'typeorm';
+import { In, IsNull, Like, Repository, DataSource } from 'typeorm';
 import { PageList } from 'src/common/models/page-list.model';
 import { UserModel } from './models/user.model';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
@@ -9,6 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { SALT_OR_ROUNDS } from 'src/common/utils/constant';
 import { RoleService } from 'src/role/role.service';
 import { RoleType } from 'src/role/enum/role.enum';
+import { UserDetailEntity } from './modules/user-detail/entities/user-detail.entity';
 
 @Injectable()
 export class UserService {
@@ -16,6 +17,7 @@ export class UserService {
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
     private readonly roleService: RoleService,
+    private readonly dataSource: DataSource,
   ) {}
 
   async getUsers(
