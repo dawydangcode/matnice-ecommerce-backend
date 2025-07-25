@@ -44,6 +44,10 @@ export class GetCategoriesQueryDto extends PickType(CategoryDto, [
   'q',
 ]) {}
 
+export class GetCategoryByIdParamsDto extends PickType(CategoryDto, [
+  'categoryId',
+]) {}
+
 export class CategoryCreateBodyDto extends PickType(CategoryDto, [
   'categoryName',
   'description',

@@ -4,6 +4,7 @@ import {
   Entity,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { CategoryModel } from '../models/category.model';
 
 @Entity('category')
 export class CategoryEntity {
@@ -33,4 +34,18 @@ export class CategoryEntity {
 
   @Column({ name: 'deleted_by' })
   deletedBy!: number;
+
+  toModel(): CategoryModel {
+    return new CategoryModel(
+      this.id,
+      this.name,
+      this.description,
+      this.createdAt,
+      this.createdBy,
+      this.updatedAt,
+      this.updatedBy,
+      this.deletedAt,
+      this.deletedBy,
+    );
+  }
 }
