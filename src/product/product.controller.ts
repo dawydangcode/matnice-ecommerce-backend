@@ -42,7 +42,7 @@ export class ProductController {
     );
   }
 
-  @Get('product/:id/detail')
+  @Get('product/:productId/detail')
   async getProductById(@Param() params: GetProductByIdParamsDto) {
     return await this.productService.getProductById(params.productId);
   }
