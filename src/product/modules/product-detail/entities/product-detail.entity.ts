@@ -14,7 +14,7 @@ export class ProductDetailEntity {
   @Column({ name: 'product_id' })
   productId!: number;
 
-  @Column({ name: 'product_name' })
+  @Column({ name: 'product_number' })
   productNumber!: string;
 
   @Column({ name: 'color' })
@@ -47,7 +47,7 @@ export class ProductDetailEntity {
   @Column({ name: 'frame_type' })
   frameType!: string;
 
-  @Column({ name: 'spring_hinge' })
+  @Column({ name: 'spring_hinges' })
   springHinge!: boolean;
 
   @Column({ name: 'created_at' })

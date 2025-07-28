@@ -30,7 +30,7 @@ import { Roles } from 'src/role/decorators/roles.decorator';
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
-  @Get('products')
+  @Get('products/list')
   async getProducts(@Query() query: GetProductsQueryDto) {
     return await this.productService.getProducts(
       undefined,

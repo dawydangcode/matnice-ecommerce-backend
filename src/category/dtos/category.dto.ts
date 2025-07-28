@@ -10,7 +10,7 @@ export class CategoryDto {
 
   @ApiProperty()
   @IsString()
-  categoryName!: string;
+  name!: string;
 
   @ApiProperty()
   @IsString()
@@ -49,7 +49,7 @@ export class GetCategoryByIdParamsDto extends PickType(CategoryDto, [
 ]) {}
 
 export class CategoryCreateBodyDto extends PickType(CategoryDto, [
-  'categoryName',
+  'name',
   'description',
 ]) {}
 
@@ -58,7 +58,7 @@ export class CategoryUpdateParamsDto extends PickType(CategoryDto, [
 ]) {}
 
 export class CategoryUpdateBodyDto extends PartialType(
-  PickType(CategoryDto, ['categoryName', 'description']),
+  PickType(CategoryDto, ['name', 'description']),
 ) {}
 
 export class CategoryDeleteParamsDto extends PickType(CategoryDto, [

@@ -1,17 +1,16 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ProductDetailController } from './product-detail.controller';
 import { ProductDetailService } from './product-detail.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProductDetailEntity } from './entities/product-detail.entity';
-import { ProductModule } from 'src/product/product.module';
+import { ProductService } from 'src/product/product.service';
+import { ProductEntity } from 'src/product/entities/product.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([ProductDetailEntity]),
-    forwardRef(() => ProductModule),
-  ],
+  imports: [TypeOrmModule.forFeature([ProductDetailEntity, ProductEntity])],
   controllers: [ProductDetailController],
-  providers: [ProductDetailService],
+  providers: [ProductDetailService, ProductService],
   exports: [ProductDetailService],
 })
+
 export class ProductDetailModule {}

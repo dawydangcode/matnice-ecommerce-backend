@@ -33,7 +33,6 @@ import { ProductDetailModule } from 'src/product/modules/product-detail/product-
     AuthModule,
     MailerModule,
     ProductModule,
-    ProductDetailModule,
     CategoryModule,
     BrandModule,
   ],
