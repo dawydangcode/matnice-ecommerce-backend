@@ -67,11 +67,9 @@ export class ProductDto {
   q!: string;
 }
 
-export class GetProductsQueryDto extends PickType(ProductDto, [
-  'page',
-  'limit',
-  'q',
-]) {}
+export class GetProductsQueryDto extends PartialType(
+  PickType(ProductDto, ['page', 'limit', 'q']),
+) {}
 
 export class GetProductByIdParamsDto extends PickType(ProductDto, [
   'productId',
