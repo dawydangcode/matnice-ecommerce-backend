@@ -53,12 +53,10 @@ export class GetProductImagesByProductIdParamsDto extends PickType(
   ['productId'],
 ) {}
 
-// Params DTOs
 export class GetProductImageParamsDto extends PickType(ProductImageDto, [
   'productImageId',
 ]) {}
 
-// Body DTOs
 export class CreateProductImageBodyDto extends PickType(ProductImageDto, [
   'productId',
   'imageUrl',
@@ -74,4 +72,9 @@ export class UpdateProductImageBodyDto extends PartialType(
 
 export class DeleteProductImageParamsDto extends PickType(ProductImageDto, [
   'productImageId',
+]) {}
+
+// Upload DTOs
+export class UploadProductImageParamsDto extends PickType(ProductImageDto, [
+  'productId',
 ]) {}

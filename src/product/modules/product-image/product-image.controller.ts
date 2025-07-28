@@ -8,13 +8,19 @@ import {
   Put,
   Query,
   Req,
+  UploadedFile,
+  UseInterceptors,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiOkResponse,
   ApiCreatedResponse,
+  ApiConsumes,
 } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ProductImageService } from './product-image.service';
 import {
   CreateProductImageBodyDto,
@@ -24,6 +30,7 @@ import {
   GetProductImagesQueryDto,
   UpdateProductImageBodyDto,
   UpdateProductImageParamsDto,
+  UploadProductImageParamsDto,
 } from './dtos/product-image.dto';
 import { RequestModel } from 'src/common/models/request.model';
 import { ProductImageModel } from './models/product-image.model';
@@ -31,23 +38,14 @@ import { PageList } from 'src/common/models/page-list.model';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
 import { Roles } from 'src/role/decorators/roles.decorator';
 import { RoleType } from 'src/role/enum/role.enum';
-import { ProductService } from 'src/product/product.service';
 
 @Controller('api/v1')
 @ApiTags('Product / Product Image')
 @Roles(RoleType.Admin, RoleType.Employee)
 export class ProductImageController {
-  constructor(
-    private readonly productImageService: ProductImageService,
-    private readonly productService: ProductService,
-  ) {}
+  constructor(private readonly productImageService: ProductImageService) {}
 
   @Get('product-image/list')
-  @ApiOperation({ summary: 'Get list of product images' })
-  @ApiOkResponse({
-    description: 'Successfully retrieved product images',
-    type: PageList<ProductImageModel>,
-  })
   async getProductImages(
     @Query() query: GetProductImagesQueryDto,
   ): Promise<PageList<ProductImageModel>> {
@@ -81,6 +79,10 @@ export class ProductImageController {
   }
 
   @Post('product-image/create')
+  @ApiOperation({ summary: 'Create new product image' })
+  @ApiCreatedResponse({
+    description: 'Product image created successfully',
+  })
   async createProductImage(
     @Req() req: RequestModel,
     @Body() body: CreateProductImageBodyDto,
@@ -92,10 +94,62 @@ export class ProductImageController {
     );
   }
 
+  @Post('product/:productId/image/upload')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ summary: 'Upload product image file' })
+  @ApiConsumes('multipart/form-data')
+  @ApiCreatedResponse({
+    description: 'Product image uploaded successfully',
+  })
+  async uploadProductImage(
+    @Param() params: UploadProductImageParamsDto,
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: RequestModel,
+  ): Promise<ProductImageModel> {
+    if (!file) {
+      throw new HttpException('No file uploaded', HttpStatus.BAD_REQUEST);
+    }
+
+    // Validate file type
+    const allowedMimeTypes = [
+      'image/jpeg',
+      'image/png',
+      'image/jpg',
+      'image/webp',
+    ];
+    if (!allowedMimeTypes.includes(file.mimetype)) {
+      throw new HttpException(
+        'Only JPEG, PNG, JPG and WebP files are allowed',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      throw new HttpException(
+        'File size cannot exceed 5MB',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    return await this.productImageService.uploadProductImage(
+      params.productId,
+      file,
+      req.user.userId,
+    );
+  }
+
   @Put('product-image/:productImageId/update')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ summary: 'Update product image' })
+  @ApiConsumes('multipart/form-data')
+  @ApiOkResponse({
+    description: 'Product image updated successfully',
+  })
   async updateProductImage(
     @Param() params: UpdateProductImageParamsDto,
-    @Body() body: UpdateProductImageBodyDto,
+    @UploadedFile() file: Express.Multer.File,
     @Req() req: RequestModel,
   ): Promise<ProductImageModel> {
     const productImage = await this.productImageService.getProductImageById(
@@ -104,7 +158,7 @@ export class ProductImageController {
 
     return await this.productImageService.updateProductImage(
       productImage,
-      body.imageUrl,
+      file,
       req.user.userId,
     );
   }
@@ -129,10 +183,8 @@ export class ProductImageController {
     @Param() params: GetProductImagesByProductIdParamsDto,
     @Req() req: RequestModel,
   ): Promise<boolean> {
-    const product = await this.productService.getProductById(params.productId);
-
     return await this.productImageService.deleteProductImagesByProductId(
-      product,
+      params.productId,
       req.user.userId,
     );
   }

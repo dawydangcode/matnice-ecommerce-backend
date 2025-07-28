@@ -5,15 +5,14 @@ import { ProductImageEntity } from './entities/product-image.entity';
 import { ProductImageModel } from './models/product-image.model';
 import { PageList } from 'src/common/models/page-list.model';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
-import { ProductModel } from 'src/product/models/product.model';
-import { ProductService } from 'src/product/product.service';
+import { AwsS3Service } from 'src/common/services/aws-s3.service';
 
 @Injectable()
 export class ProductImageService {
   constructor(
     @InjectRepository(ProductImageEntity)
     private readonly productImageRepository: Repository<ProductImageEntity>,
-    private readonly productService: ProductService,
+    private readonly awsS3Service: AwsS3Service,
   ) {}
 
   async getProductImages(
@@ -85,18 +84,75 @@ export class ProductImageService {
     return await this.getProductImageById(newProductImage.id);
   }
 
-  async updateProductImage(
-    productImage: ProductImageModel,
-    imageUrl: string | undefined,
+  async uploadProductImage(
+    productId: number,
+    file: Express.Multer.File,
     reqUserId: number,
   ): Promise<ProductImageModel> {
+    try {
+      // Generate unique filename
+      const fileName = this.awsS3Service.generateFileName(
+        file.originalname,
+        `product_${productId}`,
+      );
+
+      // Upload to S3
+      const imageUrl = await this.awsS3Service.uploadFile(
+        file.buffer,
+        fileName,
+        file.mimetype,
+        'product-images',
+      );
+
+      // Save to database
+      return await this.createProductImage(productId, imageUrl, reqUserId);
+    } catch (error) {
+      throw new HttpException(
+        'Failed to upload image',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async updateProductImage(
+    productImage: ProductImageModel,
+    file: Express.Multer.File | undefined,
+    reqUserId: number,
+  ): Promise<ProductImageModel> {
+    let newImageUrl = productImage.imageUrl;
+
+    if (file) {
+      try {
+        // Delete old image from S3
+        await this.awsS3Service.deleteFile(productImage.imageUrl);
+
+        // Upload new image
+        const fileName = this.awsS3Service.generateFileName(
+          file.originalname,
+          `product_${productImage.productId}`,
+        );
+
+        newImageUrl = await this.awsS3Service.uploadFile(
+          file.buffer,
+          fileName,
+          file.mimetype,
+          'product-images',
+        );
+      } catch (error) {
+        throw new HttpException(
+          'Failed to update image',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+
     await this.productImageRepository.update(
       {
         id: productImage.id,
         deletedAt: IsNull(),
       },
       {
-        imageUrl: imageUrl ?? productImage.imageUrl,
+        imageUrl: newImageUrl,
         updatedAt: new Date(),
         updatedBy: reqUserId,
       },
@@ -109,6 +165,15 @@ export class ProductImageService {
     productImage: ProductImageModel,
     reqUserId: number,
   ): Promise<boolean> {
+    try {
+      // Delete from S3
+      await this.awsS3Service.deleteFile(productImage.imageUrl);
+    } catch (error) {
+      console.error('Failed to delete image from S3:', error);
+      // Continue with database deletion even if S3 deletion fails
+    }
+
+    // Soft delete from database
     await this.productImageRepository.update(
       {
         id: productImage.id,
@@ -124,12 +189,12 @@ export class ProductImageService {
   }
 
   async deleteProductImagesByProductId(
-    product: ProductModel,
+    productId: number,
     reqUserId: number,
   ): Promise<boolean> {
     await this.productImageRepository.update(
       {
-        productId: product.id,
+        productId: productId,
         deletedAt: IsNull(),
       },
       {
