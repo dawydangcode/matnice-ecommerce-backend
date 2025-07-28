@@ -61,7 +61,6 @@ export class ProductService {
     brandId: number,
     gender: ProductGenderType,
     price: number,
-    color: string,
     stock: number,
     description: string,
     reqUserId: number,
@@ -70,7 +69,6 @@ export class ProductService {
     entity.productName = productName;
     entity.categoryId = categoryId;
     entity.brandId = brandId;
-    entity.color = color;
     entity.gender = gender;
     entity.price = price;
     entity.stock = stock;
@@ -87,7 +85,6 @@ export class ProductService {
     productName: string | undefined,
     categoryId: number | undefined,
     brandId: number | undefined,
-    color: string | undefined,
     gender: ProductGenderType | undefined,
     price: number | undefined,
     stock: number | undefined,
@@ -101,7 +98,6 @@ export class ProductService {
         productName: productName,
         categoryId: categoryId,
         brandId: brandId,
-        color: color,
         gender: gender,
         price: price,
         stock: stock,

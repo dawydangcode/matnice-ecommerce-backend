@@ -8,7 +8,6 @@ export class ProductModel {
   public readonly brandId: number;
   public readonly gender: ProductGenderType;
   public readonly price: number;
-  public readonly color: string;
   public readonly stock: number;
   public readonly description: string;
   public readonly createdAt: Date | undefined;
@@ -26,7 +25,6 @@ export class ProductModel {
     brandId: number,
     gender: ProductGenderType,
     price: number,
-    color: string,
     stock: number,
     description: string,
     createdAt: Date | undefined,
@@ -43,7 +41,6 @@ export class ProductModel {
     this.brandId = brandId;
     this.gender = gender;
     this.price = price;
-    this.color = color;
     this.stock = stock;
     this.description = description;
     this.createdAt = createdAt;

@@ -38,10 +38,6 @@ export class ProductDto {
 
   @ApiProperty()
   @IsString()
-  color!: string;
-
-  @ApiProperty()
-  @IsString()
   description!: string;
 
   @ApiProperty()
@@ -88,7 +84,6 @@ export class CreateProductBodyDto extends PickType(ProductDto, [
   'gender',
   'price',
   'stock',
-  'color',
   'description',
   'brandId',
 ]) {}
@@ -105,7 +100,6 @@ export class UpdateProductBodyDto extends PartialType(
     'gender',
     'price',
     'stock',
-    'color',
     'description',
     'brandId',
   ]),
