@@ -16,7 +16,6 @@ export class ProductService {
 
   async getProducts(
     productIds: number[] | undefined,
-    categoryId: number | undefined,
     brandId: number | undefined,
     pagination: PaginationParamsModel | undefined,
     search: string | undefined,
@@ -25,7 +24,6 @@ export class ProductService {
     const [products, total] = await this.productRepository.findAndCount({
       where: {
         id: productIds ? In(productIds) : undefined,
-        categoryId: categoryId ? categoryId : undefined,
         brandId: brandId ? brandId : undefined,
         productName: search ? Like(`%${search}%`) : undefined,
         deletedAt: IsNull(),
@@ -57,22 +55,24 @@ export class ProductService {
 
   async createProduct(
     productName: string,
-    categoryId: number,
+    productType: ProductType,
     brandId: number,
     gender: ProductGenderType,
     price: number,
     stock: number,
     description: string,
+    isSustainable: boolean,
     reqUserId: number,
   ): Promise<ProductModel> {
     const entity = new ProductEntity();
+    entity.productType = productType;
     entity.productName = productName;
-    entity.categoryId = categoryId;
     entity.brandId = brandId;
     entity.gender = gender;
     entity.price = price;
     entity.stock = stock;
     entity.description = description;
+    entity.isSustainable = isSustainable;
     entity.createdAt = new Date();
     entity.createdBy = reqUserId;
 
@@ -83,12 +83,12 @@ export class ProductService {
     product: ProductModel,
     productType: ProductType | undefined,
     productName: string | undefined,
-    categoryId: number | undefined,
     brandId: number | undefined,
     gender: ProductGenderType | undefined,
     price: number | undefined,
     stock: number | undefined,
     description: string | undefined,
+    isSustainable: boolean | undefined,
     reqUserId: number,
   ): Promise<ProductModel> {
     await this.productRepository.update(
@@ -96,12 +96,12 @@ export class ProductService {
       {
         productType: productType,
         productName: productName,
-        categoryId: categoryId,
         brandId: brandId,
         gender: gender,
         price: price,
         stock: stock,
         description: description,
+        isSustainable: isSustainable,
         updatedAt: new Date(),
         updatedBy: reqUserId,
       },

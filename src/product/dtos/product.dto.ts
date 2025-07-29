@@ -1,6 +1,6 @@
 import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsNumber, IsPositive, IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsPositive, IsString } from 'class-validator';
 import { ProductGenderType, ProductType } from '../enum/product.type';
 
 export class ProductDto {
@@ -46,6 +46,10 @@ export class ProductDto {
   stock!: number;
 
   @ApiProperty()
+  @IsBoolean()
+  isSustainable!: boolean;
+
+  @ApiProperty()
   @IsNumber()
   @Type(() => Number)
   reqUserId!: number;
@@ -83,6 +87,7 @@ export class CreateProductBodyDto extends PickType(ProductDto, [
   'price',
   'stock',
   'description',
+  'isSustainable',
   'brandId',
 ]) {}
 
@@ -99,6 +104,7 @@ export class UpdateProductBodyDto extends PartialType(
     'price',
     'stock',
     'description',
+    'isSustainable',
     'brandId',
   ]),
 ) {}

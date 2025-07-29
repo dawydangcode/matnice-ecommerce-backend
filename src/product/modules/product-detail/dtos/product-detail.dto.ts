@@ -1,5 +1,5 @@
 import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
-import { FrameType } from '../enum/frame.type';
+import { FrameShapeType, FrameType } from '../enum/frame.type';
 import { IsBoolean, IsNumber, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -57,7 +57,7 @@ export class ProductDetailDto {
 
   @ApiProperty()
   @IsString()
-  frameShape!: string;
+  frameShape!: FrameShapeType;
 
   @ApiProperty()
   frameType!: FrameType;

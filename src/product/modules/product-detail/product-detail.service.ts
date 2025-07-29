@@ -6,7 +6,7 @@ import { PageList } from 'src/common/models/page-list.model';
 import { ProductDetailModel } from './models/product-detail.model';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
 import { ProductModel } from 'src/product/models/product.model';
-import { FrameType } from './enum/frame.type';
+import { FrameShapeType, FrameType } from './enum/frame.type';
 import { ProductService } from 'src/product/product.service';
 
 @Injectable()
@@ -68,7 +68,7 @@ export class ProductDetailService {
     templeLength: number,
     frameColor: string,
     frameMaterial: string,
-    frameShape: string,
+    frameShape: FrameShapeType,
     frameType: FrameType,
     springHinge: boolean,
     reqUserId: number,
@@ -107,7 +107,7 @@ export class ProductDetailService {
     templeLength: number | undefined,
     frameColor: string | undefined,
     frameMaterial: string | undefined,
-    frameShape: string | undefined,
+    frameShape: FrameShapeType | undefined,
     frameType: FrameType | undefined,
     springHinge: boolean | undefined,
     reqUserId: number,

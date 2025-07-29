@@ -2,7 +2,7 @@ export class CartItemModel {
   public readonly id: number;
   public readonly cartId: number;
   public readonly productId: number;
-  public readonly lensId: number | undefined;
+  public readonly lensId: number;
   public readonly quantity: number;
   public readonly addedAt: Date | undefined;
   public readonly createdAt: Date | undefined;
@@ -16,7 +16,7 @@ export class CartItemModel {
     id: number,
     cartId: number,
     productId: number,
-    lensId: number | undefined,
+    lensId: number,
     quantity: number,
     addedAt: Date | undefined,
     createdAt: Date | undefined,

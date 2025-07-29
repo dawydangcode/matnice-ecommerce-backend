@@ -1,3 +1,5 @@
+import { FrameShapeType } from '../enum/frame.type';
+
 export class ProductDetailModel {
   public readonly id: number;
   public readonly productId: number;
@@ -10,8 +12,10 @@ export class ProductDetailModel {
   public readonly templeLength: number;
   public readonly frameColor: string;
   public readonly frameMaterial: string;
-  public readonly frameShape: string;
+  public readonly frameShape: FrameShapeType;
   public readonly frameType: string;
+  public readonly bridgeDesign: string;
+  public readonly style: string;
   public readonly springHinge: boolean;
   public readonly createdAt: Date | undefined;
   public readonly createdBy: number | undefined;
@@ -32,8 +36,10 @@ export class ProductDetailModel {
     templeLength: number,
     frameColor: string,
     frameMaterial: string,
-    frameShape: string,
+    frameShape: FrameShapeType,
     frameType: string,
+    bridgeDesign: string,
+    style: string,
     springHinge: boolean,
     createdAt: Date | undefined,
     createdBy: number | undefined,
@@ -55,6 +61,8 @@ export class ProductDetailModel {
     this.frameMaterial = frameMaterial;
     this.frameShape = frameShape;
     this.frameType = frameType;
+    this.bridgeDesign = bridgeDesign;
+    this.style = style;
     this.springHinge = springHinge;
     this.createdAt = createdAt;
     this.createdBy = createdBy;

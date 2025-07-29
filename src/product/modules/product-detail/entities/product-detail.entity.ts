@@ -5,6 +5,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ProductDetailModel } from '../models/product-detail.model';
+import { FrameShapeType } from '../enum/frame.type';
 
 @Entity('product_detail')
 export class ProductDetailEntity {
@@ -42,10 +43,16 @@ export class ProductDetailEntity {
   frameMaterial!: string;
 
   @Column({ name: 'frame_shape' })
-  frameShape!: string;
+  frameShape!: FrameShapeType;
 
   @Column({ name: 'frame_type' })
   frameType!: string;
+
+  @Column({ name: 'bridge_design' })
+  bridgeDesign!: string;
+
+  @Column({ name: 'style' })
+  style!: string;
 
   @Column({ name: 'spring_hinges' })
   springHinge!: boolean;
@@ -83,6 +90,8 @@ export class ProductDetailEntity {
       this.frameMaterial,
       this.frameShape,
       this.frameType,
+      this.bridgeDesign,
+      this.style,
       this.springHinge,
       this.createdAt,
       this.createdBy,

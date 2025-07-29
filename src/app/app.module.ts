@@ -15,6 +15,7 @@ import { ProductModule } from 'src/product/product.module';
 import { CategoryModule } from 'src/category/category.module';
 import { BrandModule } from 'src/brand/brand.module';
 import { ProductDetailModule } from 'src/product/modules/product-detail/product-detail.module';
+import { CartModule } from 'src/cart/cart.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { ProductDetailModule } from 'src/product/modules/product-detail/product-
     ProductModule,
     CategoryModule,
     BrandModule,
+    CartModule,
   ],
   controllers: [AppController],
   providers: [

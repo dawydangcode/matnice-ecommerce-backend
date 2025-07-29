@@ -20,7 +20,7 @@ import {
 } from './dtos/cart_item.dto';
 import { CartItemModel } from './models/cart_item.model';
 
-@ApiTags('Cart Item')
+@ApiTags('Cart / Cart Item')
 @Controller('api/v1/cart-item')
 export class CartItemController {
   constructor(private readonly cartItemService: CartItemService) {}

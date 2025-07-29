@@ -22,8 +22,8 @@ export class CartItemEntity {
   @Column({ name: 'product_id' })
   productId!: number;
 
-  @Column({ name: 'lens_id', nullable: true })
-  lensId!: number | null;
+  @Column({ name: 'lens_id' })
+  lensId!: number;
 
   @Column({ name: 'quantity' })
   quantity!: number;
@@ -37,17 +37,17 @@ export class CartItemEntity {
   @Column({ name: 'created_by' })
   createdBy!: number;
 
-  @Column({ name: 'updated_at', nullable: true })
-  updatedAt!: Date | null;
+  @Column({ name: 'updated_at' })
+  updatedAt!: Date;
 
-  @Column({ name: 'updated_by', nullable: true })
-  updatedBy!: number | null;
+  @Column({ name: 'updated_by' })
+  updatedBy!: number;
 
-  @Column({ name: 'deleted_at', nullable: true })
-  deletedAt!: Date | null;
+  @Column({ name: 'deleted_at' })
+  deletedAt!: Date;
 
-  @Column({ name: 'deleted_by', nullable: true })
-  deletedBy!: number | null;
+  @Column({ name: 'deleted_by' })
+  deletedBy!: number;
 
   // Relations (tạm comment để tránh circular import)
   // @ManyToOne(() => CartEntity)
@@ -67,15 +67,15 @@ export class CartItemEntity {
       this.id,
       this.cartId,
       this.productId,
-      this.lensId || undefined,
+      this.lensId,
       this.quantity,
       this.addedAt,
       this.createdAt,
       this.createdBy,
-      this.updatedAt || undefined,
-      this.updatedBy || undefined,
-      this.deletedAt || undefined,
-      this.deletedBy || undefined,
+      this.updatedAt,
+      this.updatedBy,
+      this.deletedAt,
+      this.deletedBy,
     );
   }
 }

@@ -61,14 +61,14 @@ export class CartItemService {
   async createCartItem(
     cartId: number,
     productId: number,
-    lensId: number | undefined,
+    lensId: number,
     quantity: number,
     reqUserId: number,
   ): Promise<CartItemModel> {
     const entity = new CartItemEntity();
     entity.cartId = cartId;
     entity.productId = productId;
-    entity.lensId = lensId || null;
+    entity.lensId = lensId;
     entity.quantity = quantity;
     entity.addedAt = new Date();
     entity.createdAt = new Date();

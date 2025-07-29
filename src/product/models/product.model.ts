@@ -4,12 +4,12 @@ export class ProductModel {
   public readonly id: number;
   public readonly productName: string;
   public readonly productType: ProductType;
-  public readonly categoryId: number;
   public readonly brandId: number;
   public readonly gender: ProductGenderType;
   public readonly price: number;
   public readonly stock: number;
   public readonly description: string;
+  public readonly isSustainable: boolean;
   public readonly createdAt: Date | undefined;
   public readonly createdBy: number | undefined;
   public readonly updatedAt: Date | undefined;
@@ -21,12 +21,12 @@ export class ProductModel {
     id: number,
     productName: string,
     productType: ProductType,
-    categoryId: number,
     brandId: number,
     gender: ProductGenderType,
     price: number,
     stock: number,
     description: string,
+    isSustainable: boolean,
     createdAt: Date | undefined,
     createdBy: number | undefined,
     updatedAt: Date | undefined,
@@ -37,12 +37,12 @@ export class ProductModel {
     this.id = id;
     this.productName = productName;
     this.productType = productType;
-    this.categoryId = categoryId;
     this.brandId = brandId;
     this.gender = gender;
     this.price = price;
     this.stock = stock;
     this.description = description;
+    this.isSustainable = isSustainable;
     this.createdAt = createdAt;
     this.createdBy = createdBy;
     this.updatedAt = updatedAt;

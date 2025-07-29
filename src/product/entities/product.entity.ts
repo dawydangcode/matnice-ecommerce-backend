@@ -18,9 +18,6 @@ export class ProductEntity {
   @Column({ name: 'product_type' })
   productType!: ProductType;
 
-  @Column({ name: 'category_id' })
-  categoryId!: number;
-
   @Column({ name: 'brand_id' })
   brandId!: number;
 
@@ -35,6 +32,9 @@ export class ProductEntity {
 
   @Column({ name: 'description' })
   description!: string;
+
+  @Column({ name: 'is_sustainable', default: false })
+  isSustainable!: boolean;
 
   @Column({ name: 'created_at' })
   createdAt!: Date;
@@ -59,12 +59,12 @@ export class ProductEntity {
       this.id,
       this.productName,
       this.productType,
-      this.categoryId,
       this.brandId,
       this.gender,
       this.price,
       this.stock,
       this.description,
+      this.isSustainable,
       this.createdAt,
       this.createdBy,
       this.updatedAt,

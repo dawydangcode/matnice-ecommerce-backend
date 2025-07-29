@@ -35,7 +35,6 @@ export class ProductController {
     return await this.productService.getProducts(
       undefined,
       undefined,
-      undefined,
       new PaginationParamsModel(query.page, query.limit),
       undefined,
       undefined,
@@ -54,12 +53,13 @@ export class ProductController {
   ) {
     return await this.productService.createProduct(
       body.productName,
-      body.categoryId,
+      body.productType,
       body.brandId,
       body.gender,
       body.price,
       body.stock,
       body.description,
+      body.isSustainable,
       req.user.userId,
     );
   }
@@ -75,12 +75,12 @@ export class ProductController {
       product,
       body.productType,
       body.productName,
-      body.categoryId,
       body.brandId,
       body.gender,
       body.price,
       body.stock,
       body.description,
+      body.isSustainable,
       req.user.userId,
     );
   }
