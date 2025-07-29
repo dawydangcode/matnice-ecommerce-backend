@@ -4,10 +4,10 @@ export class ProductCategoryModel {
   public readonly categoryId: number;
   public readonly createdAt: Date | undefined;
   public readonly createdBy: number | undefined;
-  public readonly updatedAt: Date | null;
-  public readonly updatedBy: number | null;
-  public readonly deletedAt: Date | null;
-  public readonly deletedBy: number | null;
+  public readonly updatedAt: Date | undefined;
+  public readonly updatedBy: number | undefined;
+  public readonly deletedAt: Date | undefined;
+  public readonly deletedBy: number | undefined;
 
   constructor(
     id: number,
@@ -15,10 +15,10 @@ export class ProductCategoryModel {
     categoryId: number,
     createdAt: Date | undefined,
     createdBy: number | undefined,
-    updatedAt: Date | null,
-    updatedBy: number | null,
-    deletedAt: Date | null,
-    deletedBy: number | null,
+    updatedAt: Date | undefined,
+    updatedBy: number | undefined,
+    deletedAt: Date | undefined,
+    deletedBy: number | undefined,
   ) {
     this.id = id;
     this.productId = productId;

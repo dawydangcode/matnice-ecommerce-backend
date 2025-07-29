@@ -96,11 +96,12 @@ export class ProductCategoryController {
   async validateProductCategory(
     @Param('productId') productId: number,
     @Param('categoryId') categoryId: number,
-  ): Promise<{ exists: boolean }> {
-    const exists = await this.productCategoryService.validateProductCategory(
+  ): Promise<boolean> {
+    await this.productCategoryService.validateProductCategory(
       productId,
       categoryId,
     );
-    return { exists };
+
+    return true;
   }
 }

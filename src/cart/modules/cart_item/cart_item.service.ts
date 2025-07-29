@@ -45,7 +45,7 @@ export class CartItemService {
     cartId: number,
     productId: number,
     lensId?: number,
-  ): Promise<CartItemModel | null> {
+  ): Promise<CartItemModel | undefined> {
     const cartItem = await this.cartItemRepository.findOne({
       where: {
         cartId: cartId,
@@ -54,8 +54,14 @@ export class CartItemService {
         deletedAt: IsNull(),
       },
     });
-
-    return cartItem ? cartItem.toModel() : null;
+    if (!cartItem) {
+      throw new HttpException(
+        'Cart item not found for the given product and lens',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    
+    return cartItem.toModel();
   }
 
   async createCartItem(
