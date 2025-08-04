@@ -52,10 +52,12 @@ export class LensDetailService {
     const entity = new LensDetailEntity();
     entity.lensId = createLensDetailDto.lensId;
     entity.lensType = createLensDetailDto.lensType || null;
-    entity.lensThicknessId = createLensDetailDto.lensThicknessId || null;
+    entity.thicknessIndex = createLensDetailDto.thicknessIndex || null;
+    entity.thicknessPrice = createLensDetailDto.thicknessPrice || null;
     entity.qualityType = createLensDetailDto.qualityType || null;
     entity.qualityPrice = createLensDetailDto.qualityPrice || null;
-    entity.tintId = createLensDetailDto.tintId || null;
+    entity.tintType = createLensDetailDto.tintType || null;
+    entity.tintPrice = createLensDetailDto.tintPrice || null;
     entity.powerSphereLeft = createLensDetailDto.powerSphereLeft || null;
     entity.powerSphereRight = createLensDetailDto.powerSphereRight || null;
     entity.powerCylinderLeft = createLensDetailDto.powerCylinderLeft || null;
@@ -136,13 +138,17 @@ export class LensDetailService {
 
     let totalPrice = 0;
 
+    if (lensDetail.thicknessPrice) {
+      totalPrice += lensDetail.thicknessPrice;
+    }
+
     if (lensDetail.qualityPrice) {
       totalPrice += lensDetail.qualityPrice;
     }
 
-    // Note: For thickness and tint pricing, you may need to fetch
-    // the related entities (lens_thickness, lens_tint) to get the prices
-    // This is a simplified calculation based on quality price only
+    if (lensDetail.tintPrice) {
+      totalPrice += lensDetail.tintPrice;
+    }
 
     return totalPrice;
   }

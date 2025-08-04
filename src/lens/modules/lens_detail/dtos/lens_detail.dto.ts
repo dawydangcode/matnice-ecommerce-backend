@@ -12,8 +12,13 @@ export class CreateLensDetailDto {
 
   @IsOptional()
   @IsNumber()
-  @Transform(({ value }) => parseInt(value))
-  lensThicknessId?: number;
+  @Transform(({ value }) => parseFloat(value))
+  thicknessIndex?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Transform(({ value }) => parseFloat(value))
+  thicknessPrice?: number;
 
   @IsOptional()
   @IsString()
@@ -25,9 +30,13 @@ export class CreateLensDetailDto {
   qualityPrice?: number;
 
   @IsOptional()
+  @IsString()
+  tintType?: string;
+
+  @IsOptional()
   @IsNumber()
-  @Transform(({ value }) => parseInt(value))
-  tintId?: number;
+  @Transform(({ value }) => parseFloat(value))
+  tintPrice?: number;
 
   @IsOptional()
   @IsNumber()
