@@ -2,27 +2,27 @@ export class TintColorModel {
   public readonly id: number;
   public readonly tintId: number;
   public readonly name: string;
-  public readonly imageUrl: string | null;
-  public readonly colorCode: string | null;
+  public readonly imageUrl: string | undefined;
+  public readonly colorCode: string | undefined;
   public readonly createdAt: Date;
   public readonly createdBy: number;
   public readonly updatedAt: Date;
   public readonly updatedBy: number;
-  public readonly deletedAt: Date | null;
-  public readonly deletedBy: number | null;
+  public readonly deletedAt: Date | undefined;
+  public readonly deletedBy: number | undefined;
 
   constructor(
     id: number,
     tintId: number,
     name: string,
-    imageUrl: string | null,
-    colorCode: string | null,
+    imageUrl: string | undefined,
+    colorCode: string | undefined,
     createdAt: Date,
     createdBy: number,
     updatedAt: Date,
     updatedBy: number,
-    deletedAt: Date | null,
-    deletedBy: number | null,
+    deletedAt: Date | undefined,
+    deletedBy: number | undefined,
   ) {
     this.id = id;
     this.tintId = tintId;

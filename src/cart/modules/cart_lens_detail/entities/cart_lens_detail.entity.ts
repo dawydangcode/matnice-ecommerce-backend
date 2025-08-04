@@ -97,7 +97,7 @@ export class CartLensDetailEntity {
   lensQuality!: string;
 
   @Column({ name: 'lens_thickness_id', type: 'bigint', nullable: true })
-  lensThicknessId!: number | null;
+  lensThicknessId!: number | undefined;
 
   @Column({
     name: 'lens_upgrade_detail_id',
@@ -105,7 +105,7 @@ export class CartLensDetailEntity {
     nullable: true,
     default: null,
   })
-  lensUpgradeDetailId!: number | null;
+  lensUpgradeDetailId!: number | undefined;
 
   @Column({
     name: 'total_upgrades_price',
@@ -130,7 +130,7 @@ export class CartLensDetailEntity {
   lensMaterial!: string;
 
   @Column({ name: 'tint_id', type: 'bigint', nullable: true, default: null })
-  tintId!: number | null;
+  tintId!: number | undefined;
 
   // Notes
   @Column({ name: 'prescription_notes', type: 'text', nullable: true })

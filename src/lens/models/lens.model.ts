@@ -5,8 +5,8 @@ export class LensModel {
   public readonly createdBy: number;
   public readonly updatedAt: Date;
   public readonly updatedBy: number;
-  public readonly deletedAt: Date | null;
-  public readonly deletedBy: number | null;
+  public readonly deletedAt: Date | undefined;
+  public readonly deletedBy: number | undefined;
 
   constructor(
     id: number,
@@ -15,8 +15,8 @@ export class LensModel {
     createdBy: number,
     updatedAt: Date,
     updatedBy: number,
-    deletedAt: Date | null,
-    deletedBy: number | null,
+    deletedAt: Date | undefined,
+    deletedBy: number | undefined,
   ) {
     this.id = id;
     this.name = name;

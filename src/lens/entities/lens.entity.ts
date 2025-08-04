@@ -32,10 +32,10 @@ export class LensEntity {
   updatedBy!: number;
 
   @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
-  deletedAt!: Date | null;
+  deletedAt!: Date | undefined;
 
   @Column({ name: 'deleted_by', type: 'bigint', nullable: true })
-  deletedBy!: number | null;
+  deletedBy!: number | undefined;
 
   // Relations
   // @ManyToOne(() => CategoryEntity)

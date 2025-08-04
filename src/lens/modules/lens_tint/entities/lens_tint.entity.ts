@@ -25,7 +25,7 @@ export class LensTintEntity {
   price!: number;
 
   @Column({ name: 'description', type: 'varchar', length: 500, nullable: true })
-  description!: string | null;
+  description!: string | undefined;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt!: Date;
@@ -40,10 +40,10 @@ export class LensTintEntity {
   updatedBy!: number;
 
   @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
-  deletedAt!: Date | null;
+  deletedAt!: Date | undefined;
 
   @Column({ name: 'deleted_by', type: 'bigint', nullable: true })
-  deletedBy!: number | null;
+  deletedBy!: number | undefined;
 
   toModel(): LensTintModel {
     return new LensTintModel(

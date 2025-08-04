@@ -19,64 +19,47 @@ export class LensDetailEntity {
   @Column({ name: 'lens_id' })
   lensId!: number;
 
-  @Column({ name: 'lens_type', type: 'varchar', length: 255, nullable: true })
-  lensType!: string | null;
-
   @Column({ name: 'lens_thickness_id', type: 'bigint', nullable: true })
-  lensThicknessId!: number | null;
+  lensThicknessId!: number;
 
-  @Column({
-    name: 'quality_type',
-    type: 'varchar',
-    length: 255,
-    nullable: true,
-  })
-  qualityType!: string | null;
-
-  @Column({
-    name: 'quality_price',
-    type: 'decimal',
-    precision: 10,
-    scale: 2,
-    nullable: true,
-  })
-  qualityPrice!: number | null;
+  @Column({ name: 'lens_quality_id', type: 'bigint', nullable: true })
+  lensQualityId!: number;
 
   @Column({ name: 'tint_id', type: 'bigint', nullable: true })
-  tintId!: number | null;
+  tintId!: number;
 
   @Column({ name: 'power_sphere_left', type: 'double', nullable: true })
-  powerSphereLeft!: number | null;
+  powerSphereLeft!: number;
 
   @Column({ name: 'power_sphere_right', type: 'double', nullable: true })
-  powerSphereRight!: number | null;
+  powerSphereRight!: number;
 
   @Column({ name: 'power_cylinder_left', type: 'double', nullable: true })
-  powerCylinderLeft!: number | null;
+  powerCylinderLeft!: number;
 
   @Column({ name: 'power_cylinder_right', type: 'double', nullable: true })
-  powerCylinderRight!: number | null;
+  powerCylinderRight!: number;
 
   @Column({ name: 'axis_left', type: 'int', nullable: true })
-  axisLeft!: number | null;
+  axisLeft!: number;
 
   @Column({ name: 'axis_right', type: 'int', nullable: true })
-  axisRight!: number | null;
+  axisRight!: number;
 
   @Column({ name: 'pd_left', type: 'double', nullable: true })
-  pdLeft!: number | null;
+  pdLeft!: number;
 
   @Column({ name: 'pd_right', type: 'double', nullable: true })
-  pdRight!: number | null;
+  pdRight!: number;
 
   @Column({ name: 'prescription_date', type: 'date', nullable: true })
-  prescriptionDate!: Date | null;
+  prescriptionDate!: Date;
 
   @Column({ name: 'material', type: 'varchar', length: 255, nullable: true })
-  material!: string | null;
+  material!: string;
 
   @Column({ name: 'coating', type: 'varchar', length: 255, nullable: true })
-  coating!: string | null;
+  coating!: string;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt!: Date;
@@ -91,10 +74,10 @@ export class LensDetailEntity {
   updatedBy!: number;
 
   @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
-  deletedAt!: Date | null;
+  deletedAt!: Date;
 
   @Column({ name: 'deleted_by', type: 'bigint', nullable: true })
-  deletedBy!: number | null;
+  deletedBy!: number;
 
   // Relations
   @ManyToOne(() => LensEntity)
@@ -105,10 +88,8 @@ export class LensDetailEntity {
     return new LensDetailModel(
       this.id,
       this.lensId,
-      this.lensType,
       this.lensThicknessId,
-      this.qualityType,
-      this.qualityPrice,
+      this.lensQualityId,
       this.tintId,
       this.powerSphereLeft,
       this.powerSphereRight,

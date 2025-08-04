@@ -1,178 +1,135 @@
 import { IsString, IsNumber, IsOptional, IsDateString } from 'class-validator';
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
+import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
 
-export class CreateLensDetailDto {
+export class LensDetailDto {
+  @ApiProperty()
   @IsNumber()
-  @Transform(({ value }) => parseInt(value))
+  @Type(() => Number)
+  lensDetailId!: number;
+
+  @ApiProperty()
+  @IsNumber()
+  @Type(() => Number)
   lensId!: number;
 
-  @IsOptional()
-  @IsString()
-  lensType?: string;
+  @ApiProperty()
+  @IsNumber()
+  @Type(() => Number)
+  lensThicknessId!: number;
 
+  @ApiProperty()
+  @IsNumber()
+  @Type(() => Number)
+  lensQualityId!: number;
+
+  @ApiProperty()
+  @IsNumber()
+  @Type(() => Number)
+  tintId!: number;
+
+  @ApiProperty()
   @IsOptional()
   @IsNumber()
   @Transform(({ value }) => parseFloat(value))
-  thicknessIndex?: number;
+  powerSphereLeft!: number;
 
+  @ApiProperty()
   @IsOptional()
   @IsNumber()
   @Transform(({ value }) => parseFloat(value))
-  thicknessPrice?: number;
+  powerSphereRight!: number;
 
-  @IsOptional()
-  @IsString()
-  qualityType?: string;
-
+  @ApiProperty()
   @IsOptional()
   @IsNumber()
   @Transform(({ value }) => parseFloat(value))
-  qualityPrice?: number;
+  powerCylinderLeft!: number;
 
-  @IsOptional()
-  @IsString()
-  tintType?: string;
-
+  @ApiProperty()
   @IsOptional()
   @IsNumber()
   @Transform(({ value }) => parseFloat(value))
-  tintPrice?: number;
+  powerCylinderRight!: number;
 
-  @IsOptional()
-  @IsNumber()
-  @Transform(({ value }) => parseFloat(value))
-  powerSphereLeft?: number;
-
-  @IsOptional()
-  @IsNumber()
-  @Transform(({ value }) => parseFloat(value))
-  powerSphereRight?: number;
-
-  @IsOptional()
-  @IsNumber()
-  @Transform(({ value }) => parseFloat(value))
-  powerCylinderLeft?: number;
-
-  @IsOptional()
-  @IsNumber()
-  @Transform(({ value }) => parseFloat(value))
-  powerCylinderRight?: number;
-
+  @ApiProperty()
   @IsOptional()
   @IsNumber()
   @Transform(({ value }) => parseInt(value))
-  axisLeft?: number;
+  axisLeft!: number;
 
+  @ApiProperty()
   @IsOptional()
   @IsNumber()
   @Transform(({ value }) => parseInt(value))
-  axisRight?: number;
+  axisRight!: number;
 
+  @ApiProperty()
   @IsOptional()
   @IsNumber()
   @Transform(({ value }) => parseFloat(value))
-  pdLeft?: number;
+  pdLeft!: number;
 
+  @ApiProperty()
   @IsOptional()
   @IsNumber()
   @Transform(({ value }) => parseFloat(value))
-  pdRight?: number;
+  pdRight!: number;
 
+  @ApiProperty()
   @IsOptional()
   @IsDateString()
-  prescriptionDate?: string;
+  prescriptionDate!: Date;
 
+  @ApiProperty()
   @IsOptional()
   @IsString()
-  material?: string;
+  material!: string;
 
+  @ApiProperty()
   @IsOptional()
   @IsString()
-  coating?: string;
+  coating!: string;
 }
 
-export class UpdateLensDetailDto {
-  @IsOptional()
-  @IsString()
-  lensType?: string;
+export class CreateLensDetailBodyDto extends PickType(LensDetailDto, [
+  'lensId',
+  'lensThicknessId',
+  'lensQualityId',
+  'tintId',
+  'powerSphereLeft',
+  'powerSphereRight',
+  'powerCylinderLeft',
+  'powerCylinderRight',
+  'axisLeft',
+  'axisRight',
+  'pdLeft',
+  'pdRight',
+  'prescriptionDate',
+  'material',
+  'coating',
+]) {}
 
-  @IsOptional()
-  @IsNumber()
-  @Transform(({ value }) => parseFloat(value))
-  thicknessIndex?: number;
+export class UpdateLensDetailParamsDto extends PickType(LensDetailDto, [
+  'lensDetailId',
+]) {}
 
-  @IsOptional()
-  @IsNumber()
-  @Transform(({ value }) => parseFloat(value))
-  thicknessPrice?: number;
-
-  @IsOptional()
-  @IsString()
-  qualityType?: string;
-
-  @IsOptional()
-  @IsNumber()
-  @Transform(({ value }) => parseFloat(value))
-  qualityPrice?: number;
-
-  @IsOptional()
-  @IsString()
-  tintType?: string;
-
-  @IsOptional()
-  @IsNumber()
-  @Transform(({ value }) => parseFloat(value))
-  tintPrice?: number;
-
-  @IsOptional()
-  @IsNumber()
-  @Transform(({ value }) => parseFloat(value))
-  powerSphereLeft?: number;
-
-  @IsOptional()
-  @IsNumber()
-  @Transform(({ value }) => parseFloat(value))
-  powerSphereRight?: number;
-
-  @IsOptional()
-  @IsNumber()
-  @Transform(({ value }) => parseFloat(value))
-  powerCylinderLeft?: number;
-
-  @IsOptional()
-  @IsNumber()
-  @Transform(({ value }) => parseFloat(value))
-  powerCylinderRight?: number;
-
-  @IsOptional()
-  @IsNumber()
-  @Transform(({ value }) => parseInt(value))
-  axisLeft?: number;
-
-  @IsOptional()
-  @IsNumber()
-  @Transform(({ value }) => parseInt(value))
-  axisRight?: number;
-
-  @IsOptional()
-  @IsNumber()
-  @Transform(({ value }) => parseFloat(value))
-  pdLeft?: number;
-
-  @IsOptional()
-  @IsNumber()
-  @Transform(({ value }) => parseFloat(value))
-  pdRight?: number;
-
-  @IsOptional()
-  @IsDateString()
-  prescriptionDate?: string;
-
-  @IsOptional()
-  @IsString()
-  material?: string;
-
-  @IsOptional()
-  @IsString()
-  coating?: string;
-}
+export class UpdateLensDetailBodyDto extends PartialType(
+  PickType(LensDetailDto, [
+    'lensId',
+    'lensThicknessId',
+    'lensQualityId',
+    'tintId',
+    'powerSphereLeft',
+    'powerSphereRight',
+    'powerCylinderLeft',
+    'powerCylinderRight',
+    'axisLeft',
+    'axisRight',
+    'pdLeft',
+    'pdRight',
+    'prescriptionDate',
+    'material',
+    'coating',
+  ]),
+) {}

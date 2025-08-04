@@ -96,9 +96,9 @@ export class CartLensDetailService {
     entity.pdRight = pdRight;
     entity.lensType = lensType;
     entity.lensQuality = lensQuality || 'Standard';
-    entity.lensThicknessId = lensThicknessId ?? null;
-    entity.lensUpgradeDetailId = lensUpgradeDetailId ?? null;
-    entity.tintId = tintId ?? null;
+    entity.lensThicknessId = lensThicknessId;
+    entity.lensUpgradeDetailId = lensUpgradeDetailId;
+    entity.tintId = tintId;
     entity.lensPrice = lensPrice;
     entity.lensMaterial = lensMaterial;
     entity.prescriptionNotes = prescriptionNotes;
@@ -109,8 +109,6 @@ export class CartLensDetailService {
     entity.addRight = addRight;
     entity.createdAt = new Date();
     entity.createdBy = reqUserId;
-    entity.updatedAt = new Date();
-    entity.updatedBy = reqUserId;
 
     const savedLensDetail = await this.cartLensDetailRepository.save(entity);
     return savedLensDetail.toModel();

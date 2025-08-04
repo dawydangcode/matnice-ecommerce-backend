@@ -61,13 +61,13 @@ export class LensUpgradeDetailEntity {
   total_upgrades_price!: number;
 
   @Column({ type: 'text', nullable: true })
-  description!: string | null;
+  description!: string | undefined;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at!: Date;
 
   @Column({ type: 'int', nullable: true })
-  created_by!: number | null;
+  created_by!: number | undefined;
 
   @Column({
     type: 'timestamp',
@@ -77,13 +77,13 @@ export class LensUpgradeDetailEntity {
   updated_at!: Date;
 
   @Column({ type: 'int', nullable: true })
-  updated_by!: number | null;
+  updated_by!: number | undefined;
 
   @Column({ type: 'timestamp', nullable: true })
-  deleted_at!: Date | null;
+  deleted_at!: Date | undefined;
 
   @Column({ type: 'int', nullable: true })
-  deleted_by!: number | null;
+  deleted_by!: number | undefined;
 
   toModel(): LensUpgradeDetailModel {
     return new LensUpgradeDetailModel(

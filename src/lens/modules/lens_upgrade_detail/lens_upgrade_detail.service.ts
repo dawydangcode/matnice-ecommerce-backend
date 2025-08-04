@@ -54,7 +54,7 @@ export class LensUpgradeDetailService {
     upgradeTransitionPrice: number,
     upgradeProgressivePrice: number,
     totalUpgradesPrice: number,
-    description: string | null,
+    description: string | undefined,
     reqUserId: number,
   ): Promise<LensUpgradeDetailModel> {
     const entity = new LensUpgradeDetailEntity();

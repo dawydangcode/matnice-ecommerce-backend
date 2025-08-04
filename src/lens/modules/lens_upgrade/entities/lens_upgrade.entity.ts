@@ -17,7 +17,7 @@ export class LensUpgradeEntity {
   upgradeName!: string;
 
   @Column({ name: 'description', type: 'varchar', length: 500, nullable: true })
-  description!: string | null;
+  description!: string | undefined;
 
   @Column({
     name: 'price',
@@ -40,10 +40,10 @@ export class LensUpgradeEntity {
   updatedBy!: number;
 
   @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
-  deletedAt!: Date | null;
+  deletedAt!: Date | undefined;
 
   @Column({ name: 'deleted_by', type: 'bigint', nullable: true })
-  deletedBy!: number | null;
+  deletedBy!: number | undefined;
 
   toModel(): LensUpgradeModel {
     return new LensUpgradeModel(

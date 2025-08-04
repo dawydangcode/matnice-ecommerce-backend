@@ -19,12 +19,12 @@ export class LensUpgradeDetailModel {
     public upgradeTransitionPrice: number,
     public upgradeProgressivePrice: number,
     public totalUpgradesPrice: number,
-    public description: string | null,
+    public description: string | undefined,
     public createdAt: Date,
-    public createdBy: number | null,
+    public createdBy: number | undefined,
     public updatedAt: Date,
-    public updatedBy: number | null,
-    public deletedAt: Date | null,
-    public deletedBy: number | null,
+    public updatedBy: number | undefined,
+    public deletedAt: Date | undefined,
+    public deletedBy: number | undefined,
   ) {}
 }

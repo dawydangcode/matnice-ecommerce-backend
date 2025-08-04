@@ -63,7 +63,7 @@ export class LensUpgradeDetailController {
       body.upgradeTransitionPrice || 0,
       body.upgradeProgressivePrice || 0,
       body.totalUpgradesPrice || 0,
-      body.description || null,
+      body.description || undefined,
       req.user.userId,
     );
   }

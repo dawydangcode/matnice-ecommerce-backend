@@ -6,8 +6,7 @@ import { LensController } from './lens.controller';
 import { LensDetailModule } from './modules/lens_detail/lens_detail.module';
 import { LensUpgradeModule } from './modules/lens_upgrade/lens_upgrade.module';
 import { LensUpgradeDetailModule } from './modules/lens_upgrade_detail/lens_upgrade_detail.module';
-import { LensThicknessModule } from './modules/lens_thickness/lens_thickness.module';
-import { LensTintModule } from './modules/lens_tint/lens_tint.module';
+import { LensQualityModule } from './modules/lens_quality/lens_quality.module';
 
 @Module({
   imports: [
@@ -15,8 +14,7 @@ import { LensTintModule } from './modules/lens_tint/lens_tint.module';
     LensDetailModule,
     LensUpgradeModule,
     LensUpgradeDetailModule,
-    LensThicknessModule,
-    LensTintModule,
+    LensQualityModule,
   ],
   controllers: [LensController],
   providers: [LensService],
@@ -25,8 +23,7 @@ import { LensTintModule } from './modules/lens_tint/lens_tint.module';
     LensDetailModule,
     LensUpgradeModule,
     LensUpgradeDetailModule,
-    LensThicknessModule,
-    LensTintModule,
+    LensQualityModule,
   ],
 })
 export class LensModule {}

@@ -36,12 +36,15 @@ export class LensUpgradeService {
     return lensUpgrade.toModel();
   }
 
-  async findByName(upgradeName: string): Promise<LensUpgradeModel | null> {
+  async findByName(upgradeName: string): Promise<LensUpgradeModel | undefined> {
     const lensUpgrade = await this.lensUpgradeRepository.findOne({
       where: { upgradeName, deletedAt: IsNull() },
     });
+    if (!lensUpgrade) {
+      throw new HttpException('Lens upgrade not found', HttpStatus.NOT_FOUND);
+    }
 
-    return lensUpgrade ? lensUpgrade.toModel() : null;
+    return lensUpgrade.toModel();
   }
 
   async create(
@@ -61,7 +64,7 @@ export class LensUpgradeService {
 
     const entity = new LensUpgradeEntity();
     entity.upgradeName = createLensUpgradeDto.upgradeName;
-    entity.description = createLensUpgradeDto.description || null;
+    entity.description = createLensUpgradeDto.description || undefined;
     entity.price = createLensUpgradeDto.price;
     entity.createdAt = new Date();
     entity.createdBy = reqUserId;

@@ -1,61 +1,55 @@
 export class LensDetailModel {
   public readonly id: number;
   public readonly lensId: number;
-  public readonly lensType: string | null;
-  public readonly lensThicknessId: number | null;
-  public readonly qualityType: string | null;
-  public readonly qualityPrice: number | null;
-  public readonly tintId: number | null;
-  public readonly powerSphereLeft: number | null;
-  public readonly powerSphereRight: number | null;
-  public readonly powerCylinderLeft: number | null;
-  public readonly powerCylinderRight: number | null;
-  public readonly axisLeft: number | null;
-  public readonly axisRight: number | null;
-  public readonly pdLeft: number | null;
-  public readonly pdRight: number | null;
-  public readonly prescriptionDate: Date | null;
-  public readonly material: string | null;
-  public readonly coating: string | null;
+  public readonly lensThicknessId: number | undefined;
+  public readonly lensQualityId: number | undefined;
+  public readonly tintId: number | undefined;
+  public readonly powerSphereLeft: number | undefined;
+  public readonly powerSphereRight: number | undefined;
+  public readonly powerCylinderLeft: number | undefined;
+  public readonly powerCylinderRight: number | undefined;
+  public readonly axisLeft: number | undefined;
+  public readonly axisRight: number | undefined;
+  public readonly pdLeft: number | undefined;
+  public readonly pdRight: number | undefined;
+  public readonly prescriptionDate: Date;
+  public readonly material: string | undefined;
+  public readonly coating: string | undefined;
   public readonly createdAt: Date;
   public readonly createdBy: number;
   public readonly updatedAt: Date;
   public readonly updatedBy: number;
-  public readonly deletedAt: Date | null;
-  public readonly deletedBy: number | null;
+  public readonly deletedAt: Date | undefined;
+  public readonly deletedBy: number | undefined;
 
   constructor(
     id: number,
     lensId: number,
-    lensType: string | null,
-    lensThicknessId: number | null,
-    qualityType: string | null,
-    qualityPrice: number | null,
-    tintId: number | null,
-    powerSphereLeft: number | null,
-    powerSphereRight: number | null,
-    powerCylinderLeft: number | null,
-    powerCylinderRight: number | null,
-    axisLeft: number | null,
-    axisRight: number | null,
-    pdLeft: number | null,
-    pdRight: number | null,
-    prescriptionDate: Date | null,
-    material: string | null,
-    coating: string | null,
+    lensThicknessId: number | undefined,
+    lensQualityId: number | undefined,
+    tintId: number | undefined,
+    powerSphereLeft: number | undefined,
+    powerSphereRight: number | undefined,
+    powerCylinderLeft: number | undefined,
+    powerCylinderRight: number | undefined,
+    axisLeft: number | undefined,
+    axisRight: number | undefined,
+    pdLeft: number | undefined,
+    pdRight: number | undefined,
+    prescriptionDate: Date,
+    material: string | undefined,
+    coating: string | undefined,
     createdAt: Date,
     createdBy: number,
     updatedAt: Date,
     updatedBy: number,
-    deletedAt: Date | null,
-    deletedBy: number | null,
+    deletedAt: Date | undefined,
+    deletedBy: number | undefined,
   ) {
     this.id = id;
     this.lensId = lensId;
-    this.lensType = lensType;
     this.lensThicknessId = lensThicknessId;
-    this.qualityType = qualityType;
-    this.qualityPrice = qualityPrice;
+    this.lensQualityId = lensQualityId;
     this.tintId = tintId;
     this.powerSphereLeft = powerSphereLeft;
     this.powerSphereRight = powerSphereRight;

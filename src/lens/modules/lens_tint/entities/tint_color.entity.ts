@@ -20,16 +20,16 @@ export class TintColorEntity {
   name!: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
-  image_url!: string | null;
+  image_url!: string | undefined;
 
   @Column({ type: 'varchar', length: 7, nullable: true })
-  color_code!: string | null;
+  color_code!: string | undefined;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at!: Date;
 
   @Column({ type: 'int', nullable: true })
-  created_by!: number | null;
+  created_by!: number | undefined;
 
   @Column({
     type: 'timestamp',
@@ -39,13 +39,13 @@ export class TintColorEntity {
   updated_at!: Date;
 
   @Column({ type: 'int', nullable: true })
-  updated_by!: number | null;
+  updated_by!: number | undefined;
 
   @Column({ type: 'timestamp', nullable: true })
-  deleted_at!: Date | null;
+  deleted_at!: Date | undefined;
 
   @Column({ type: 'int', nullable: true })
-  deleted_by!: number | null;
+  deleted_by!: number | undefined;
 
   @ManyToOne(() => LensTintEntity)
   @JoinColumn({ name: 'tint_id' })

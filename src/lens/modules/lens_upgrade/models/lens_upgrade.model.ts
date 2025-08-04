@@ -1,26 +1,26 @@
 export class LensUpgradeModel {
   public readonly id: number;
   public readonly upgradeName: string;
-  public readonly description: string | null;
+  public readonly description: string | undefined;
   public readonly price: number;
   public readonly createdAt: Date;
   public readonly createdBy: number;
   public readonly updatedAt: Date;
   public readonly updatedBy: number;
-  public readonly deletedAt: Date | null;
-  public readonly deletedBy: number | null;
+  public readonly deletedAt: Date | undefined;
+  public readonly deletedBy: number | undefined;
 
   constructor(
     id: number,
     upgradeName: string,
-    description: string | null,
+    description: string | undefined,
     price: number,
     createdAt: Date,
     createdBy: number,
     updatedAt: Date,
     updatedBy: number,
-    deletedAt: Date | null,
-    deletedBy: number | null,
+    deletedAt: Date | undefined,
+    deletedBy: number | undefined,
   ) {
     this.id = id;
     this.upgradeName = upgradeName;

@@ -3,10 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Repository } from 'typeorm';
 import { LensDetailEntity } from './entities/lens_detail.entity';
 import { LensDetailModel } from './models/lens_detail.model';
-import {
-  CreateLensDetailDto,
-  UpdateLensDetailDto,
-} from './dtos/lens_detail.dto';
+import { LensDetailDto } from './dtos/lens_detail.dto';
 
 @Injectable()
 export class LensDetailService {
@@ -45,75 +42,91 @@ export class LensDetailService {
     return lensDetails.map((detail) => detail.toModel());
   }
 
-  async create(
-    createLensDetailDto: CreateLensDetailDto,
+  async createLensDetail(
+    lensId: number,
+    lensThicknessId: number,
+    lensQualityId: number,
+    tintId: number,
+    powerSphereLeft: number,
+    powerSphereRight: number,
+    powerCylinderLeft: number,
+    powerCylinderRight: number,
+    axisLeft: number,
+    axisRight: number,
+    pdLeft: number,
+    pdRight: number,
+    prescriptionDate: Date,
+    material: string,
+    coating: string,
     reqUserId: number,
   ): Promise<LensDetailModel> {
     const entity = new LensDetailEntity();
-    entity.lensId = createLensDetailDto.lensId;
-    entity.lensType = createLensDetailDto.lensType || null;
-    entity.thicknessIndex = createLensDetailDto.thicknessIndex || null;
-    entity.thicknessPrice = createLensDetailDto.thicknessPrice || null;
-    entity.qualityType = createLensDetailDto.qualityType || null;
-    entity.qualityPrice = createLensDetailDto.qualityPrice || null;
-    entity.tintType = createLensDetailDto.tintType || null;
-    entity.tintPrice = createLensDetailDto.tintPrice || null;
-    entity.powerSphereLeft = createLensDetailDto.powerSphereLeft || null;
-    entity.powerSphereRight = createLensDetailDto.powerSphereRight || null;
-    entity.powerCylinderLeft = createLensDetailDto.powerCylinderLeft || null;
-    entity.powerCylinderRight = createLensDetailDto.powerCylinderRight || null;
-    entity.axisLeft = createLensDetailDto.axisLeft || null;
-    entity.axisRight = createLensDetailDto.axisRight || null;
-    entity.pdLeft = createLensDetailDto.pdLeft || null;
-    entity.pdRight = createLensDetailDto.pdRight || null;
-    entity.prescriptionDate = createLensDetailDto.prescriptionDate
-      ? new Date(createLensDetailDto.prescriptionDate)
-      : null;
-    entity.material = createLensDetailDto.material || null;
-    entity.coating = createLensDetailDto.coating || null;
-    entity.createdAt = new Date();
+    entity.lensId = lensId;
+    entity.lensThicknessId = lensThicknessId;
+    entity.lensQualityId = lensQualityId;
+    entity.tintId = tintId;
+    entity.powerSphereLeft = powerSphereLeft;
+    entity.powerSphereRight = powerSphereRight;
+    entity.powerCylinderLeft = powerCylinderLeft;
+    entity.powerCylinderRight = powerCylinderRight;
+    entity.axisLeft = axisLeft;
+    entity.axisRight = axisRight;
+    entity.pdLeft = pdLeft;
+    entity.pdRight = pdRight;
+    entity.prescriptionDate = prescriptionDate;
+    entity.material = material;
+    entity.coating = coating;
     entity.createdBy = reqUserId;
-    entity.updatedAt = new Date();
-    entity.updatedBy = reqUserId;
 
     const savedLensDetail = await this.lensDetailRepository.save(entity);
     return savedLensDetail.toModel();
   }
 
-  async update(
-    id: number,
-    updateLensDetailDto: UpdateLensDetailDto,
+  async updateLensDetail(
+    lensDetail: LensDetailModel,
+    lensId: number | undefined,
+    lensThicknessId: number | undefined,
+    lensQualityId: number | undefined,
+    tintId: number | undefined,
+    powerSphereLeft: number | undefined,
+    powerSphereRight: number | undefined,
+    powerCylinderLeft: number | undefined,
+    powerCylinderRight: number | undefined,
+    axisLeft: number | undefined,
+    axisRight: number | undefined,
+    pdLeft: number | undefined,
+    pdRight: number | undefined,
+    prescriptionDate: Date | undefined,
+    material: string | undefined,
+    coating: string | undefined,
     reqUserId: number,
   ): Promise<LensDetailModel> {
-    const lensDetail = await this.lensDetailRepository.findOne({
-      where: { id, deletedAt: IsNull() },
-    });
-
-    if (!lensDetail) {
-      throw new HttpException('Lens detail not found', HttpStatus.NOT_FOUND);
-    }
-
-    const updateData: any = {
-      ...updateLensDetailDto,
-      updatedAt: new Date(),
-      updatedBy: reqUserId,
-    };
-
-    if (updateLensDetailDto.prescriptionDate) {
-      updateData.prescriptionDate = new Date(
-        updateLensDetailDto.prescriptionDate,
-      );
-    }
-
     await this.lensDetailRepository.update(
-      { id, deletedAt: IsNull() },
-      updateData,
+      { id: lensDetail.id },
+      {
+        lensId,
+        lensThicknessId,
+        lensQualityId,
+        tintId,
+        powerSphereLeft,
+        powerSphereRight,
+        powerCylinderLeft,
+        powerCylinderRight,
+        axisLeft,
+        axisRight,
+        pdLeft,
+        pdRight,
+        prescriptionDate,
+        material,
+        coating,
+        updatedAt: new Date(),
+        updatedBy: reqUserId,
+      },
     );
-
-    return this.findById(id);
+    return this.findById(lensDetail.id);
   }
 
-  async delete(id: number, reqUserId: number): Promise<boolean> {
+  async deleteLensDetail(id: number, reqUserId: number): Promise<boolean> {
     const lensDetail = await this.lensDetailRepository.findOne({
       where: { id, deletedAt: IsNull() },
     });
@@ -138,17 +151,9 @@ export class LensDetailService {
 
     let totalPrice = 0;
 
-    if (lensDetail.thicknessPrice) {
-      totalPrice += lensDetail.thicknessPrice;
-    }
-
-    if (lensDetail.qualityPrice) {
-      totalPrice += lensDetail.qualityPrice;
-    }
-
-    if (lensDetail.tintPrice) {
-      totalPrice += lensDetail.tintPrice;
-    }
+    // TODO: Implement price calculation by fetching from related tables
+    // This would require joining with lens_thickness, lens_quality, and tint tables
+    // For now, return 0 as prices are stored in separate tables
 
     return totalPrice;
   }

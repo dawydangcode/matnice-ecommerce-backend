@@ -1,68 +1,68 @@
 export class CartLensDetailModel {
   public readonly id: number;
   public readonly cartFrameId: number;
-  public readonly lensId: number | null;
-  public readonly rightEyeSphere: number | null;
-  public readonly rightEyeCylinder: number | null;
-  public readonly rightEyeAxis: number | null;
-  public readonly leftEyeSphere: number | null;
-  public readonly leftEyeCylinder: number | null;
-  public readonly leftEyeAxis: number | null;
-  public readonly pdLeft: number | null;
-  public readonly pdRight: number | null;
-  public readonly lensType: string | null;
+  public readonly lensId: number | undefined;
+  public readonly rightEyeSphere: number | undefined;
+  public readonly rightEyeCylinder: number | undefined;
+  public readonly rightEyeAxis: number | undefined;
+  public readonly leftEyeSphere: number | undefined;
+  public readonly leftEyeCylinder: number | undefined;
+  public readonly leftEyeAxis: number | undefined;
+  public readonly pdLeft: number | undefined;
+  public readonly pdRight: number | undefined;
+  public readonly lensType: string | undefined;
   public readonly lensQuality: string;
-  public readonly lensThicknessId: number | null;
-  public readonly lensUpgradeDetailId: number | null;
+  public readonly lensThicknessId: number | undefined;
+  public readonly lensUpgradeDetailId: number | undefined;
   public readonly totalUpgradesPrice: number;
   public readonly lensPrice: number;
-  public readonly lensMaterial: string | null;
-  public readonly tintId: number | null;
-  public readonly prescriptionNotes: string | null;
-  public readonly lensNotes: string | null;
-  public readonly manufacturingNotes: string | null;
-  public readonly fieldOfVision: string | null;
-  public readonly addLeft: number | null;
-  public readonly addRight: number | null;
+  public readonly lensMaterial: string | undefined;
+  public readonly tintId: number | undefined;
+  public readonly prescriptionNotes: string | undefined;
+  public readonly lensNotes: string | undefined;
+  public readonly manufacturingNotes: string | undefined;
+  public readonly fieldOfVision: string | undefined;
+  public readonly addLeft: number | undefined;
+  public readonly addRight: number | undefined;
   public readonly createdAt: Date;
   public readonly createdBy: number;
   public readonly updatedAt: Date;
   public readonly updatedBy: number;
-  public readonly deletedAt: Date | null;
-  public readonly deletedBy: number | null;
+  public readonly deletedAt: Date | undefined;
+  public readonly deletedBy: number | undefined;
 
   constructor(
     id: number,
     cartFrameId: number,
-    lensId: number | null,
-    rightEyeSphere: number | null,
-    rightEyeCylinder: number | null,
-    rightEyeAxis: number | null,
-    leftEyeSphere: number | null,
-    leftEyeCylinder: number | null,
-    leftEyeAxis: number | null,
-    pdLeft: number | null,
-    pdRight: number | null,
-    lensType: string | null,
+    lensId: number | undefined,
+    rightEyeSphere: number | undefined,
+    rightEyeCylinder: number | undefined,
+    rightEyeAxis: number | undefined,
+    leftEyeSphere: number | undefined,
+    leftEyeCylinder: number | undefined,
+    leftEyeAxis: number | undefined,
+    pdLeft: number | undefined,
+    pdRight: number | undefined,
+    lensType: string | undefined,
     lensQuality: string,
-    lensThicknessId: number | null,
-    lensUpgradeDetailId: number | null,
+    lensThicknessId: number | undefined,
+    lensUpgradeDetailId: number | undefined,
     totalUpgradesPrice: number,
     lensPrice: number,
-    lensMaterial: string | null,
-    tintId: number | null,
-    prescriptionNotes: string | null,
-    lensNotes: string | null,
-    manufacturingNotes: string | null,
-    fieldOfVision: string | null,
-    addLeft: number | null,
-    addRight: number | null,
+    lensMaterial: string | undefined,
+    tintId: number | undefined,
+    prescriptionNotes: string | undefined,
+    lensNotes: string | undefined,
+    manufacturingNotes: string | undefined,
+    fieldOfVision: string | undefined,
+    addLeft: number | undefined,
+    addRight: number | undefined,
     createdAt: Date,
     createdBy: number,
     updatedAt: Date,
     updatedBy: number,
-    deletedAt: Date | null,
-    deletedBy: number | null,
+    deletedAt: Date | undefined,
+    deletedBy: number | undefined,
   ) {
     this.id = id;
     this.cartFrameId = cartFrameId;

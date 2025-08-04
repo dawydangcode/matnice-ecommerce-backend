@@ -9,11 +9,12 @@ import {
   Req,
 } from '@nestjs/common';
 import { LensDetailService } from './lens_detail.service';
-import {
-  CreateLensDetailDto,
-  UpdateLensDetailDto,
-} from './dtos/lens_detail.dto';
 import { RequestModel } from '../../../common/models/request.model';
+import {
+  CreateLensDetailBodyDto,
+  UpdateLensDetailBodyDto,
+  UpdateLensDetailParamsDto,
+} from './dtos/lens_detail.dto';
 
 @Controller('lens-details')
 export class LensDetailController {
@@ -25,39 +26,73 @@ export class LensDetailController {
   }
 
   @Get(':id')
-  async findById(@Param('id') id: number) {
-    return this.lensDetailService.findById(Number(id));
+  async findById(@Param() params: number) {
+    return this.lensDetailService.findById(Number(params));
   }
 
   @Get('lens/:lensId')
-  async findByLensId(@Param('lensId') lensId: number) {
-    return this.lensDetailService.findByLensId(Number(lensId));
+  async findByLensId(@Param() params: number) {
+    return this.lensDetailService.findByLensId(Number(params));
   }
 
   @Post()
   async create(
-    @Body() createLensDetailDto: CreateLensDetailDto,
+    @Body() body: CreateLensDetailBodyDto,
     @Req() req: RequestModel,
   ) {
-    return this.lensDetailService.create(createLensDetailDto, req.user.userId);
+    return this.lensDetailService.createLensDetail(
+      body.lensId,
+      body.lensThicknessId,
+      body.lensQualityId,
+      body.tintId,
+      body.powerSphereLeft,
+      body.powerSphereRight,
+      body.powerCylinderLeft,
+      body.powerCylinderRight,
+      body.axisLeft,
+      body.axisRight,
+      body.pdLeft,
+      body.pdRight,
+      body.prescriptionDate,
+      body.material,
+      body.coating,
+      req.user.userId,
+    );
   }
 
   @Patch(':id')
   async update(
-    @Param('id') id: number,
-    @Body() updateLensDetailDto: UpdateLensDetailDto,
+    @Param() params: UpdateLensDetailParamsDto,
+    @Body() updateLensDetailDto: UpdateLensDetailBodyDto,
     @Req() req: RequestModel,
   ) {
-    return this.lensDetailService.update(
-      Number(id),
-      updateLensDetailDto,
+    const lensDetail = await this.lensDetailService.findById(
+      Number(params.lensDetailId),
+    );
+    return this.lensDetailService.updateLensDetail(
+      lensDetail,
+      updateLensDetailDto.lensId,
+      updateLensDetailDto.lensThicknessId,
+      updateLensDetailDto.lensQualityId,
+      updateLensDetailDto.tintId,
+      updateLensDetailDto.powerSphereLeft,
+      updateLensDetailDto.powerSphereRight,
+      updateLensDetailDto.powerCylinderLeft,
+      updateLensDetailDto.powerCylinderRight,
+      updateLensDetailDto.axisLeft,
+      updateLensDetailDto.axisRight,
+      updateLensDetailDto.pdLeft,
+      updateLensDetailDto.pdRight,
+      updateLensDetailDto.prescriptionDate,
+      updateLensDetailDto.material,
+      updateLensDetailDto.coating,
       req.user.userId,
     );
   }
 
   @Delete(':id')
   async delete(@Param('id') id: number, @Req() req: RequestModel) {
-    return this.lensDetailService.delete(Number(id), req.user.userId);
+    return this.lensDetailService.deleteLensDetail(Number(id), req.user.userId);
   }
 
   @Get(':id/price')

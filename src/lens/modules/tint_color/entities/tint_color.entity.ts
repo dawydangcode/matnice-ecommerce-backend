@@ -22,10 +22,10 @@ export class TintColorEntity {
   name!: string;
 
   @Column({ name: 'image_url', type: 'varchar', length: 500, nullable: true })
-  imageUrl!: string | null;
+  imageUrl!: string | undefined;
 
   @Column({ name: 'color_code', type: 'varchar', length: 10, nullable: true })
-  colorCode!: string | null;
+  colorCode!: string | undefined;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt!: Date;
@@ -40,10 +40,10 @@ export class TintColorEntity {
   updatedBy!: number;
 
   @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
-  deletedAt!: Date | null;
+  deletedAt!: Date | undefined;
 
   @Column({ name: 'deleted_by', type: 'bigint', nullable: true })
-  deletedBy!: number | null;
+  deletedBy!: number | undefined;
 
   // Relations
   // @ManyToOne(() => LensTintEntity)

@@ -165,7 +165,7 @@ export class ProductImageService {
   async checkDuplicateImage(
     productId: number,
     file: Express.Multer.File,
-  ): Promise<ProductImageModel | null> {
+  ): Promise<ProductImageModel | undefined> {
     const fileHash = this.calculateFileHash(file);
 
     // Get all images for this product
@@ -199,7 +199,7 @@ export class ProductImageService {
       }
     }
 
-    return null;
+    return undefined;
   }
 
   async createProductImage(
