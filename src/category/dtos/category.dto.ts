@@ -38,11 +38,9 @@ export class CategoryDto {
   q!: string;
 }
 
-export class GetCategoriesQueryDto extends PickType(CategoryDto, [
-  'page',
-  'limit',
-  'q',
-]) {}
+export class GetCategoriesQueryDto extends PartialType(
+  PickType(CategoryDto, ['page', 'limit', 'q']),
+) {}
 
 export class GetCategoryByIdParamsDto extends PickType(CategoryDto, [
   'categoryId',

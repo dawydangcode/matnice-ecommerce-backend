@@ -26,7 +26,7 @@ import { RequestModel } from 'src/common/models/request.model';
 
 @Controller('api/v1')
 @ApiTags('Brand')
-@Roles(RoleType.Admin, RoleType.Employee)
+@Roles(RoleType.Admin)
 export class BrandController {
   constructor(private readonly brandService: BrandService) {}
 
@@ -57,7 +57,7 @@ export class BrandController {
     );
   }
 
-  @Post('brand/:brandId/update')
+  @Put('brand/:brandId/update')
   async updateBrand(
     @Req() req: RequestModel,
     @Param() params: UpdateBrandParamsDto,

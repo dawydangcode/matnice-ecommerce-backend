@@ -33,11 +33,9 @@ export class BrandDto {
   q!: string;
 }
 
-export class GetBrandsQueryDto extends PickType(BrandDto, [
-  'page',
-  'limit',
-  'q',
-]) {}
+export class GetBrandsQueryDto extends PartialType(
+  PickType(BrandDto, ['page', 'limit', 'q']),
+) {}
 
 export class GetBrandByIdParamsDto extends PickType(BrandDto, ['brandId']) {}
 
