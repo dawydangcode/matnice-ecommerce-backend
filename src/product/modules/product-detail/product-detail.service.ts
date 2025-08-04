@@ -7,14 +7,15 @@ import { ProductDetailModel } from './models/product-detail.model';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
 import { ProductModel } from 'src/product/models/product.model';
 import { FrameShapeType, FrameType } from './enum/frame.type';
-import { ProductService } from 'src/product/product.service';
+import { ProductEntity } from 'src/product/entities/product.entity';
 
 @Injectable()
 export class ProductDetailService {
   constructor(
     @InjectRepository(ProductDetailEntity)
     private readonly productDetailRepository: Repository<ProductDetailEntity>,
-    private readonly productService: ProductService,
+    @InjectRepository(ProductEntity)
+    private readonly productRepository: Repository<ProductEntity>,
   ) {}
 
   async getProductDetails(
@@ -73,7 +74,14 @@ export class ProductDetailService {
     springHinge: boolean,
     reqUserId: number,
   ): Promise<ProductDetailModel> {
-    await this.productService.getProductById(product.id);
+    // Validate product exists
+    const existingProduct = await this.productRepository.findOne({
+      where: { id: product.id, deletedAt: IsNull() },
+    });
+
+    if (!existingProduct) {
+      throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
+    }
 
     const entity = new ProductDetailEntity();
     entity.productId = product.id;

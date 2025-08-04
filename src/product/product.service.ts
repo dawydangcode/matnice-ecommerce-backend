@@ -6,12 +6,14 @@ import { PaginationParamsModel } from 'src/common/models/pagination-params.model
 import { PageList } from 'src/common/models/page-list.model';
 import { ProductModel } from './models/product.model';
 import { ProductGenderType, ProductType } from './enum/product.type';
+import { ProductCategoryService } from './modules/product-category/product-category.service';
 
 @Injectable()
 export class ProductService {
   constructor(
     @InjectRepository(ProductEntity)
     private readonly productRepository: Repository<ProductEntity>,
+    private readonly productCategoryService: ProductCategoryService,
   ) {}
 
   async getProducts(
@@ -53,6 +55,20 @@ export class ProductService {
     return product.toModel();
   }
 
+  async getProductWithCategories(productId: number): Promise<{
+    product: ProductModel;
+    categoryIds: number[];
+  }> {
+    const product = await this.getProductById(productId);
+    const categoryIds =
+      await this.productCategoryService.getCategoriesByProductId(productId);
+
+    return {
+      product,
+      categoryIds,
+    };
+  }
+
   async createProduct(
     productName: string,
     productType: ProductType,
@@ -62,6 +78,7 @@ export class ProductService {
     stock: number,
     description: string,
     isSustainable: boolean,
+    categoryIds: number[] | undefined,
     reqUserId: number,
   ): Promise<ProductModel> {
     const entity = new ProductEntity();
@@ -75,8 +92,25 @@ export class ProductService {
     entity.isSustainable = isSustainable;
     entity.createdAt = new Date();
     entity.createdBy = reqUserId;
+    entity.updatedAt = new Date();
+    entity.updatedBy = reqUserId;
 
-    return await this.productRepository.save(entity);
+    const savedProduct = await this.productRepository.save(entity);
+
+    // Tạo product-category relationships nếu có categoryIds
+    if (categoryIds && categoryIds.length > 0) {
+      await Promise.all(
+        categoryIds.map((categoryId) =>
+          this.productCategoryService.createProductCategory(
+            savedProduct.id,
+            categoryId,
+            reqUserId,
+          ),
+        ),
+      );
+    }
+
+    return savedProduct.toModel();
   }
 
   async updateProduct(

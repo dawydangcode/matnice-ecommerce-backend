@@ -1,6 +1,13 @@
 import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsBoolean, IsNumber, IsPositive, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsNumber,
+  IsPositive,
+  IsString,
+  IsArray,
+  IsOptional,
+} from 'class-validator';
 import { ProductGenderType, ProductType } from '../enum/product.type';
 
 export class ProductDto {
@@ -82,14 +89,25 @@ export class GetProductByIdParamsDto extends PickType(ProductDto, [
 export class CreateProductBodyDto extends PickType(ProductDto, [
   'productName',
   'productType',
-  'categoryId',
   'gender',
   'price',
   'stock',
   'description',
   'isSustainable',
   'brandId',
-]) {}
+]) {
+  @ApiProperty({
+    type: [Number],
+    description: 'Array of category IDs',
+    required: false,
+    example: [1, 2, 3],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  @Type(() => Number)
+  categoryIds?: number[];
+}
 
 export class UpdateProductParamsDto extends PickType(ProductDto, [
   'productId',

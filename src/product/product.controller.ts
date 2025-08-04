@@ -46,6 +46,11 @@ export class ProductController {
     return await this.productService.getProductById(params.productId);
   }
 
+  @Get('product/:productId/with-categories')
+  async getProductWithCategories(@Param() params: GetProductByIdParamsDto) {
+    return await this.productService.getProductWithCategories(params.productId);
+  }
+
   @Post('product/create')
   async createProduct(
     @Req() req: RequestModel,
@@ -60,6 +65,7 @@ export class ProductController {
       body.stock,
       body.description,
       body.isSustainable,
+      body.categoryIds,
       req.user.userId,
     );
   }
