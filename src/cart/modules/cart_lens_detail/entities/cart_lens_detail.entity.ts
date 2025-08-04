@@ -88,115 +88,24 @@ export class CartLensDetailEntity {
   @Column({ name: 'lens_type', length: 100, nullable: true })
   lensType!: string;
 
-  @Column({ name: 'lens_quality', length: 50, default: 'Standard' })
+  @Column({
+    name: 'lens_quality',
+    type: 'varchar',
+    length: 50,
+    default: 'Standard',
+  })
   lensQuality!: string;
 
-  @Column({
-    name: 'refraction_index',
-    type: 'decimal',
-    precision: 3,
-    scale: 2,
-    default: 1.5,
-  })
-  refractionIndex!: number;
-
-  // Upgrades
-  @Column({ name: 'upgrade_hard_coating', default: false })
-  upgradeHardCoating!: boolean;
-
-  @Column({ name: 'upgrade_anti_reflection', default: false })
-  upgradeAntiReflection!: boolean;
-
-  @Column({ name: 'upgrade_uv_protection', default: false })
-  upgradeUvProtection!: boolean;
-
-  @Column({ name: 'upgrade_blue_light', default: false })
-  upgradeBlueLight!: boolean;
-
-  @Column({ name: 'upgrade_lotus_effect', default: false })
-  upgradeLotusEffect!: boolean;
-
-  @Column({ name: 'upgrade_smart_focus', default: false })
-  upgradeSmartFocus!: boolean;
-
-  @Column({ name: 'upgrade_transition', default: false })
-  upgradeTransition!: boolean;
-
-  @Column({ name: 'upgrade_progressive', default: false })
-  upgradeProgressive!: boolean;
-
-  // Upgrade prices
-  @Column({
-    name: 'upgrade_hard_coating_price',
-    type: 'decimal',
-    precision: 8,
-    scale: 2,
-    default: 0,
-  })
-  upgradeHardCoatingPrice!: number;
+  @Column({ name: 'lens_thickness_id', type: 'bigint', nullable: true })
+  lensThicknessId!: number | null;
 
   @Column({
-    name: 'upgrade_anti_reflection_price',
-    type: 'decimal',
-    precision: 8,
-    scale: 2,
-    default: 0,
+    name: 'lens_upgrade_detail_id',
+    type: 'bigint',
+    nullable: true,
+    default: null,
   })
-  upgradeAntiReflectionPrice!: number;
-
-  @Column({
-    name: 'upgrade_uv_protection_price',
-    type: 'decimal',
-    precision: 8,
-    scale: 2,
-    default: 0,
-  })
-  upgradeUvProtectionPrice!: number;
-
-  @Column({
-    name: 'upgrade_blue_light_price',
-    type: 'decimal',
-    precision: 8,
-    scale: 2,
-    default: 0,
-  })
-  upgradeBluelightPrice!: number;
-
-  @Column({
-    name: 'upgrade_lotus_effect_price',
-    type: 'decimal',
-    precision: 8,
-    scale: 2,
-    default: 0,
-  })
-  upgradeLotusEffectPrice!: number;
-
-  @Column({
-    name: 'upgrade_smart_focus_price',
-    type: 'decimal',
-    precision: 8,
-    scale: 2,
-    default: 0,
-  })
-  upgradeSmartFocusPrice!: number;
-
-  @Column({
-    name: 'upgrade_transition_price',
-    type: 'decimal',
-    precision: 8,
-    scale: 2,
-    default: 0,
-  })
-  upgradeTransitionPrice!: number;
-
-  @Column({
-    name: 'upgrade_progressive_price',
-    type: 'decimal',
-    precision: 8,
-    scale: 2,
-    default: 0,
-  })
-  upgradeProgressivePrice!: number;
+  lensUpgradeDetailId!: number | null;
 
   @Column({
     name: 'total_upgrades_price',
@@ -220,14 +129,8 @@ export class CartLensDetailEntity {
   @Column({ name: 'lens_material', length: 50, nullable: true })
   lensMaterial!: string;
 
-  @Column({ name: 'lens_thickness', length: 20, nullable: true })
-  lensThickness!: string;
-
-  @Column({ name: 'tint_color', length: 30, nullable: true })
-  tintColor!: string;
-
-  @Column({ name: 'tint_density', length: 20, nullable: true })
-  tintDensity!: string;
+  @Column({ name: 'tint_id', type: 'bigint', nullable: true, default: null })
+  tintId!: number | null;
 
   // Notes
   @Column({ name: 'prescription_notes', type: 'text', nullable: true })
@@ -302,29 +205,12 @@ export class CartLensDetailEntity {
       this.pdRight,
       this.lensType,
       this.lensQuality,
-      this.refractionIndex,
-      this.upgradeHardCoating,
-      this.upgradeAntiReflection,
-      this.upgradeUvProtection,
-      this.upgradeBlueLight,
-      this.upgradeLotusEffect,
-      this.upgradeSmartFocus,
-      this.upgradeTransition,
-      this.upgradeProgressive,
-      this.upgradeHardCoatingPrice,
-      this.upgradeAntiReflectionPrice,
-      this.upgradeUvProtectionPrice,
-      this.upgradeBluelightPrice,
-      this.upgradeLotusEffectPrice,
-      this.upgradeSmartFocusPrice,
-      this.upgradeTransitionPrice,
-      this.upgradeProgressivePrice,
+      this.lensThicknessId,
+      this.lensUpgradeDetailId,
       this.totalUpgradesPrice,
       this.lensPrice,
       this.lensMaterial,
-      this.lensThickness,
-      this.tintColor,
-      this.tintDensity,
+      this.tintId,
       this.prescriptionNotes,
       this.lensNotes,
       this.manufacturingNotes,

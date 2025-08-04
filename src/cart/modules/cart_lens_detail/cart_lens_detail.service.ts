@@ -70,29 +70,8 @@ export class CartLensDetailService {
     pdRight: number,
     lensType: string,
     lensQuality: string,
-    refractionIndex: number,
-    upgradeHardCoating: boolean,
-    upgradeAntiReflection: boolean,
-    upgradeUvProtection: boolean,
-    upgradeBlueLight: boolean,
-    upgradeLotusEffect: boolean,
-    upgradeSmartFocus: boolean,
-    upgradeTransition: boolean,
-    upgradeProgressive: boolean,
-    upgradeHardCoatingPrice: number,
-    upgradeAntiReflectionPrice: number,
-    upgradeUvProtectionPrice: number,
-    upgradeBluelightPrice: number,
-    upgradeLotusEffectPrice: number,
-    upgradeSmartFocusPrice: number,
-    upgradeTransitionPrice: number,
-    upgradeProgressivePrice: number,
-    totalUpgradesPrice: number,
     lensPrice: number,
     lensMaterial: string,
-    lensThickness: string,
-    tintColor: string,
-    tintDensity: string,
     prescriptionNotes: string,
     lensNotes: string,
     manufacturingNotes: string,
@@ -100,6 +79,9 @@ export class CartLensDetailService {
     addLeft: number,
     addRight: number,
     reqUserId: number,
+    lensThicknessId?: number,
+    lensUpgradeDetailId?: number,
+    tintId?: number,
   ): Promise<CartLensDetailModel> {
     const entity = new CartLensDetailEntity();
     entity.cartFrameId = cartFrameId;
@@ -114,29 +96,11 @@ export class CartLensDetailService {
     entity.pdRight = pdRight;
     entity.lensType = lensType;
     entity.lensQuality = lensQuality || 'Standard';
-    entity.refractionIndex = refractionIndex || 1.5;
-    entity.upgradeHardCoating = upgradeHardCoating;
-    entity.upgradeAntiReflection = upgradeAntiReflection;
-    entity.upgradeUvProtection = upgradeUvProtection;
-    entity.upgradeBlueLight = upgradeBlueLight;
-    entity.upgradeLotusEffect = upgradeLotusEffect;
-    entity.upgradeSmartFocus = upgradeSmartFocus;
-    entity.upgradeTransition = upgradeTransition;
-    entity.upgradeProgressive = upgradeProgressive;
-    entity.upgradeHardCoatingPrice = upgradeHardCoatingPrice;
-    entity.upgradeAntiReflectionPrice = upgradeAntiReflectionPrice;
-    entity.upgradeUvProtectionPrice = upgradeUvProtectionPrice;
-    entity.upgradeBluelightPrice = upgradeBluelightPrice;
-    entity.upgradeLotusEffectPrice = upgradeLotusEffectPrice;
-    entity.upgradeSmartFocusPrice = upgradeSmartFocusPrice;
-    entity.upgradeTransitionPrice = upgradeTransitionPrice;
-    entity.upgradeProgressivePrice = upgradeProgressivePrice;
-    entity.totalUpgradesPrice = totalUpgradesPrice;
+    entity.lensThicknessId = lensThicknessId ?? null;
+    entity.lensUpgradeDetailId = lensUpgradeDetailId ?? null;
+    entity.tintId = tintId ?? null;
     entity.lensPrice = lensPrice;
     entity.lensMaterial = lensMaterial;
-    entity.lensThickness = lensThickness;
-    entity.tintColor = tintColor;
-    entity.tintDensity = tintDensity;
     entity.prescriptionNotes = prescriptionNotes;
     entity.lensNotes = lensNotes;
     entity.manufacturingNotes = manufacturingNotes;
@@ -211,22 +175,6 @@ export class CartLensDetailService {
     // Base lens price calculation logic
     let basePrice = 50.0; // Default base price
 
-    // Refraction index pricing
-    switch (lensDetail.refractionIndex) {
-      case 1.56:
-        basePrice += 20.0;
-        break;
-      case 1.6:
-        basePrice += 40.0;
-        break;
-      case 1.67:
-        basePrice += 80.0;
-        break;
-      case 1.74:
-        basePrice += 120.0;
-        break;
-    }
-
     // Quality pricing
     switch (lensDetail.lensQuality) {
       case 'Premium':
@@ -237,6 +185,7 @@ export class CartLensDetailService {
         break;
     }
 
-    return basePrice + lensDetail.totalUpgradesPrice;
+    // Return base price, additional pricing will come from referenced tables
+    return basePrice;
   }
 }

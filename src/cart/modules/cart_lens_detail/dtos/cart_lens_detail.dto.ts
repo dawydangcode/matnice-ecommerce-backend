@@ -82,42 +82,15 @@ export class CreateCartLensDetailDto {
   @IsIn(['Standard', 'Premium', 'Ultra'])
   lensQuality!: string;
 
-  @ApiProperty({ required: false, default: 1.5 })
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsNumber()
-  @IsIn([1.5, 1.56, 1.6, 1.67, 1.74])
-  refractionIndex!: number;
+  lensThicknessId!: number;
 
-  // Upgrade booleans
-  @ApiProperty({ required: false, default: false })
+  @ApiProperty({ required: false })
   @IsOptional()
-  @IsBoolean()
-  upgradeHardCoating!: boolean;
-
-  @ApiProperty({ required: false, default: false })
-  @IsOptional()
-  @IsBoolean()
-  upgradeAntiReflection!: boolean;
-
-  @ApiProperty({ required: false, default: false })
-  @IsOptional()
-  @IsBoolean()
-  upgradeUvProtection!: boolean;
-
-  @ApiProperty({ required: false, default: false })
-  @IsOptional()
-  @IsBoolean()
-  upgradeBlueLight!: boolean;
-
-  @ApiProperty({ required: false, default: false })
-  @IsOptional()
-  @IsBoolean()
-  upgradeLotusEffect!: boolean;
-
-  @ApiProperty({ required: false, default: false })
-  @IsOptional()
-  @IsBoolean()
-  upgradeSmartFocus!: boolean;
+  @IsNumber()
+  lensUpgradeDetailId!: number;
 
   @ApiProperty({ required: false, default: false })
   @IsOptional()
@@ -148,31 +121,6 @@ export class CreateCartLensDetailDto {
   @ApiProperty({ required: false, default: 0 })
   @IsOptional()
   @IsNumber()
-  upgradeBluelightPrice!: number;
-
-  @ApiProperty({ required: false, default: 0 })
-  @IsOptional()
-  @IsNumber()
-  upgradeLotusEffectPrice!: number;
-
-  @ApiProperty({ required: false, default: 0 })
-  @IsOptional()
-  @IsNumber()
-  upgradeSmartFocusPrice!: number;
-
-  @ApiProperty({ required: false, default: 0 })
-  @IsOptional()
-  @IsNumber()
-  upgradeTransitionPrice!: number;
-
-  @ApiProperty({ required: false, default: 0 })
-  @IsOptional()
-  @IsNumber()
-  upgradeProgressivePrice!: number;
-
-  @ApiProperty({ required: false, default: 0 })
-  @IsOptional()
-  @IsNumber()
   totalUpgradesPrice!: number;
 
   @ApiProperty({ required: false, default: 0 })
@@ -185,6 +133,11 @@ export class CreateCartLensDetailDto {
   @IsOptional()
   @IsString()
   lensMaterial!: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  tintId!: number;
 
   @ApiProperty({ required: false })
   @IsOptional()
@@ -244,29 +197,11 @@ export class UpdateCartLensDetailDto extends PickType(CreateCartLensDetailDto, [
   'pdRight',
   'lensType',
   'lensQuality',
-  'refractionIndex',
-  'upgradeHardCoating',
-  'upgradeAntiReflection',
-  'upgradeUvProtection',
-  'upgradeBlueLight',
-  'upgradeLotusEffect',
-  'upgradeSmartFocus',
-  'upgradeTransition',
-  'upgradeProgressive',
-  'upgradeHardCoatingPrice',
-  'upgradeAntiReflectionPrice',
-  'upgradeUvProtectionPrice',
-  'upgradeBluelightPrice',
-  'upgradeLotusEffectPrice',
-  'upgradeSmartFocusPrice',
-  'upgradeTransitionPrice',
-  'upgradeProgressivePrice',
-  'totalUpgradesPrice',
+  'lensThicknessId',
+  'lensUpgradeDetailId',
+  'tintId',
   'lensPrice',
   'lensMaterial',
-  'lensThickness',
-  'tintColor',
-  'tintDensity',
   'prescriptionNotes',
   'lensNotes',
   'manufacturingNotes',
