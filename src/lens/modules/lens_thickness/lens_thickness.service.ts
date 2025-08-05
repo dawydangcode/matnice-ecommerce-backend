@@ -18,13 +18,13 @@ export class LensThicknessService {
   }
 
   async getLensThicknessById(
-    lenThicknessId: number,
+    lensThicknessId: number,
   ): Promise<LensThicknessModel> {
     const entity = await this.lensThicknessRepository.findOne({
-      where: { id: lenThicknessId, deletedAt: IsNull() },
+      where: { id: lensThicknessId, deletedAt: IsNull() },
     });
     if (!entity) {
-      throw new Error(`Lens thickness with ID ${lenThicknessId} not found`);
+      throw new Error(`Lens thickness with ID ${lensThicknessId} not found`);
     }
 
     return entity.toModel();

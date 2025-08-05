@@ -6,7 +6,7 @@ export class LensThicknessDto {
   @ApiProperty()
   @IsNumber()
   @Type(() => Number)
-  lenThicknessId!: number;
+  lensThicknessId!: number;
 
   @ApiProperty()
   @IsString()
@@ -27,7 +27,7 @@ export class LensThicknessDto {
   description!: string;
 }
 export class GetLensThicknessByIdParamsDto extends PickType(LensThicknessDto, [
-  'lenThicknessId',
+  'lensThicknessId',
 ]) {}
 
 export class CreateLensThicknessBodyDto extends PickType(LensThicknessDto, [
@@ -38,7 +38,7 @@ export class CreateLensThicknessBodyDto extends PickType(LensThicknessDto, [
 ]) {}
 
 export class UpdateLensThicknessParamsDto extends PickType(LensThicknessDto, [
-  'lenThicknessId',
+  'lensThicknessId',
 ]) {}
 
 export class UpdateLensThicknessBodyDto extends PartialType(
@@ -46,5 +46,5 @@ export class UpdateLensThicknessBodyDto extends PartialType(
 ) {}
 
 export class DeleteLensThicknessParamsDto extends PickType(LensThicknessDto, [
-  'lenThicknessId',
+  'lensThicknessId',
 ]) {}

@@ -31,10 +31,10 @@ export class LensThicknessController {
     return this.lensThicknessService.getLensThickness();
   }
 
-  @Get('lens-thickness/:lenThicknessId')
+  @Get('lens-thickness/:lensThicknessId')
   async findById(@Param() params: GetLensThicknessByIdParamsDto) {
     return this.lensThicknessService.getLensThicknessById(
-      params.lenThicknessId,
+      params.lensThicknessId,
     );
   }
 
@@ -59,7 +59,7 @@ export class LensThicknessController {
     @Req() req: RequestModel,
   ) {
     const lensThickness = await this.lensThicknessService.getLensThicknessById(
-      params.lenThicknessId,
+      params.lensThicknessId,
     );
 
     return this.lensThicknessService.updateLensThickness(
@@ -75,7 +75,7 @@ export class LensThicknessController {
   @Delete('lens-thickness/:lensThicknessId/delete')
   async delete(@Param() params: DeleteLensThicknessParamsDto) {
     const lensThickness = await this.lensThicknessService.getLensThicknessById(
-      params.lenThicknessId,
+      params.lensThicknessId,
     );
 
     return true;
