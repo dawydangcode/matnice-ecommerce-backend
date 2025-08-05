@@ -10,7 +10,7 @@ import { LensThicknessModel } from '../models/lens_thickness.model';
 
 @Entity('lens_thickness')
 export class LensThicknessEntity {
-  @PrimaryGeneratedColumn({ name: 'id', type: 'bigint' })
+  @PrimaryGeneratedColumn({ name: 'id' })
   id!: number;
 
   @Column({ name: 'name', type: 'varchar', length: 255 })
