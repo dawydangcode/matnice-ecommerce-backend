@@ -4,7 +4,6 @@ export class ProductDetailModel {
   public readonly id: number;
   public readonly productId: number;
   public readonly productNumber: string;
-  public readonly color: string;
   public readonly bridgeWidth: number;
   public readonly frameWidth: number;
   public readonly lensHeight: number;
@@ -28,7 +27,6 @@ export class ProductDetailModel {
     id: number,
     productId: number,
     productNumber: string,
-    color: string,
     bridgeWidth: number,
     frameWidth: number,
     lensHeight: number,
@@ -51,7 +49,6 @@ export class ProductDetailModel {
     this.id = id;
     this.productId = productId;
     this.productNumber = productNumber;
-    this.color = color;
     this.bridgeWidth = bridgeWidth;
     this.frameWidth = frameWidth;
     this.lensHeight = lensHeight;

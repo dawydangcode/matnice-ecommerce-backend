@@ -18,9 +18,6 @@ export class ProductDetailEntity {
   @Column({ name: 'product_number' })
   productNumber!: string;
 
-  @Column({ name: 'color' })
-  color!: string;
-
   @Column({ name: 'bridge_width' })
   bridgeWidth!: number;
 
@@ -36,7 +33,7 @@ export class ProductDetailEntity {
   @Column({ name: 'temple_length' })
   templeLength!: number;
 
-  @Column({ name: 'frame_color' })
+  @Column({ name: 'frame_colour' })
   frameColor!: string;
 
   @Column({ name: 'frame_material' })
@@ -80,7 +77,6 @@ export class ProductDetailEntity {
       this.id,
       this.productId,
       this.productNumber,
-      this.color,
       this.bridgeWidth,
       this.frameWidth,
       this.lensHeight,

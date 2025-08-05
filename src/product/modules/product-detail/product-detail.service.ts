@@ -61,7 +61,6 @@ export class ProductDetailService {
   async createProductDetail(
     product: ProductModel,
     productNumber: string,
-    color: string,
     bridgeWidth: number,
     frameWidth: number,
     lensHeight: number,
@@ -86,7 +85,6 @@ export class ProductDetailService {
     const entity = new ProductDetailEntity();
     entity.productId = product.id;
     entity.productNumber = productNumber;
-    entity.color = color;
     entity.bridgeWidth = bridgeWidth;
     entity.frameWidth = frameWidth;
     entity.lensHeight = lensHeight;
@@ -107,7 +105,6 @@ export class ProductDetailService {
     productDetail: ProductDetailModel,
     productId: number | undefined,
     productNumber: string | undefined,
-    color: string | undefined,
     bridgeWidth: number | undefined,
     frameWidth: number | undefined,
     lensHeight: number | undefined,
@@ -125,7 +122,6 @@ export class ProductDetailService {
       {
         productId: productId,
         productNumber: productNumber,
-        color: color,
         bridgeWidth: bridgeWidth,
         frameWidth: frameWidth,
         lensHeight: lensHeight,

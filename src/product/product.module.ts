@@ -6,12 +6,14 @@ import { ProductEntity } from './entities/product.entity';
 import { ProductDetailModule } from './modules/product-detail/product-detail.module';
 import { ProductImageModule } from './modules/product-image/product-image.module';
 import { ProductCategoryModule } from './modules/product-category/product-category.module';
+import { ProductThicknessCompatibilityModule } from './modules/product-thickness-compatibility/product-thickness-compatibility.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([ProductEntity]),
     ProductDetailModule,
     ProductCategoryModule,
+    ProductThicknessCompatibilityModule,
     forwardRef(() => ProductImageModule),
   ],
   controllers: [ProductController],
@@ -21,6 +23,7 @@ import { ProductCategoryModule } from './modules/product-category/product-catego
     ProductDetailModule,
     ProductImageModule,
     ProductCategoryModule,
+    ProductThicknessCompatibilityModule,
   ],
 })
 export class ProductModule {}

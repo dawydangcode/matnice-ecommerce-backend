@@ -36,7 +36,7 @@ export class LensService {
     );
   }
 
-  async findLensById(id: number): Promise<LensModel> {
+  async getLensById(id: number): Promise<LensModel> {
     const lens = await this.lensRepository.findOne({
       where: { id, deletedAt: IsNull() },
     });
@@ -48,7 +48,7 @@ export class LensService {
     return lens.toModel();
   }
 
-  async create(name: string, reqUserId: number): Promise<LensModel> {
+  async createLens(name: string, reqUserId: number): Promise<LensModel> {
     const entity = new LensEntity();
     entity.name = name;
     entity.createdAt = new Date();
@@ -71,7 +71,7 @@ export class LensService {
       },
     );
 
-    return this.findLensById(lens.id);
+    return this.getLensById(lens.id);
   }
 
   async deleteLens(lens: LensModel, reqUserId: number): Promise<boolean> {

@@ -39,28 +39,31 @@ export class LensController {
   }
 
   @Get('lens/:lenId/detail')
-  async findById(@Param('id') id: number) {
-    return this.lensService.findLensById(Number(id));
+  async getLensById(@Param('id') id: number) {
+    return this.lensService.getLensById(Number(id));
   }
 
   @Post('lens/create')
-  async create(@Body() body: CreateLensBodyDto, @Req() req: RequestModel) {
-    return this.lensService.create(body.name, req.user.userId);
+  async createLens(@Body() body: CreateLensBodyDto, @Req() req: RequestModel) {
+    return this.lensService.createLens(body.name, req.user.userId);
   }
 
   @Put('lens/:lensId/update')
-  async update(
+  async updateLens(
     @Param() params: UpdateLensParamsDto,
     @Body() body: UpdateBrandBodyDto,
     @Req() req: RequestModel,
   ) {
-    const lens = await this.lensService.findLensById(params.lensId);
+    const lens = await this.lensService.getLensById(params.lensId);
     return this.lensService.updateLens(lens, body.name, req.user.userId);
   }
 
   @Delete('lens/:lensId/delete')
-  async delete(@Param() params: DeleteLensParamsDto, @Req() req: RequestModel) {
-    const lens = await this.lensService.findLensById(params.lensId);
+  async deleteLens(
+    @Param() params: DeleteLensParamsDto,
+    @Req() req: RequestModel,
+  ) {
+    const lens = await this.lensService.getLensById(params.lensId);
 
     return this.lensService.deleteLens(lens, req.user.userId);
   }

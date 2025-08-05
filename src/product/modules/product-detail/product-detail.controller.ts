@@ -60,7 +60,6 @@ export class ProductDetailController {
     return this.productDetailService.createProductDetail(
       product,
       body.productNumber,
-      body.color,
       body.bridgeWidth,
       body.frameWidth,
       body.lensHeight,
@@ -88,7 +87,6 @@ export class ProductDetailController {
       productDetail,
       body.productId,
       body.productNumber,
-      body.color,
       body.bridgeWidth,
       body.frameWidth,
       body.lensWidth,
