@@ -62,12 +62,12 @@ export class ProductColorService {
   }
 
   async updateProductColor(
-    id: number,
+    productColor: ProductColorModel,
     colorName: string | undefined,
     reqUserId: number,
   ): Promise<ProductColorModel> {
     await this.productColorRepository.update(
-      { id, deletedAt: IsNull() },
+      { id: productColor.id, deletedAt: IsNull() },
       {
         colorName,
         updatedAt: new Date(),
@@ -75,7 +75,7 @@ export class ProductColorService {
       },
     );
 
-    return await this.getProductColorById(id);
+    return await this.getProductColorById(productColor.id);
   }
 
   async deleteProductColor(id: number, reqUserId: number): Promise<boolean> {

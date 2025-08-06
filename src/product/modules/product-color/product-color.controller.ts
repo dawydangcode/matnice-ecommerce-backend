@@ -17,6 +17,7 @@ import { RequestModel } from 'src/common/models/request.model';
 import {
   CreateProductColorBodyDto,
   UpdateProductColorBodyDto,
+  UpdateProductColorParamsDto,
 } from './dtos/product-color.dto';
 
 @Controller('products/:productId/colors')
@@ -55,12 +56,16 @@ export class ProductColorController {
 
   @Put(':colorId')
   async updateProductColor(
-    @Param('colorId') colorId: number,
+    @Param() params: UpdateProductColorParamsDto,
     @Body() body: UpdateProductColorBodyDto,
     @Req() req: RequestModel,
   ) {
+    const productColor = await this.productColorService.getProductColorById(
+      params.productColorId,
+    );
+
     return await this.productColorService.updateProductColor(
-      colorId,
+      productColor,
       body.colorName,
       req.user.userId,
     );

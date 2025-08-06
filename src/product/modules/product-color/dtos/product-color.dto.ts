@@ -21,7 +21,7 @@ export class CreateProductColorBodyDto extends PickType(ProductColorDto, [
   'colorName',
 ]) {}
 
-export class UdapteProductColorBodyDto extends PickType(ProductColorDto, [
+export class UpdateProductColorParamsDto extends PickType(ProductColorDto, [
   'productColorId',
 ]) {}
 
