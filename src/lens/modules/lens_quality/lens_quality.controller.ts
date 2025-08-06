@@ -77,10 +77,6 @@ export class LensQualityController {
   }
 
   @Post('lens-quality/create')
-  @ApiOperation({ summary: 'Create new lens quality' })
-  @ApiCreatedResponse({
-    description: 'Lens quality created successfully',
-  })
   async create(
     @Body() createLensQualityDto: CreateLensQualityDto,
     @Req() req: RequestModel,

@@ -3,74 +3,14 @@ import {
   IsString,
   IsNumber,
   IsOptional,
+  IsInt,
   Min,
   MaxLength,
   IsNotEmpty,
-  IsInt,
   IsUrl,
   Matches,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-
-export class CreateLensTintDto {
-  @ApiProperty({
-    description: 'Name of the lens tint',
-    example: 'Photochromic',
-  })
-  @IsNotEmpty()
-  @IsString()
-  @MaxLength(255)
-  name!: string;
-
-  @ApiProperty({
-    description: 'Price of the lens tint',
-    example: 89.95,
-  })
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(0)
-  @Transform(({ value }) => parseFloat(value))
-  price!: number;
-
-  @ApiPropertyOptional({
-    description: 'Description of the lens tint',
-    example: 'Advanced photochromic lenses that adapt to light conditions',
-  })
-  @IsOptional()
-  @IsString()
-  @MaxLength(500)
-  description?: string;
-}
-
-export class UpdateLensTintDto {
-  @ApiPropertyOptional({
-    description: 'Name of the lens tint',
-    example: 'Photochromic Pro',
-  })
-  @IsOptional()
-  @IsString()
-  @MaxLength(255)
-  name?: string;
-
-  @ApiPropertyOptional({
-    description: 'Price of the lens tint',
-    example: 99.95,
-  })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  @Transform(({ value }) => parseFloat(value))
-  price?: number;
-
-  @ApiPropertyOptional({
-    description: 'Description of the lens tint',
-    example: 'Premium photochromic lenses with enhanced features',
-  })
-  @IsOptional()
-  @IsString()
-  @MaxLength(500)
-  description?: string;
-}
 
 export class CreateTintColorDto {
   @ApiProperty({
@@ -88,7 +28,7 @@ export class CreateTintColorDto {
   })
   @IsNotEmpty()
   @IsString()
-  @MaxLength(100)
+  @MaxLength(255)
   name!: string;
 
   @ApiPropertyOptional({
@@ -97,7 +37,7 @@ export class CreateTintColorDto {
   })
   @IsOptional()
   @IsUrl()
-  @MaxLength(255)
+  @MaxLength(500)
   imageUrl?: string;
 
   @ApiPropertyOptional({
@@ -114,12 +54,21 @@ export class CreateTintColorDto {
 
 export class UpdateTintColorDto {
   @ApiPropertyOptional({
+    description: 'ID of the lens tint this color belongs to',
+    example: 1,
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  tintId?: number;
+
+  @ApiPropertyOptional({
     description: 'Name of the tint color',
     example: 'Dark Grey',
   })
   @IsOptional()
   @IsString()
-  @MaxLength(100)
+  @MaxLength(255)
   name?: string;
 
   @ApiPropertyOptional({
@@ -128,7 +77,7 @@ export class UpdateTintColorDto {
   })
   @IsOptional()
   @IsUrl()
-  @MaxLength(255)
+  @MaxLength(500)
   imageUrl?: string;
 
   @ApiPropertyOptional({
@@ -143,18 +92,6 @@ export class UpdateTintColorDto {
   colorCode?: string;
 }
 
-export class LensTintParamsDto {
-  @ApiProperty({
-    description: 'Lens tint ID',
-    example: 1,
-  })
-  @IsNotEmpty()
-  @Transform(({ value }) => parseInt(value))
-  @IsInt()
-  @Min(1)
-  lensTintId!: number;
-}
-
 export class TintColorParamsDto {
   @ApiProperty({
     description: 'Tint color ID',
@@ -165,4 +102,16 @@ export class TintColorParamsDto {
   @IsInt()
   @Min(1)
   tintColorId!: number;
+}
+
+export class TintIdParamsDto {
+  @ApiProperty({
+    description: 'Tint ID',
+    example: 1,
+  })
+  @IsNotEmpty()
+  @Transform(({ value }) => parseInt(value))
+  @IsInt()
+  @Min(1)
+  tintId!: number;
 }

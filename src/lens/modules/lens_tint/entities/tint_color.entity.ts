@@ -2,6 +2,9 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
@@ -10,41 +13,37 @@ import { TintColorModel } from '../models/tint_color.model';
 
 @Entity('tint_color')
 export class TintColorEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: 'id', type: 'bigint' })
   id!: number;
 
-  @Column({ type: 'int' })
+  @Column({ name: 'tint_id', type: 'bigint' })
   tint_id!: number;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ name: 'name', type: 'varchar', length: 100 })
   name!: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Column({ name: 'image_url', type: 'varchar', length: 255, nullable: true })
   image_url!: string | undefined;
 
-  @Column({ type: 'varchar', length: 7, nullable: true })
+  @Column({ name: 'color_code', type: 'varchar', length: 7, nullable: true })
   color_code!: string | undefined;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   created_at!: Date;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ name: 'created_by', type: 'bigint', nullable: true })
   created_by!: number | undefined;
 
-  @Column({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-    onUpdate: 'CURRENT_TIMESTAMP',
-  })
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
   updated_at!: Date;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ name: 'updated_by', type: 'bigint', nullable: true })
   updated_by!: number | undefined;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
   deleted_at!: Date | undefined;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ name: 'deleted_by', type: 'bigint', nullable: true })
   deleted_by!: number | undefined;
 
   @ManyToOne(() => LensTintEntity)
