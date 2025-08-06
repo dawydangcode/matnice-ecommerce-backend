@@ -1,157 +1,129 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, IsNull } from 'typeorm';
 import { ProductDetailEntity } from './entities/product-detail.entity';
-import { In, IsNull, Like, Repository } from 'typeorm';
-import { PageList } from 'src/common/models/page-list.model';
 import { ProductDetailModel } from './models/product-detail.model';
-import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
-import { ProductModel } from 'src/product/models/product.model';
-import { FrameShapeType, FrameType } from './enum/frame.type';
-import { ProductEntity } from 'src/product/entities/product.entity';
 
 @Injectable()
 export class ProductDetailService {
   constructor(
     @InjectRepository(ProductDetailEntity)
     private readonly productDetailRepository: Repository<ProductDetailEntity>,
-    @InjectRepository(ProductEntity)
-    private readonly productRepository: Repository<ProductEntity>,
   ) {}
 
-  async getProductDetails(
-    productDetailIds: number[] | undefined,
-    pagination: PaginationParamsModel | undefined,
-    search: string | undefined,
-    relations: string[] | undefined,
-  ): Promise<PageList<ProductDetailModel>> {
-    const [productDetail, total] =
-      await this.productDetailRepository.findAndCount({
-        where: {
-          id: productDetailIds ? In(productDetailIds) : undefined,
-          deletedAt: IsNull(),
-          ...(search ? { productNumber: Like(`%${search}%`) } : {}),
-        },
-        relations: relations,
-        ...pagination?.toQuery(),
-      });
-
-    return new PageList<ProductDetailModel>(
-      total,
-      productDetail.map((entity) => entity.toModel()),
-    );
-  }
-
-  async getProductDetailById(
-    productDetailId: number,
-  ): Promise<ProductDetailModel> {
+  async getProductDetailByColorId(
+    productColorId: number,
+  ): Promise<ProductDetailModel | null> {
     const productDetail = await this.productDetailRepository.findOne({
-      where: { id: productDetailId, deletedAt: IsNull() },
+      where: { productColorId, deletedAt: IsNull() },
     });
 
-    if (!productDetail) {
-      throw new HttpException(
-        `Product detail with ID ${productDetailId} not found`,
-        HttpStatus.NOT_FOUND,
-      );
-    }
-
-    return productDetail.toModel();
+    return productDetail ? productDetail.toModel() : null;
   }
 
   async createProductDetail(
-    product: ProductModel,
-    productNumber: string,
-    bridgeWidth: number,
-    frameWidth: number,
-    lensHeight: number,
-    lensWidth: number,
-    templeLength: number,
-    frameColor: string,
-    frameMaterial: string,
-    frameShape: FrameShapeType,
-    frameType: FrameType,
-    springHinge: boolean,
+    productColorId: number,
+    detailData: {
+      bridgeWidth?: number;
+      frameWidth?: number;
+      lensHeight?: number;
+      lensWidth?: number;
+      templeLength?: number;
+      productNumber?: number;
+      frameMaterial?: string;
+      frameShape?: string;
+      frameType?: string;
+      bridgeDesign?: string;
+      style?: string;
+      springHinges?: boolean;
+      weight?: number;
+      multifocal?: boolean;
+    },
     reqUserId: number,
   ): Promise<ProductDetailModel> {
-    // Validate product exists
-    const existingProduct = await this.productRepository.findOne({
-      where: { id: product.id, deletedAt: IsNull() },
-    });
-
-    if (!existingProduct) {
-      throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
-    }
-
     const entity = new ProductDetailEntity();
-    entity.productId = product.id;
-    entity.productNumber = productNumber;
-    entity.bridgeWidth = bridgeWidth;
-    entity.frameWidth = frameWidth;
-    entity.lensHeight = lensHeight;
-    entity.lensWidth = lensWidth;
-    entity.templeLength = templeLength;
-    entity.frameColor = frameColor;
-    entity.frameMaterial = frameMaterial;
-    entity.frameShape = frameShape;
-    entity.frameType = frameType;
-    entity.springHinge = springHinge;
+    entity.productColorId = productColorId;
+    entity.bridgeWidth = detailData.bridgeWidth;
+    entity.frameWidth = detailData.frameWidth;
+    entity.lensHeight = detailData.lensHeight;
+    entity.lensWidth = detailData.lensWidth;
+    entity.templeLength = detailData.templeLength;
+    entity.productNumber = detailData.productNumber;
+    entity.frameMaterial = detailData.frameMaterial;
+    entity.frameShape = detailData.frameShape;
+    entity.frameType = detailData.frameType;
+    entity.bridgeDesign = detailData.bridgeDesign;
+    entity.style = detailData.style;
+    entity.springHinges = detailData.springHinges || false;
+    entity.weight = detailData.weight;
+    entity.multifocal = detailData.multifocal || false;
     entity.createdAt = new Date();
     entity.createdBy = reqUserId;
+    entity.updatedAt = new Date();
+    entity.updatedBy = reqUserId;
 
-    return await this.productDetailRepository.save(entity);
+    const savedDetail = await this.productDetailRepository.save(entity);
+    return savedDetail.toModel();
   }
 
   async updateProductDetail(
-    productDetail: ProductDetailModel,
-    productId: number | undefined,
-    productNumber: string | undefined,
-    bridgeWidth: number | undefined,
-    frameWidth: number | undefined,
-    lensHeight: number | undefined,
-    lensWidth: number | undefined,
-    templeLength: number | undefined,
-    frameColor: string | undefined,
-    frameMaterial: string | undefined,
-    frameShape: FrameShapeType | undefined,
-    frameType: FrameType | undefined,
-    springHinge: boolean | undefined,
+    productColorId: number,
+    detailData: {
+      bridgeWidth?: number;
+      frameWidth?: number;
+      lensHeight?: number;
+      lensWidth?: number;
+      templeLength?: number;
+      productNumber?: number;
+      frameMaterial?: string;
+      frameShape?: string;
+      frameType?: string;
+      bridgeDesign?: string;
+      style?: string;
+      springHinges?: boolean;
+      weight?: number;
+      multifocal?: boolean;
+    },
     reqUserId: number,
   ): Promise<ProductDetailModel> {
-    await this.productDetailRepository.update(
-      { id: productDetail.id, deletedAt: IsNull() },
-      {
-        productId: productId,
-        productNumber: productNumber,
-        bridgeWidth: bridgeWidth,
-        frameWidth: frameWidth,
-        lensHeight: lensHeight,
-        lensWidth: lensWidth,
-        templeLength: templeLength,
-        frameColor: frameColor,
-        frameMaterial: frameMaterial,
-        frameShape: frameShape,
-        frameType: frameType,
-        springHinge: springHinge,
-        updatedAt: new Date(),
-        updatedBy: reqUserId,
-      },
-    );
+    const existingDetail = await this.productDetailRepository.findOne({
+      where: { productColorId, deletedAt: IsNull() },
+    });
 
-    return await this.getProductDetailById(productDetail.id);
+    if (existingDetail) {
+      await this.productDetailRepository.update(
+        { productColorId, deletedAt: IsNull() },
+        {
+          ...detailData,
+          updatedAt: new Date(),
+          updatedBy: reqUserId,
+        },
+      );
+
+      const updatedDetail =
+        await this.getProductDetailByColorId(productColorId);
+      return updatedDetail!;
+    } else {
+      return await this.createProductDetail(
+        productColorId,
+        detailData,
+        reqUserId,
+      );
+    }
   }
 
   async deleteProductDetail(
-    productDetail: ProductDetailModel,
+    productColorId: number,
     reqUserId: number,
-  ): Promise<ProductDetailModel> {
+  ): Promise<boolean> {
     await this.productDetailRepository.update(
-      { id: productDetail.id, deletedAt: IsNull() },
+      { productColorId, deletedAt: IsNull() },
       {
         deletedAt: new Date(),
         deletedBy: reqUserId,
       },
     );
 
-    return await this.getProductDetailById(productDetail.id);
+    return true;
   }
 }

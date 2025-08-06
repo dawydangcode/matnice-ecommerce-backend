@@ -6,111 +6,60 @@ import {
   Param,
   Post,
   Put,
-  Query,
+  UseGuards,
   Req,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
-import { Roles } from 'src/role/decorators/roles.decorator';
-import { RoleType } from 'src/role/enum/role.enum';
 import { ProductDetailService } from './product-detail.service';
-import { ProductService } from 'src/product/product.service';
-import { GetProductsQueryDto } from 'src/product/dtos/product.dto';
-import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
 import {
-  CreateProductDetailBodyDto,
-  DeleteProductDetailParamsDto,
-  GetProductDetailByIdParamsDto,
-  UpdateProductDetailBodyDto,
-  UpdateProductDetailParamsDto,
+  CreateProductDetailDto,
+  UpdateProductDetailDto,
 } from './dtos/product-detail.dto';
+import { JwtAuthGuard } from 'src/middlewares/guards/jwt-auth.guard';
 import { RequestModel } from 'src/common/models/request.model';
 
-@Controller('api/v1')
-@ApiTags('Product / Product Detail')
-@Roles(RoleType.Admin)
+@Controller('products/:productId/colors/:colorId/details')
+@UseGuards(JwtAuthGuard)
 export class ProductDetailController {
-  constructor(
-    private readonly productDetailService: ProductDetailService,
-    private readonly productService: ProductService,
-  ) {}
+  constructor(private readonly productDetailService: ProductDetailService) {}
 
-  @Get('product-detail/list')
-  async getProductDetails(@Query() query: GetProductsQueryDto) {
-    return this.productDetailService.getProductDetails(
-      undefined,
-      new PaginationParamsModel(query.page, query.limit),
-      undefined,
-      undefined,
-    );
+  @Get()
+  async getProductDetail(@Param('colorId') colorId: number) {
+    return await this.productDetailService.getProductDetailByColorId(colorId);
   }
 
-  @Get('product-detail/:productDetailId/detail')
-  async getProductDetailById(@Param() params: GetProductDetailByIdParamsDto) {
-    return this.productDetailService.getProductDetailById(
-      params.productDetailId,
-    );
-  }
-
-  @Post('product-detail/create')
+  @Post()
   async createProductDetail(
+    @Param('colorId') colorId: number,
+    @Body() createDto: CreateProductDetailDto,
     @Req() req: RequestModel,
-    @Body() body: CreateProductDetailBodyDto,
   ) {
-    const product = await this.productService.getProductById(body.productId);
-    return this.productDetailService.createProductDetail(
-      product,
-      body.productNumber,
-      body.bridgeWidth,
-      body.frameWidth,
-      body.lensHeight,
-      body.lensWidth,
-      body.templeLength,
-      body.frameColor,
-      body.frameMaterial,
-      body.frameShape,
-      body.frameType,
-      body.springHinge,
+    return await this.productDetailService.createProductDetail(
+      colorId,
+      createDto,
       req.user.userId,
     );
   }
 
-  @Put('product-detail/:productDetailId/update')
+  @Put()
   async updateProductDetail(
+    @Param('colorId') colorId: number,
+    @Body() updateDto: UpdateProductDetailDto,
     @Req() req: RequestModel,
-    @Param() params: UpdateProductDetailParamsDto,
-    @Body() body: UpdateProductDetailBodyDto,
   ) {
-    const productDetail = await this.productDetailService.getProductDetailById(
-      params.productDetailId,
-    );
-    return this.productDetailService.updateProductDetail(
-      productDetail,
-      body.productId,
-      body.productNumber,
-      body.bridgeWidth,
-      body.frameWidth,
-      body.lensWidth,
-      body.lensHeight,
-      body.templeLength,
-      body.frameColor,
-      body.frameMaterial,
-      body.frameShape,
-      body.frameType,
-      body.springHinge,
+    return await this.productDetailService.updateProductDetail(
+      colorId,
+      updateDto,
       req.user.userId,
     );
   }
 
-  @Delete('product-detail/:productDetailId/delete')
+  @Delete()
   async deleteProductDetail(
+    @Param('colorId') colorId: number,
     @Req() req: RequestModel,
-    @Param() params: DeleteProductDetailParamsDto,
   ) {
-    const productDetail = await this.productDetailService.getProductDetailById(
-      params.productDetailId,
-    );
-    return this.productDetailService.deleteProductDetail(
-      productDetail,
+    return await this.productDetailService.deleteProductDetail(
+      colorId,
       req.user.userId,
     );
   }

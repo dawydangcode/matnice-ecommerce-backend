@@ -14,7 +14,6 @@ import { MailerModule } from 'src/mailer/mailer.module';
 import { ProductModule } from 'src/product/product.module';
 import { CategoryModule } from 'src/category/category.module';
 import { BrandModule } from 'src/brand/brand.module';
-import { ProductDetailModule } from 'src/product/modules/product-detail/product-detail.module';
 import { CartModule } from 'src/cart/cart.module';
 import { LensModule } from 'src/lens/lens.module';
 

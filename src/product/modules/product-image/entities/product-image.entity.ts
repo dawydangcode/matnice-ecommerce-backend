@@ -9,6 +9,7 @@ import {
   DeleteDateColumn,
 } from 'typeorm';
 import { ProductEntity } from '../../../entities/product.entity';
+import { ProductColorEntity } from '../../product-color/entities/product-color.entity';
 import { ProductImageModel } from '../models/product-image.model';
 
 @Entity('product_image')
@@ -18,6 +19,9 @@ export class ProductImageEntity {
 
   @Column({ name: 'product_id' })
   productId!: number;
+
+  @Column({ name: 'product_color_id', nullable: true })
+  productColorId?: number;
 
   @Column({ name: 'image_url' })
   imageUrl!: string;
@@ -44,10 +48,18 @@ export class ProductImageEntity {
   @JoinColumn({ name: 'product_id' })
   product!: ProductEntity;
 
+  @ManyToOne(
+    () => ProductColorEntity,
+    (productColor) => productColor.productImage,
+  )
+  @JoinColumn({ name: 'product_color_id' })
+  productColor?: ProductColorEntity;
+
   toModel(): ProductImageModel {
     return new ProductImageModel(
       this.id,
       this.productId,
+      this.productColorId,
       this.imageUrl,
       this.createdAt,
       this.createdBy,

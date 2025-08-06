@@ -1,126 +1,61 @@
-import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
-import { FrameShapeType, FrameType } from '../enum/frame.type';
-import { IsBoolean, IsNumber, IsString } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsOptional, IsNumber, IsString, IsBoolean } from 'class-validator';
 
-export class ProductDetailDto {
-  @ApiProperty()
+export class CreateProductDetailDto {
+  @IsOptional()
   @IsNumber()
-  @Type(() => Number)
-  productDetailId!: number;
+  bridgeWidth?: number;
 
-  @ApiProperty()
+  @IsOptional()
   @IsNumber()
-  @Type(() => Number)
-  productId!: number;
+  frameWidth?: number;
 
-  @ApiProperty()
+  @IsOptional()
+  @IsNumber()
+  lensHeight?: number;
+
+  @IsOptional()
+  @IsNumber()
+  lensWidth?: number;
+
+  @IsOptional()
+  @IsNumber()
+  templeLength?: number;
+
+  @IsOptional()
+  @IsNumber()
+  productNumber?: number;
+
+  @IsOptional()
   @IsString()
-  productNumber!: string;
+  frameMaterial?: string;
 
-  @ApiProperty()
-  @IsNumber()
-  @Type(() => Number)
-  bridgeWidth!: number;
-
-  @ApiProperty()
-  @IsNumber()
-  @Type(() => Number)
-  frameWidth!: number;
-
-  @ApiProperty()
-  @IsNumber()
-  @Type(() => Number)
-  lensHeight!: number;
-
-  @ApiProperty()
-  @IsNumber()
-  @Type(() => Number)
-  lensWidth!: number;
-
-  @ApiProperty()
-  @IsNumber()
-  @Type(() => Number)
-  templeLength!: number;
-
-  @ApiProperty()
+  @IsOptional()
   @IsString()
-  frameColor!: string;
+  frameShape?: string;
 
-  @ApiProperty()
+  @IsOptional()
   @IsString()
-  frameMaterial!: string;
+  frameType?: string;
 
-  @ApiProperty()
+  @IsOptional()
   @IsString()
-  frameShape!: FrameShapeType;
+  bridgeDesign?: string;
 
-  @ApiProperty()
-  frameType!: FrameType;
+  @IsOptional()
+  @IsString()
+  style?: string;
 
-  @ApiProperty()
+  @IsOptional()
   @IsBoolean()
-  springHinge!: boolean;
+  springHinges?: boolean;
 
-  @ApiProperty()
+  @IsOptional()
   @IsNumber()
-  @Type(() => Number)
-  page!: number;
+  weight?: number;
 
-  @ApiProperty()
-  @IsNumber()
-  @Type(() => Number)
-  limit!: number;
-
-  @ApiProperty()
-  @IsString()
-  q!: string;
+  @IsOptional()
+  @IsBoolean()
+  multifocal?: boolean;
 }
 
-export class GetProductDetailQueryDto extends PartialType(
-  PickType(ProductDetailDto, ['page', 'limit', 'q']),
-) {}
-
-export class GetProductDetailByIdParamsDto extends PickType(ProductDetailDto, [
-  'productDetailId',
-]) {}
-
-export class CreateProductDetailBodyDto extends PickType(ProductDetailDto, [
-  'productId',
-  'productNumber',
-  'bridgeWidth',
-  'frameWidth',
-  'lensHeight',
-  'lensWidth',
-  'templeLength',
-  'frameColor',
-  'frameMaterial',
-  'frameShape',
-  'frameType',
-  'springHinge',
-]) {}
-
-export class UpdateProductDetailParamsDto extends PickType(ProductDetailDto, [
-  'productDetailId',
-]) {}
-
-export class UpdateProductDetailBodyDto extends PartialType(
-  PickType(ProductDetailDto, [
-    'productId',
-    'productNumber',
-    'bridgeWidth',
-    'frameWidth',
-    'lensHeight',
-    'lensWidth',
-    'templeLength',
-    'frameColor',
-    'frameMaterial',
-    'frameShape',
-    'frameType',
-    'springHinge',
-  ]),
-) {}
-
-export class DeleteProductDetailParamsDto extends PickType(ProductDetailDto, [
-  'productDetailId',
-]) {}
+export class UpdateProductDetailDto extends CreateProductDetailDto {}

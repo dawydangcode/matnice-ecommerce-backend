@@ -1,8 +1,7 @@
-export class ProductImageModel {
+export class ProductColorModel {
   public readonly id: number;
   public readonly productId: number;
-  public readonly productColorId?: number;
-  public readonly imageUrl: string;
+  public readonly colorName: string;
   public readonly createdAt: Date | undefined;
   public readonly createdBy: number | undefined;
   public readonly updatedAt: Date | undefined;
@@ -13,9 +12,8 @@ export class ProductImageModel {
   constructor(
     id: number,
     productId: number,
-    productColorId: number | undefined,
-    imageUrl: string,
-    createdAt: Date,
+    colorName: string,
+    createdAt: Date | undefined,
     createdBy: number | undefined,
     updatedAt: Date | undefined,
     updatedBy: number | undefined,
@@ -24,8 +22,7 @@ export class ProductImageModel {
   ) {
     this.id = id;
     this.productId = productId;
-    this.productColorId = productColorId;
-    this.imageUrl = imageUrl;
+    this.colorName = colorName;
     this.createdAt = createdAt;
     this.createdBy = createdBy;
     this.updatedAt = updatedAt;

@@ -3,9 +3,11 @@ import {
   DeleteDateColumn,
   Entity,
   PrimaryGeneratedColumn,
+  OneToMany,
 } from 'typeorm';
 import { ProductGenderType, ProductType } from '../enum/product.type';
 import { ProductModel } from '../models/product.model';
+import { ProductColorEntity } from '../modules/product-color/entities/product-color.entity';
 
 @Entity('product')
 export class ProductEntity {
@@ -53,6 +55,10 @@ export class ProductEntity {
 
   @Column({ name: 'deleted_by' })
   deletedBy!: number;
+
+  // Relations
+  @OneToMany(() => ProductColorEntity, (productColor) => productColor.product)
+  productColors!: ProductColorEntity[];
 
   toModel(): ProductModel {
     return new ProductModel(

@@ -8,6 +8,7 @@ import { ProductModel } from './models/product.model';
 import { ProductGenderType, ProductType } from './enum/product.type';
 import { ProductCategoryService } from './modules/product-category/product-category.service';
 import { ProductThicknessCompatibilityService } from './modules/product-thickness-compatibility/product-thickness-compatibility.service';
+import { ProductColorService } from './modules/product-color/product-color.service';
 
 @Injectable()
 export class ProductService {
@@ -16,6 +17,7 @@ export class ProductService {
     private readonly productRepository: Repository<ProductEntity>,
     private readonly productCategoryService: ProductCategoryService,
     private readonly productThicknessCompatibilityService: ProductThicknessCompatibilityService,
+    private readonly productColorService: ProductColorService,
   ) {}
 
   async getProducts(
