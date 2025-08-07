@@ -5,13 +5,19 @@ import { ProductDetailEntity } from './entities/product-detail.entity';
 import { ProductDetailModel } from './models/product-detail.model';
 import { ProductService } from 'src/product/product.service';
 import { ProductModel } from 'src/product/models/product.model';
+import {
+  FrameBridgeDesignType,
+  FrameMaterialType,
+  FrameShapeType,
+  FrameStyleType,
+  FrameType,
+} from './enum/frame.type';
 
 @Injectable()
 export class ProductDetailService {
   constructor(
     @InjectRepository(ProductDetailEntity)
     private readonly productDetailRepository: Repository<ProductDetailEntity>,
-    private readonly productService: ProductService,
   ) {}
 
   async getProductDetailById(
@@ -41,17 +47,17 @@ export class ProductDetailService {
 
   async createProductDetail(
     productId: number,
+    productNumber: number,
     bridgeWidth: number,
     frameWidth: number,
     lensHeight: number,
     lensWidth: number,
     templeLength: number,
-    productNumber: number,
-    frameMaterial: string,
-    frameShape: string,
-    frameType: string,
-    bridgeDesign: string,
-    style: string,
+    frameMaterial: FrameMaterialType,
+    frameShape: FrameShapeType,
+    frameType: FrameType,
+    bridgeDesign: FrameBridgeDesignType,
+    style: FrameStyleType,
     springHinges: boolean,
     weight: number,
     multifocal: boolean,
@@ -59,6 +65,7 @@ export class ProductDetailService {
   ): Promise<ProductDetailModel> {
     const entity = new ProductDetailEntity();
     entity.productId = productId;
+    entity.productNumber = productNumber;
     entity.bridgeWidth = bridgeWidth;
     entity.frameWidth = frameWidth;
     entity.lensHeight = lensHeight;
@@ -82,32 +89,32 @@ export class ProductDetailService {
 
   async updateProductDetail(
     productDetail: ProductDetailModel,
-    product: ProductModel,
+    productId: number | undefined,
+    productNumber: number | undefined,
     bridgeWidth: number | undefined,
     frameWidth: number | undefined,
     lensHeight: number | undefined,
     lensWidth: number | undefined,
     templeLength: number | undefined,
-    productNumber: number | undefined,
-    frameMaterial: string | undefined,
-    frameShape: string | undefined,
-    frameType: string | undefined,
-    bridgeDesign: string | undefined,
-    style: string | undefined,
+    frameMaterial: FrameMaterialType | undefined,
+    frameShape: FrameShapeType | undefined,
+    frameType: FrameType | undefined,
+    bridgeDesign: FrameBridgeDesignType | undefined,
+    style: FrameStyleType | undefined,
     springHinges: boolean | undefined,
     weight: number | undefined,
     multifocal: boolean | undefined,
     reqUserId: number,
   ): Promise<ProductDetailModel> {
     await this.productDetailRepository.update(
-      { id: productDetail.id, productId: product.id, deletedAt: IsNull() },
+      { id: productDetail.id, productId: productId, deletedAt: IsNull() },
       {
+        productNumber: productNumber,
         bridgeWidth: bridgeWidth,
         frameWidth: frameWidth,
         lensHeight: lensHeight,
         lensWidth: lensWidth,
         templeLength: templeLength,
-        productNumber: productNumber,
         frameMaterial: frameMaterial,
         frameShape: frameShape,
         frameType: frameType,

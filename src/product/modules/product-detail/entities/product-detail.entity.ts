@@ -2,40 +2,42 @@ import {
   Column,
   Entity,
   PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
   DeleteDateColumn,
-  ManyToOne,
-  JoinColumn,
 } from 'typeorm';
 import { ProductDetailModel } from '../models/product-detail.model';
-import { ProductEntity } from '../../../entities/product.entity';
+import {
+  FrameBridgeDesignType,
+  FrameMaterialType,
+  FrameShapeType,
+  FrameStyleType,
+  FrameType,
+} from '../enum/frame.type';
 
 @Entity('product_detail')
 export class ProductDetailEntity {
-  @PrimaryGeneratedColumn('increment', { type: 'bigint' })
+  @PrimaryGeneratedColumn({ name: 'id' })
   id!: number;
 
-  @Column({ name: 'product_id', type: 'bigint' })
+  @Column({ name: 'product_id' })
   productId!: number;
 
-  @Column({ name: 'bridge_width', type: 'double precision', nullable: true })
-  bridgeWidth?: number;
+  @Column({ name: 'product_number' })
+  productNumber!: number;
 
-  @Column({ name: 'frame_width', type: 'double precision', nullable: true })
-  frameWidth?: number;
+  @Column({ name: 'bridge_width' })
+  bridgeWidth!: number;
 
-  @Column({ name: 'lens_height', type: 'double precision', nullable: true })
-  lensHeight?: number;
+  @Column({ name: 'frame_width' })
+  frameWidth!: number;
 
-  @Column({ name: 'lens_width', type: 'double precision', nullable: true })
-  lensWidth?: number;
+  @Column({ name: 'lens_height' })
+  lensHeight!: number;
 
-  @Column({ name: 'temple_length', type: 'double precision', nullable: true })
-  templeLength?: number;
+  @Column({ name: 'lens_width' })
+  lensWidth!: number;
 
-  @Column({ name: 'product_number', type: 'int', nullable: true })
-  productNumber?: number;
+  @Column({ name: 'temple_length' })
+  templeLength!: number;
 
   @Column({
     name: 'frame_material',
@@ -43,13 +45,13 @@ export class ProductDetailEntity {
     length: 100,
     nullable: true,
   })
-  frameMaterial?: string;
+  frameMaterial!: FrameMaterialType;
 
-  @Column({ name: 'frame_shape', type: 'varchar', length: 50, nullable: true })
-  frameShape?: string;
+  @Column({ name: 'frame_shape' })
+  frameShape!: FrameShapeType;
 
-  @Column({ name: 'frame_type', type: 'varchar', length: 50, nullable: true })
-  frameType?: string;
+  @Column({ name: 'frame_type' })
+  frameType!: FrameType;
 
   @Column({
     name: 'bridge_design',
@@ -57,37 +59,37 @@ export class ProductDetailEntity {
     length: 50,
     nullable: true,
   })
-  bridgeDesign?: string;
+  bridgeDesign!: FrameBridgeDesignType;
 
-  @Column({ name: 'style', type: 'varchar', length: 50, nullable: true })
-  style?: string;
+  @Column({ name: 'style' })
+  style!: FrameStyleType;
 
-  @Column({ name: 'spring_hinges', type: 'boolean', default: false })
+  @Column({ name: 'spring_hinges' })
   springHinges!: boolean;
 
-  @Column({ name: 'weight', type: 'double precision', nullable: true })
-  weight?: number;
+  @Column({ name: 'weight' })
+  weight!: number;
 
   @Column({ name: 'multifocal', type: 'boolean', default: false })
   multifocal!: boolean;
 
-  @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
+  @Column({ name: 'created_at', type: 'timestamp' })
   createdAt!: Date;
 
   @Column({ name: 'created_by', type: 'bigint' })
   createdBy!: number;
 
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
+  @Column({ name: 'updated_at', type: 'timestamp' })
   updatedAt!: Date;
 
   @Column({ name: 'updated_by', type: 'bigint' })
   updatedBy!: number;
 
-  @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
-  deletedAt?: Date;
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deletedAt!: Date;
 
-  @Column({ name: 'deleted_by', type: 'bigint', nullable: true })
-  deletedBy?: number;
+  @Column({ name: 'deleted_by' })
+  deletedBy!: number;
 
   // Relations - TODO: Add to ProductEntity
   // @ManyToOne(
@@ -101,16 +103,12 @@ export class ProductDetailEntity {
     return new ProductDetailModel(
       this.id,
       this.productId,
-      this.createdAt,
-      this.createdBy,
-      this.updatedAt,
-      this.updatedBy,
+      this.productNumber,
       this.bridgeWidth,
       this.frameWidth,
       this.lensHeight,
       this.lensWidth,
       this.templeLength,
-      this.productNumber,
       this.frameMaterial,
       this.frameShape,
       this.frameType,
@@ -119,6 +117,10 @@ export class ProductDetailEntity {
       this.springHinges,
       this.weight,
       this.multifocal,
+      this.createdAt,
+      this.createdBy,
+      this.updatedAt,
+      this.updatedBy,
       this.deletedAt,
       this.deletedBy,
     );

@@ -1,12 +1,29 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsOptional, IsNumber, IsString, IsBoolean } from 'class-validator';
+import {
+  FrameBridgeDesignType,
+  FrameMaterialType,
+  FrameShapeType,
+  FrameStyleType,
+  FrameType,
+} from '../enum/frame.type';
 
-export class CreateProductDetailDto {
+export class ProductDetailDto {
+  @ApiProperty()
+  @IsNumber()
+  @Type(() => Number)
+  productDetailId!: number;
+
   @ApiProperty()
   @IsNumber()
   @Type(() => Number)
   productId!: number;
+
+  @ApiProperty()
+  @IsNumber()
+  @Type(() => Number)
+  productNumber!: number;
 
   @ApiProperty()
   @IsNumber()
@@ -32,28 +49,24 @@ export class CreateProductDetailDto {
   templeLength!: number;
 
   @ApiProperty()
-  @IsNumber()
-  productNumber!: number;
+  @IsString()
+  frameMaterial!: FrameMaterialType;
 
   @ApiProperty()
   @IsString()
-  frameMaterial!: ;
+  frameShape!: FrameShapeType;
 
   @ApiProperty()
   @IsString()
-  frameShape!: string;
+  frameType!: FrameType;
 
   @ApiProperty()
   @IsString()
-  frameType!: string;
+  bridgeDesign!: FrameBridgeDesignType;
 
   @ApiProperty()
   @IsString()
-  bridgeDesign!: string;
-
-  @ApiProperty()
-  @IsString()
-  style!: string;
+  style!: FrameStyleType;
 
   @ApiProperty()
   @IsBoolean()
@@ -69,4 +82,52 @@ export class CreateProductDetailDto {
   multifocal!: boolean;
 }
 
-export class UpdateProductDetailDto extends CreateProductDetailDto {}
+export class GetProductDetailByIdParamsDto extends PickType(ProductDetailDto, [
+  'productDetailId',
+]) {}
+
+export class CreateProductDetailBodyDto extends PickType(ProductDetailDto, [
+  'productId',
+  'productNumber',
+  'bridgeWidth',
+  'frameWidth',
+  'lensHeight',
+  'lensWidth',
+  'templeLength',
+  'frameMaterial',
+  'frameShape',
+  'frameType',
+  'bridgeDesign',
+  'style',
+  'springHinges',
+  'weight',
+  'multifocal',
+]) {}
+
+export class UpdateProductDetailParamsDto extends PickType(ProductDetailDto, [
+  'productDetailId',
+]) {}
+
+export class UpdateProductDetailBodyDto extends PartialType(
+  PickType(ProductDetailDto, [
+    'productId',
+    'productNumber',
+    'bridgeWidth',
+    'frameWidth',
+    'lensHeight',
+    'lensWidth',
+    'templeLength',
+    'frameMaterial',
+    'frameShape',
+    'frameType',
+    'bridgeDesign',
+    'style',
+    'springHinges',
+    'weight',
+    'multifocal',
+  ]),
+) {}
+
+export class DeleteProductDetailParamsDto extends PickType(ProductDetailDto, [
+  'productDetailId',
+]) {}

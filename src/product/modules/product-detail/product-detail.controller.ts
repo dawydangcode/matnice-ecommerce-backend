@@ -11,72 +11,93 @@ import {
 } from '@nestjs/common';
 import { ProductDetailService } from './product-detail.service';
 import {
-  CreateProductDetailDto,
-  UpdateProductDetailDto,
+  CreateProductDetailBodyDto,
+  DeleteProductDetailParamsDto,
+  GetProductDetailByIdParamsDto,
+  UpdateProductDetailBodyDto,
+  UpdateProductDetailParamsDto,
 } from './dtos/product-detail.dto';
 import { RequestModel } from 'src/common/models/request.model';
+import { ProductService } from 'src/product/product.service';
 
 @Controller('api/v1/')
 export class ProductDetailController {
   constructor(private readonly productDetailService: ProductDetailService) {}
 
   @Get('products-detail/:productDetailId/details')
-  async getProductDetail(@Param() productDetailId: number) {
-    return await this.productDetailService.getProductDetailByProductId(
-      productDetailId,
+  async getProductDetail(@Param() params: GetProductDetailByIdParamsDto) {
+    return await this.productDetailService.getProductDetailById(
+      params.productDetailId,
     );
   }
 
   @Post('product-detail/create')
   async createProductDetail(
-    @Body() createDto: CreateProductDetailDto,
+    @Body() body: CreateProductDetailBodyDto,
     @Req() req: RequestModel,
   ) {
     return await this.productDetailService.createProductDetail(
-      createDto.productId, // Get productId from request body
-      createDto,
+      body.productId,
+      body.productNumber,
+      body.bridgeWidth,
+      body.frameWidth,
+      body.lensHeight,
+      body.lensWidth,
+      body.templeLength,
+      body.frameMaterial,
+      body.frameShape,
+      body.frameType,
+      body.bridgeDesign,
+      body.style,
+      body.springHinges,
+      body.weight,
+      body.multifocal,
       req.user.userId,
     );
   }
 
   @Put('product-detail/:productDetailId/update')
   async updateProductDetail(
-    @Param('productDetailId') productDetailId: number,
-    @Body() updateDto: UpdateProductDetailDto,
+    @Param() params: UpdateProductDetailParamsDto,
+    @Body() body: UpdateProductDetailBodyDto,
     @Req() req: RequestModel,
   ) {
-    // Get productId from the existing detail
-    const existingDetail =
-      await this.productDetailService.getProductDetailByProductId(
-        productDetailId,
-      );
-    if (!existingDetail) {
-      throw new Error('Product detail not found');
-    }
+    const productDetail = await this.productDetailService.getProductDetailById(
+      params.productDetailId,
+    );
 
     return await this.productDetailService.updateProductDetail(
-      existingDetail.productId,
-      updateDto,
+      productDetail,
+      body.productId,
+      body.productNumber,
+      body.bridgeWidth,
+      body.frameWidth,
+      body.lensHeight,
+      body.lensWidth,
+      body.templeLength,
+      body.frameMaterial,
+      body.frameShape,
+      body.frameType,
+      body.bridgeDesign,
+      body.style,
+      body.springHinges,
+      body.weight,
+      body.multifocal,
       req.user.userId,
     );
   }
 
   @Delete('product-detail/:productDetailId/delete')
   async deleteProductDetail(
-    @Param('productDetailId') productDetailId: number,
+    @Param() params: DeleteProductDetailParamsDto,
     @Req() req: RequestModel,
   ) {
-    // Get productId from the existing detail
-    const existingDetail =
-      await this.productDetailService.getProductDetailByProductId(
-        productDetailId,
-      );
-    if (!existingDetail) {
-      throw new Error('Product detail not found');
-    }
+    const productDetail = await this.productDetailService.getProductDetailById(
+      params.productDetailId,
+    );
 
     return await this.productDetailService.deleteProductDetail(
-      existingDetail.productId,
+      productDetail,
       req.user.userId,
     );
   }
