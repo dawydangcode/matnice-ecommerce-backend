@@ -5,12 +5,11 @@ import { LensTintEntity } from './entities/lens_tint.entity';
 import { TintColorEntity } from './entities/tint_color.entity';
 import { LensTintModel } from './models/lens_tint.model';
 import { TintColorModel } from './models/tint_color.model';
+import { CreateLensTintDto, UpdateLensTintDto } from './dtos/lens_tint.dto';
 import {
-  CreateLensTintDto,
-  UpdateLensTintDto,
   CreateTintColorDto,
   UpdateTintColorDto,
-} from './dtos/lens_tint.dto';
+} from '../tint_color/dtos/tint_color.dto';
 
 @Injectable()
 export class LensTintService {

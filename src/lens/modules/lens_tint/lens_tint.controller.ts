@@ -19,11 +19,13 @@ import { LensTintService } from './lens_tint.service';
 import {
   CreateLensTintDto,
   UpdateLensTintDto,
-  CreateTintColorDto,
-  UpdateTintColorDto,
   LensTintParamsDto,
   TintColorParamsDto,
 } from './dtos/lens_tint.dto';
+import {
+  CreateTintColorDto,
+  UpdateTintColorDto,
+} from '../tint_color/dtos/tint_color.dto';
 import { RequestModel } from 'src/common/models/request.model';
 import { LensTintModel } from './models/lens_tint.model';
 import { TintColorModel } from './models/tint_color.model';

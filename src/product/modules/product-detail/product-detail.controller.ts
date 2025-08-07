@@ -18,7 +18,6 @@ import {
   UpdateProductDetailParamsDto,
 } from './dtos/product-detail.dto';
 import { RequestModel } from 'src/common/models/request.model';
-import { ProductService } from 'src/product/product.service';
 
 @Controller('api/v1/')
 export class ProductDetailController {

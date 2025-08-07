@@ -29,9 +29,6 @@ export class ProductEntity {
   @Column({ name: 'price' })
   price!: number;
 
-  @Column({ name: 'stock' })
-  stock!: number;
-
   @Column({ name: 'description' })
   description!: string;
 
@@ -68,7 +65,6 @@ export class ProductEntity {
       this.brandId,
       this.gender,
       this.price,
-      this.stock,
       this.description,
       this.isSustainable,
       this.createdAt,

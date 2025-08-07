@@ -48,11 +48,6 @@ export class ProductDto {
   description!: string;
 
   @ApiProperty()
-  @IsNumber()
-  @Type(() => Number)
-  stock!: number;
-
-  @ApiProperty()
   @IsBoolean()
   isSustainable!: boolean;
 
@@ -91,7 +86,6 @@ export class CreateProductBodyDto extends PickType(ProductDto, [
   'productType',
   'gender',
   'price',
-  'stock',
   'description',
   'isSustainable',
   'brandId',
@@ -120,7 +114,6 @@ export class UpdateProductBodyDto extends PartialType(
     'categoryId',
     'gender',
     'price',
-    'stock',
     'description',
     'isSustainable',
     'brandId',

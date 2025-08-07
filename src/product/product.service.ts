@@ -79,7 +79,6 @@ export class ProductService {
     brandId: number,
     gender: ProductGenderType,
     price: number,
-    stock: number,
     description: string,
     isSustainable: boolean,
     categoryIds: number[] | undefined,
@@ -91,7 +90,6 @@ export class ProductService {
     entity.brandId = brandId;
     entity.gender = gender;
     entity.price = price;
-    entity.stock = stock;
     entity.description = description;
     entity.isSustainable = isSustainable;
     entity.createdAt = new Date();
@@ -124,7 +122,6 @@ export class ProductService {
     brandId: number | undefined,
     gender: ProductGenderType | undefined,
     price: number | undefined,
-    stock: number | undefined,
     description: string | undefined,
     isSustainable: boolean | undefined,
     reqUserId: number,
@@ -137,7 +134,6 @@ export class ProductService {
         brandId: brandId,
         gender: gender,
         price: price,
-        stock: stock,
         description: description,
         isSustainable: isSustainable,
         updatedAt: new Date(),
