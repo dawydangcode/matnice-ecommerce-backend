@@ -15,14 +15,17 @@ import { PaginationParamsModel } from 'src/common/models/pagination-params.model
 import { RequestModel } from 'src/common/models/request.model';
 import {
   CreateProductColorBodyDto,
+  DeleteProductColorParamsDto,
   UpdateProductColorBodyDto,
+  UpdateProductColorParamsDto,
 } from './dtos/product-color.dto';
+import { DeleteProductDetailParamsDto } from '../product-detail/dtos/product-detail.dto';
 
-@Controller('api/v1/products/:productId/colors')
+@Controller('api/v1/')
 export class ProductColorController {
   constructor(private readonly productColorService: ProductColorService) {}
 
-  @Get()
+  @Get('product-color/list')
   async getProductColors(
     @Param('productId') productId: number,
     @Query() pagination: PaginationParamsModel,
@@ -33,7 +36,7 @@ export class ProductColorController {
     );
   }
 
-  @Get(':colorId')
+  @Get('/product-color/:colorId/detail')
   async getProductColor(
     @Param('productId') productId: number,
     @Param('colorId') colorId: number,
@@ -41,44 +44,54 @@ export class ProductColorController {
     return await this.productColorService.getProductColorById(colorId);
   }
 
-  @Post()
+  @Post('product-color/create')
   async createProductColor(
-    @Param('productId') productId: number,
     @Body() body: CreateProductColorBodyDto,
     @Req() req: RequestModel,
   ) {
     return await this.productColorService.createProductColor(
-      productId,
+      body.productId,
       body.colorName,
+      body.productVariantName,
+      body.productNumber,
+      body.stock,
+      body.isThumbnail,
       req.user.userId,
     );
   }
 
-  @Put(':colorId')
+  @Put('product-color/:productColorId/update')
   async updateProductColor(
-    @Param('productId') productId: number,
-    @Param('colorId') colorId: number,
+    @Param() params: UpdateProductColorParamsDto,
     @Body() body: UpdateProductColorBodyDto,
     @Req() req: RequestModel,
   ) {
-    const productColor =
-      await this.productColorService.getProductColorById(colorId);
+    const productColor = await this.productColorService.getProductColorById(
+      params.productColorId,
+    );
 
     return await this.productColorService.updateProductColor(
       productColor,
       body.colorName,
+      body.productVariantName,
+      body.productNumber,
+      body.stock,
+      body.isThumbnail,
       req.user.userId,
     );
   }
 
-  @Delete(':colorId')
+  @Delete('product-color/:productColorId/delete')
   async deleteProductColor(
-    @Param('productId') productId: number,
-    @Param('colorId') colorId: number,
+    @Param() params: DeleteProductColorParamsDto,
     @Req() req: RequestModel,
   ) {
+    const productColor = await this.productColorService.getProductColorById(
+      params.productColorId,
+    );
+
     return await this.productColorService.deleteProductColor(
-      colorId,
+      productColor,
       req.user.userId,
     );
   }

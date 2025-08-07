@@ -33,9 +33,11 @@ export class ProductColorService {
     );
   }
 
-  async getProductColorById(id: number): Promise<ProductColorModel> {
+  async getProductColorById(
+    productColorId: number,
+  ): Promise<ProductColorModel> {
     const productColor = await this.productColorRepository.findOne({
-      where: { id, deletedAt: IsNull() },
+      where: { id: productColorId, deletedAt: IsNull() },
       relations: ['productDetails', 'productImages'],
     });
 
@@ -49,11 +51,19 @@ export class ProductColorService {
   async createProductColor(
     productId: number,
     colorName: string,
+    productVariantName: string,
+    productNumber: number,
+    stock: number,
+    isThumbnail: boolean,
     reqUserId: number,
   ): Promise<ProductColorModel> {
     const entity = new ProductColorEntity();
     entity.productId = productId;
     entity.colorName = colorName;
+    entity.productVariantName = productVariantName;
+    entity.productNumber = productNumber;
+    entity.stock = stock;
+    entity.isThumbnail = isThumbnail;
     entity.createdAt = new Date();
     entity.createdBy = reqUserId;
 
@@ -64,12 +74,20 @@ export class ProductColorService {
   async updateProductColor(
     productColor: ProductColorModel,
     colorName: string | undefined,
+    productVariantName: string | undefined,
+    productNumber: number | undefined,
+    stock: number | undefined,
+    isThumbnail: boolean | undefined,
     reqUserId: number,
   ): Promise<ProductColorModel> {
     await this.productColorRepository.update(
       { id: productColor.id, deletedAt: IsNull() },
       {
-        colorName,
+        colorName: colorName,
+        productVariantName: productVariantName,
+        productNumber: productNumber,
+        stock: stock,
+        isThumbnail: isThumbnail,
         updatedAt: new Date(),
         updatedBy: reqUserId,
       },
@@ -78,9 +96,12 @@ export class ProductColorService {
     return await this.getProductColorById(productColor.id);
   }
 
-  async deleteProductColor(id: number, reqUserId: number): Promise<boolean> {
+  async deleteProductColor(
+    productColor: ProductColorModel,
+    reqUserId: number,
+  ): Promise<boolean> {
     await this.productColorRepository.update(
-      { id, deletedAt: IsNull() },
+      { id: productColor.id, deletedAt: IsNull() },
       {
         deletedAt: new Date(),
         deletedBy: reqUserId,

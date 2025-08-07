@@ -47,7 +47,6 @@ export class ProductDetailService {
 
   async createProductDetail(
     productId: number,
-    productNumber: number,
     bridgeWidth: number,
     frameWidth: number,
     lensHeight: number,
@@ -65,13 +64,11 @@ export class ProductDetailService {
   ): Promise<ProductDetailModel> {
     const entity = new ProductDetailEntity();
     entity.productId = productId;
-    entity.productNumber = productNumber;
     entity.bridgeWidth = bridgeWidth;
     entity.frameWidth = frameWidth;
     entity.lensHeight = lensHeight;
     entity.lensWidth = lensWidth;
     entity.templeLength = templeLength;
-    entity.productNumber = productNumber;
     entity.frameMaterial = frameMaterial;
     entity.frameShape = frameShape;
     entity.frameType = frameType;
@@ -90,7 +87,6 @@ export class ProductDetailService {
   async updateProductDetail(
     productDetail: ProductDetailModel,
     productId: number | undefined,
-    productNumber: number | undefined,
     bridgeWidth: number | undefined,
     frameWidth: number | undefined,
     lensHeight: number | undefined,
@@ -109,7 +105,6 @@ export class ProductDetailService {
     await this.productDetailRepository.update(
       { id: productDetail.id, productId: productId, deletedAt: IsNull() },
       {
-        productNumber: productNumber,
         bridgeWidth: bridgeWidth,
         frameWidth: frameWidth,
         lensHeight: lensHeight,

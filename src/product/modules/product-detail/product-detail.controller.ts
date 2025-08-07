@@ -37,7 +37,6 @@ export class ProductDetailController {
   ) {
     return await this.productDetailService.createProductDetail(
       body.productId,
-      body.productNumber,
       body.bridgeWidth,
       body.frameWidth,
       body.lensHeight,
@@ -68,7 +67,6 @@ export class ProductDetailController {
     return await this.productDetailService.updateProductDetail(
       productDetail,
       body.productId,
-      body.productNumber,
       body.bridgeWidth,
       body.frameWidth,
       body.lensHeight,

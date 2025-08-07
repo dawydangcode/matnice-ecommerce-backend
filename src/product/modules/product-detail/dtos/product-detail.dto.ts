@@ -23,11 +23,6 @@ export class ProductDetailDto {
   @ApiProperty()
   @IsNumber()
   @Type(() => Number)
-  productNumber!: number;
-
-  @ApiProperty()
-  @IsNumber()
-  @Type(() => Number)
   bridgeWidth!: number;
 
   @ApiProperty()
@@ -88,7 +83,6 @@ export class GetProductDetailByIdParamsDto extends PickType(ProductDetailDto, [
 
 export class CreateProductDetailBodyDto extends PickType(ProductDetailDto, [
   'productId',
-  'productNumber',
   'bridgeWidth',
   'frameWidth',
   'lensHeight',
@@ -111,7 +105,6 @@ export class UpdateProductDetailParamsDto extends PickType(ProductDetailDto, [
 export class UpdateProductDetailBodyDto extends PartialType(
   PickType(ProductDetailDto, [
     'productId',
-    'productNumber',
     'bridgeWidth',
     'frameWidth',
     'lensHeight',

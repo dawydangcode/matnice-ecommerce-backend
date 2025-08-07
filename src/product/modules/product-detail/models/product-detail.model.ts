@@ -9,7 +9,6 @@ import {
 export class ProductDetailModel {
   public readonly id: number;
   public readonly productId: number;
-  public readonly productNumber: number;
   public readonly bridgeWidth: number;
   public readonly frameWidth: number;
   public readonly lensHeight: number;
@@ -33,7 +32,6 @@ export class ProductDetailModel {
   constructor(
     id: number,
     productId: number,
-    productNumber: number,
     bridgeWidth: number,
     frameWidth: number,
     lensHeight: number,
@@ -56,7 +54,6 @@ export class ProductDetailModel {
   ) {
     this.id = id;
     this.productId = productId;
-    this.productNumber = productNumber;
     this.bridgeWidth = bridgeWidth;
     this.frameWidth = frameWidth;
     this.lensHeight = lensHeight;

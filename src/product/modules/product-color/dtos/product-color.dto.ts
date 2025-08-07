@@ -1,6 +1,6 @@
 import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsString, IsNumber } from 'class-validator';
+import { IsString, IsNumber, IsBoolean } from 'class-validator';
 
 export class ProductColorDto {
   @ApiProperty()
@@ -11,6 +11,29 @@ export class ProductColorDto {
   @ApiProperty()
   @IsString()
   colorName!: string;
+
+  @ApiProperty()
+  @IsNumber()
+  @Type(() => Number)
+  productId!: number;
+
+  @ApiProperty()
+  @IsString()
+  productVariantName!: string;
+
+  @ApiProperty()
+  @IsNumber()
+  @Type(() => Number)
+  productNumber!: number;
+
+  @ApiProperty()
+  @IsNumber()
+  @Type(() => Number)
+  stock!: number;
+
+  @ApiProperty()
+  @IsBoolean()
+  isThumbnail!: boolean;
 }
 
 export class GetProductColorById extends PickType(ProductColorDto, [
@@ -18,7 +41,12 @@ export class GetProductColorById extends PickType(ProductColorDto, [
 ]) {}
 
 export class CreateProductColorBodyDto extends PickType(ProductColorDto, [
+  'productId',
   'colorName',
+  'productVariantName',
+  'productNumber',
+  'stock',
+  'isThumbnail',
 ]) {}
 
 export class UpdateProductColorParamsDto extends PickType(ProductColorDto, [
@@ -26,5 +54,16 @@ export class UpdateProductColorParamsDto extends PickType(ProductColorDto, [
 ]) {}
 
 export class UpdateProductColorBodyDto extends PartialType(
-  PickType(ProductColorDto, ['colorName']),
+  PickType(ProductColorDto, [
+    'productId',
+    'colorName',
+    'productVariantName',
+    'productNumber',
+    'stock',
+    'isThumbnail',
+  ]),
 ) {}
+
+export class DeleteProductColorParamsDto extends PickType(ProductColorDto, [
+  'productColorId',
+]) {}

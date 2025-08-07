@@ -22,8 +22,20 @@ export class ProductColorEntity {
   @Column({ name: 'product_id' })
   productId!: number;
 
+  @Column({ name: 'product_variant_name' })
+  productVariantName!: string;
+
+  @Column({ name: 'product_number' })
+  productNumber!: number;
+
   @Column({ name: 'color_name' })
   colorName!: string;
+
+  @Column({ name: 'stock' })
+  stock!: number;
+
+  @Column({ name: 'is_thumbnail' })
+  isThumbnail!: boolean;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
@@ -54,7 +66,11 @@ export class ProductColorEntity {
     return new ProductColorModel(
       this.id,
       this.productId,
+      this.productVariantName,
+      this.productNumber,
       this.colorName,
+      this.stock,
+      this.isThumbnail,
       this.createdAt,
       this.createdBy,
       this.updatedAt,

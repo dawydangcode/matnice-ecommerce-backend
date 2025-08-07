@@ -21,9 +21,6 @@ export class ProductDetailEntity {
   @Column({ name: 'product_id' })
   productId!: number;
 
-  @Column({ name: 'product_number' })
-  productNumber!: number;
-
   @Column({ name: 'bridge_width' })
   bridgeWidth!: number;
 
@@ -103,7 +100,6 @@ export class ProductDetailEntity {
     return new ProductDetailModel(
       this.id,
       this.productId,
-      this.productNumber,
       this.bridgeWidth,
       this.frameWidth,
       this.lensHeight,
