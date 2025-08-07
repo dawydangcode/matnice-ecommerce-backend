@@ -36,7 +36,7 @@ export class ProductColorDto {
   isThumbnail!: boolean;
 }
 
-export class GetProductColorById extends PickType(ProductColorDto, [
+export class GetProductColorByIdParamsDto extends PickType(ProductColorDto, [
   'productColorId',
 ]) {}
 

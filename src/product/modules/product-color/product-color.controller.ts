@@ -16,6 +16,7 @@ import { RequestModel } from 'src/common/models/request.model';
 import {
   CreateProductColorBodyDto,
   DeleteProductColorParamsDto,
+  GetProductColorByIdParamsDto,
   UpdateProductColorBodyDto,
   UpdateProductColorParamsDto,
 } from './dtos/product-color.dto';
@@ -37,11 +38,10 @@ export class ProductColorController {
   }
 
   @Get('/product-color/:colorId/detail')
-  async getProductColor(
-    @Param('productId') productId: number,
-    @Param('colorId') colorId: number,
-  ) {
-    return await this.productColorService.getProductColorById(colorId);
+  async getProductColor(@Param() params: GetProductColorByIdParamsDto) {
+    return await this.productColorService.getProductColorById(
+      params.productColorId,
+    );
   }
 
   @Post('product-color/create')
@@ -94,5 +94,10 @@ export class ProductColorController {
       productColor,
       req.user.userId,
     );
+  }
+
+  @Get('product-color/:productId/product')
+  async getProductColorByProductId(@Param('productId') productId: number) {
+    return await this.productColorService.getProductColorByProductId(productId);
   }
 }

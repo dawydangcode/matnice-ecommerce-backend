@@ -110,4 +110,15 @@ export class ProductColorService {
 
     return true;
   }
+
+  async getProductColorByProductId(
+    productId: number,
+  ): Promise<ProductColorModel[]> {
+    const productColors = await this.productColorRepository.find({
+      where: { productId: productId, deletedAt: IsNull() },
+      relations: ['productDetails', 'productImages'],
+    });
+
+    return productColors.map((color) => color.toModel());
+  }
 }
