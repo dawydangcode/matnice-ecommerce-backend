@@ -188,4 +188,113 @@ export class ProductImageController {
       req.user.userId,
     );
   }
+
+  // ========== PRODUCT COLOR IMAGE ENDPOINTS ==========
+
+  @Post('product/:productId/color/:colorId/image/upload')
+  @ApiOperation({ summary: 'Upload single product color image' })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadProductColorImage(
+    @Param('productId') productId: number,
+    @Param('colorId') colorId: number,
+    @Body('productNumber') productNumber: string,
+    @Body('imageOrder') imageOrder: 'a' | 'b' | 'c' | 'd' | 'e',
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: RequestModel,
+  ): Promise<ProductImageModel> {
+    if (!file) {
+      throw new HttpException('No file uploaded', HttpStatus.BAD_REQUEST);
+    }
+
+    if (!productNumber) {
+      throw new HttpException(
+        'Product number is required',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    if (!imageOrder) {
+      throw new HttpException(
+        'Image order is required',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    return await this.productImageService.uploadProductColorImage(
+      productId,
+      colorId,
+      productNumber,
+      file,
+      imageOrder,
+      req.user.userId,
+    );
+  }
+
+  @Get('product/:productId/color/:colorId/images')
+  @ApiOperation({ summary: 'Get all images for a product color' })
+  async getProductColorImages(
+    @Param('productId') productId: number,
+    @Param('colorId') colorId: number,
+  ): Promise<ProductImageModel[]> {
+    return await this.productImageService.getProductImagesByColorId(
+      productId,
+      colorId,
+    );
+  }
+
+  @Get('product/:productId/thumbnails')
+  @ApiOperation({ summary: 'Get thumbnail images for product' })
+  async getProductThumbnailImages(
+    @Param('productId') productId: number,
+  ): Promise<ProductImageModel[]> {
+    return await this.productImageService.getProductThumbnailImages(productId);
+  }
+
+  @Get('product/:productId/images/grouped-by-color')
+  @ApiOperation({ summary: 'Get all product images grouped by color' })
+  async getProductImagesGroupedByColor(
+    @Param('productId') productId: number,
+  ): Promise<Record<string, ProductImageModel[]>> {
+    const groupedImages =
+      await this.productImageService.getProductImagesGroupedByColor(productId);
+
+    // Convert Map to Record for JSON serialization
+    const result: Record<string, ProductImageModel[]> = {};
+    groupedImages.forEach((images, colorId) => {
+      result[colorId.toString()] = images;
+    });
+
+    return result;
+  }
+
+  @Delete('product/:productId/color/:colorId/image/:imageOrder')
+  @ApiOperation({ summary: 'Delete product color image by order' })
+  async deleteProductColorImage(
+    @Param('productId') productId: number,
+    @Param('colorId') colorId: number,
+    @Param('imageOrder') imageOrder: 'a' | 'b' | 'c' | 'd' | 'e',
+    @Req() req: RequestModel,
+  ): Promise<boolean> {
+    return await this.productImageService.deleteProductColorImage(
+      productId,
+      colorId,
+      imageOrder,
+      req.user.userId,
+    );
+  }
+
+  @Delete('product/:productId/color/:colorId/images')
+  @ApiOperation({ summary: 'Delete all images for a product color' })
+  async deleteProductColorImages(
+    @Param('productId') productId: number,
+    @Param('colorId') colorId: number,
+    @Req() req: RequestModel,
+  ): Promise<boolean> {
+    return await this.productImageService.deleteProductColorImages(
+      productId,
+      colorId,
+      req.user.userId,
+    );
+  }
 }

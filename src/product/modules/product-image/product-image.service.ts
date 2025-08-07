@@ -73,6 +73,49 @@ export class ProductImageService {
     }
   }
 
+  /**
+   * Get product color folder path for S3 storage
+   * Structure: product_image/{productNumber}/
+   */
+  private async getProductColorFolderPath(
+    productNumber: string,
+  ): Promise<string> {
+    return `product_image/${productNumber}`;
+  }
+
+  /**
+   * Generate filename for product color image
+   * Format: {productNumber}_{imageOrder}.{extension}
+   */
+  private generateColorImageFileName(
+    productNumber: string,
+    imageOrder: 'a' | 'b' | 'c' | 'd' | 'e',
+    originalFileName: string,
+  ): string {
+    const extension = originalFileName.split('.').pop()?.toLowerCase() || 'jpg';
+    return `${productNumber}_${imageOrder}.${extension}`;
+  }
+
+  /**
+   * Validate image order
+   */
+  private validateImageOrder(imageOrder: string): 'a' | 'b' | 'c' | 'd' | 'e' {
+    const validOrders: Array<'a' | 'b' | 'c' | 'd' | 'e'> = [
+      'a',
+      'b',
+      'c',
+      'd',
+      'e',
+    ];
+    if (!validOrders.includes(imageOrder as any)) {
+      throw new HttpException(
+        `Invalid image order. Must be one of: ${validOrders.join(', ')}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return imageOrder as 'a' | 'b' | 'c' | 'd' | 'e';
+  }
+
   private async getProductFolderPath(productId: number): Promise<string> {
     const productInfo = await this.getProductInfo(productId);
     return productInfo.folderPath;
@@ -206,10 +249,16 @@ export class ProductImageService {
     productId: number,
     imageUrl: string,
     reqUserId: number,
+    productColorId?: number,
+    imageOrder?: string,
+    isThumbnail: boolean = false,
   ): Promise<ProductImageModel> {
     const entity = new ProductImageEntity();
     entity.productId = productId;
     entity.imageUrl = imageUrl;
+    entity.productColorId = productColorId;
+    entity.imageOrder = imageOrder;
+    entity.isThumbnail = isThumbnail;
     entity.createdAt = new Date();
     entity.createdBy = reqUserId;
 
@@ -273,6 +322,9 @@ export class ProductImageService {
         productId,
         imageUrl,
         reqUserId,
+        undefined, // no productColorId for regular images
+        undefined, // no imageOrder for regular images
+        false, // not thumbnail for regular images
       );
       this.log('Database save successful');
 
@@ -413,6 +465,326 @@ export class ProductImageService {
     await this.productImageRepository.update(
       {
         productId: productId,
+        deletedAt: IsNull(),
+      },
+      {
+        deletedAt: new Date(),
+        deletedBy: reqUserId,
+      },
+    );
+
+    return true;
+  }
+
+  // ========== PRODUCT COLOR IMAGE METHODS ==========
+
+  /**
+   * Upload single product color image with specific order
+   */
+  async uploadProductColorImage(
+    productId: number,
+    productColorId: number,
+    productNumber: string,
+    file: Express.Multer.File,
+    imageOrder: 'a' | 'b' | 'c' | 'd' | 'e',
+    reqUserId: number,
+  ): Promise<ProductImageModel> {
+    try {
+      this.log('Starting product color image upload...', {
+        productId,
+        productColorId,
+        productNumber,
+        imageOrder,
+        fileName: file.originalname,
+      });
+
+      // Validate file
+      this.validateImageFile(file);
+
+      // Validate image order
+      const validatedOrder = this.validateImageOrder(imageOrder);
+
+      // Check if image with this order already exists for this color
+      const existingImage = await this.productImageRepository.findOne({
+        where: {
+          productId,
+          productColorId,
+          imageOrder: validatedOrder,
+          deletedAt: IsNull(),
+        },
+      });
+
+      // Generate filename with productNumber and order
+      const fileName = this.generateColorImageFileName(
+        productNumber,
+        validatedOrder,
+        file.originalname,
+      );
+
+      // Get folder path for this product color
+      const folderPath = await this.getProductColorFolderPath(productNumber);
+
+      this.log('Generated filename and path:', { fileName, folderPath });
+
+      // Upload to S3 (overwrite if exists)
+      const imageUrl = await this.awsS3Service.uploadFile(
+        file.buffer,
+        fileName,
+        file.mimetype,
+        folderPath,
+        true, // Overwrite existing file
+      );
+
+      this.log('S3 upload successful:', imageUrl);
+
+      // Determine if this is a thumbnail (a or b)
+      const isThumbnail = validatedOrder === 'a' || validatedOrder === 'b';
+
+      if (existingImage) {
+        // Update existing image
+        await this.productImageRepository.update(
+          { id: existingImage.id },
+          {
+            imageUrl,
+            isThumbnail,
+            updatedAt: new Date(),
+            updatedBy: reqUserId,
+          },
+        );
+        return await this.getProductImageById(existingImage.id);
+      } else {
+        // Create new image record
+        const entity = new ProductImageEntity();
+        entity.productId = productId;
+        entity.productColorId = productColorId;
+        entity.imageOrder = validatedOrder;
+        entity.isThumbnail = isThumbnail;
+        entity.imageUrl = imageUrl;
+        entity.createdAt = new Date();
+        entity.createdBy = reqUserId;
+
+        const savedImage = await this.productImageRepository.save(entity);
+        return await this.getProductImageById(savedImage.id);
+      }
+    } catch (error) {
+      this.logError('Error uploading product color image:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      throw new HttpException(
+        `Failed to upload color image: ${errorMessage}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * Upload multiple product color images
+   */
+  async uploadProductColorImages(
+    productId: number,
+    productColorId: number,
+    productNumber: string,
+    files: Array<{
+      file: Express.Multer.File;
+      imageOrder: 'a' | 'b' | 'c' | 'd' | 'e';
+    }>,
+    reqUserId: number,
+  ): Promise<ProductImageModel[]> {
+    const results: ProductImageModel[] = [];
+
+    try {
+      this.log('Starting bulk color images upload...', {
+        productId,
+        productColorId,
+        productNumber,
+        fileCount: files.length,
+      });
+
+      // Validate that we don't have more than 5 images
+      if (files.length > 5) {
+        throw new HttpException(
+          'Maximum 5 images allowed per product color',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      // Validate that all image orders are unique
+      const orders = files.map((f) => f.imageOrder);
+      const uniqueOrders = new Set(orders);
+      if (orders.length !== uniqueOrders.size) {
+        throw new HttpException(
+          'Each image order (a, b, c, d, e) can only be used once',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      // Upload each file
+      for (const { file, imageOrder } of files) {
+        const result = await this.uploadProductColorImage(
+          productId,
+          productColorId,
+          productNumber,
+          file,
+          imageOrder,
+          reqUserId,
+        );
+        results.push(result);
+      }
+
+      this.log(`Successfully uploaded ${results.length} color images`);
+      return results;
+    } catch (error) {
+      this.logError('Error in bulk color images upload:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get product images by color ID
+   */
+  async getProductImagesByColorId(
+    productId: number,
+    productColorId: number,
+  ): Promise<ProductImageModel[]> {
+    const images = await this.productImageRepository.find({
+      where: {
+        productId,
+        productColorId,
+        deletedAt: IsNull(),
+      },
+      order: {
+        imageOrder: 'ASC',
+      },
+    });
+
+    return images.map((img) => img.toModel());
+  }
+
+  /**
+   * Get thumbnail images for product (only a and b orders)
+   */
+  async getProductThumbnailImages(
+    productId: number,
+  ): Promise<ProductImageModel[]> {
+    const images = await this.productImageRepository.find({
+      where: {
+        productId,
+        isThumbnail: true,
+        deletedAt: IsNull(),
+      },
+      order: {
+        imageOrder: 'ASC',
+      },
+    });
+
+    return images.map((img) => img.toModel());
+  }
+
+  /**
+   * Get all images for a product grouped by color
+   */
+  async getProductImagesGroupedByColor(
+    productId: number,
+  ): Promise<Map<number, ProductImageModel[]>> {
+    const images = await this.productImageRepository.find({
+      where: {
+        productId,
+        deletedAt: IsNull(),
+      },
+      order: {
+        productColorId: 'ASC',
+        imageOrder: 'ASC',
+      },
+    });
+
+    const groupedImages = new Map<number, ProductImageModel[]>();
+
+    images.forEach((img) => {
+      const colorId = img.productColorId || 0;
+      if (!groupedImages.has(colorId)) {
+        groupedImages.set(colorId, []);
+      }
+      groupedImages.get(colorId)!.push(img.toModel());
+    });
+
+    return groupedImages;
+  }
+
+  /**
+   * Delete product color image by order
+   */
+  async deleteProductColorImage(
+    productId: number,
+    productColorId: number,
+    imageOrder: 'a' | 'b' | 'c' | 'd' | 'e',
+    reqUserId: number,
+  ): Promise<boolean> {
+    const image = await this.productImageRepository.findOne({
+      where: {
+        productId,
+        productColorId,
+        imageOrder,
+        deletedAt: IsNull(),
+      },
+    });
+
+    if (!image) {
+      throw new HttpException(
+        `Image with order ${imageOrder} not found for this product color`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    // Delete from S3
+    try {
+      await this.awsS3Service.deleteFile(image.imageUrl);
+    } catch (error) {
+      this.logError('Failed to delete image from S3:', error);
+      // Continue with database deletion even if S3 deletion fails
+    }
+
+    // Soft delete from database
+    await this.productImageRepository.update(
+      { id: image.id },
+      {
+        deletedAt: new Date(),
+        deletedBy: reqUserId,
+      },
+    );
+
+    return true;
+  }
+
+  /**
+   * Delete all images for a product color
+   */
+  async deleteProductColorImages(
+    productId: number,
+    productColorId: number,
+    reqUserId: number,
+  ): Promise<boolean> {
+    const images = await this.productImageRepository.find({
+      where: {
+        productId,
+        productColorId,
+        deletedAt: IsNull(),
+      },
+    });
+
+    // Delete from S3
+    for (const image of images) {
+      try {
+        await this.awsS3Service.deleteFile(image.imageUrl);
+      } catch (error) {
+        this.logError('Failed to delete image from S3:', error);
+      }
+    }
+
+    // Soft delete from database
+    await this.productImageRepository.update(
+      {
+        productId,
+        productColorId,
         deletedAt: IsNull(),
       },
       {
