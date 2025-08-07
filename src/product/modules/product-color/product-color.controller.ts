@@ -12,16 +12,13 @@ import {
 } from '@nestjs/common';
 import { ProductColorService } from './product-color.service';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
-import { JwtAuthGuard } from 'src/middlewares/guards/jwt-auth.guard';
 import { RequestModel } from 'src/common/models/request.model';
 import {
   CreateProductColorBodyDto,
   UpdateProductColorBodyDto,
-  UpdateProductColorParamsDto,
 } from './dtos/product-color.dto';
 
-@Controller('products/:productId/colors')
-@UseGuards(JwtAuthGuard)
+@Controller('api/v1/products/:productId/colors')
 export class ProductColorController {
   constructor(private readonly productColorService: ProductColorService) {}
 
@@ -37,13 +34,16 @@ export class ProductColorController {
   }
 
   @Get(':colorId')
-  async getProductColor(@Param('colorId') colorId: number) {
+  async getProductColor(
+    @Param('productId') productId: number,
+    @Param('colorId') colorId: number,
+  ) {
     return await this.productColorService.getProductColorById(colorId);
   }
 
   @Post()
   async createProductColor(
-    @Param() productId: number,
+    @Param('productId') productId: number,
     @Body() body: CreateProductColorBodyDto,
     @Req() req: RequestModel,
   ) {
@@ -56,13 +56,13 @@ export class ProductColorController {
 
   @Put(':colorId')
   async updateProductColor(
-    @Param() params: UpdateProductColorParamsDto,
+    @Param('productId') productId: number,
+    @Param('colorId') colorId: number,
     @Body() body: UpdateProductColorBodyDto,
     @Req() req: RequestModel,
   ) {
-    const productColor = await this.productColorService.getProductColorById(
-      params.productColorId,
-    );
+    const productColor =
+      await this.productColorService.getProductColorById(colorId);
 
     return await this.productColorService.updateProductColor(
       productColor,
@@ -73,6 +73,7 @@ export class ProductColorController {
 
   @Delete(':colorId')
   async deleteProductColor(
+    @Param('productId') productId: number,
     @Param('colorId') colorId: number,
     @Req() req: RequestModel,
   ) {

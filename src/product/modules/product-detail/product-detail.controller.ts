@@ -14,52 +14,69 @@ import {
   CreateProductDetailDto,
   UpdateProductDetailDto,
 } from './dtos/product-detail.dto';
-import { JwtAuthGuard } from 'src/middlewares/guards/jwt-auth.guard';
 import { RequestModel } from 'src/common/models/request.model';
 
-@Controller('products/:productId/colors/:colorId/details')
-@UseGuards(JwtAuthGuard)
+@Controller('api/v1/')
 export class ProductDetailController {
   constructor(private readonly productDetailService: ProductDetailService) {}
 
-  @Get()
-  async getProductDetail(@Param('colorId') colorId: number) {
-    return await this.productDetailService.getProductDetailByColorId(colorId);
+  @Get('products-detail/:productDetailId/details')
+  async getProductDetail(@Param() productDetailId: number) {
+    return await this.productDetailService.getProductDetailByProductId(
+      productDetailId,
+    );
   }
 
-  @Post()
+  @Post('product-detail/create')
   async createProductDetail(
-    @Param('colorId') colorId: number,
     @Body() createDto: CreateProductDetailDto,
     @Req() req: RequestModel,
   ) {
     return await this.productDetailService.createProductDetail(
-      colorId,
+      createDto.productId, // Get productId from request body
       createDto,
       req.user.userId,
     );
   }
 
-  @Put()
+  @Put('product-detail/:productDetailId/update')
   async updateProductDetail(
-    @Param('colorId') colorId: number,
+    @Param('productDetailId') productDetailId: number,
     @Body() updateDto: UpdateProductDetailDto,
     @Req() req: RequestModel,
   ) {
+    // Get productId from the existing detail
+    const existingDetail =
+      await this.productDetailService.getProductDetailByProductId(
+        productDetailId,
+      );
+    if (!existingDetail) {
+      throw new Error('Product detail not found');
+    }
+
     return await this.productDetailService.updateProductDetail(
-      colorId,
+      existingDetail.productId,
       updateDto,
       req.user.userId,
     );
   }
 
-  @Delete()
+  @Delete('product-detail/:productDetailId/delete')
   async deleteProductDetail(
-    @Param('colorId') colorId: number,
+    @Param('productDetailId') productDetailId: number,
     @Req() req: RequestModel,
   ) {
+    // Get productId from the existing detail
+    const existingDetail =
+      await this.productDetailService.getProductDetailByProductId(
+        productDetailId,
+      );
+    if (!existingDetail) {
+      throw new Error('Product detail not found');
+    }
+
     return await this.productDetailService.deleteProductDetail(
-      colorId,
+      existingDetail.productId,
       req.user.userId,
     );
   }

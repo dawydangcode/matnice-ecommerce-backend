@@ -47,9 +47,6 @@ export class ProductColorEntity {
   @JoinColumn({ name: 'product_id' })
   product?: ProductEntity;
 
-  @OneToMany(() => ProductDetailEntity, (detail) => detail.productColor)
-  productDetails?: ProductDetailEntity[];
-
   @OneToMany(() => ProductImageEntity, (image) => image.productColor)
   productImage?: ProductImageEntity[];
 

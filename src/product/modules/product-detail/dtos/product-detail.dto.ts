@@ -1,61 +1,72 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { IsOptional, IsNumber, IsString, IsBoolean } from 'class-validator';
 
 export class CreateProductDetailDto {
-  @IsOptional()
+  @ApiProperty()
   @IsNumber()
-  bridgeWidth?: number;
+  @Type(() => Number)
+  productId!: number;
 
-  @IsOptional()
+  @ApiProperty()
   @IsNumber()
-  frameWidth?: number;
+  @Type(() => Number)
+  bridgeWidth!: number;
 
-  @IsOptional()
+  @ApiProperty()
   @IsNumber()
-  lensHeight?: number;
+  @Type(() => Number)
+  frameWidth!: number;
 
-  @IsOptional()
+  @ApiProperty()
   @IsNumber()
-  lensWidth?: number;
+  @Type(() => Number)
+  lensHeight!: number;
 
-  @IsOptional()
+  @ApiProperty()
   @IsNumber()
-  templeLength?: number;
+  lensWidth!: number;
 
-  @IsOptional()
+  @ApiProperty()
   @IsNumber()
-  productNumber?: number;
+  templeLength!: number;
 
-  @IsOptional()
+  @ApiProperty()
+  @IsNumber()
+  productNumber!: number;
+
+  @ApiProperty()
   @IsString()
-  frameMaterial?: string;
+  frameMaterial!: ;
 
-  @IsOptional()
+  @ApiProperty()
   @IsString()
-  frameShape?: string;
+  frameShape!: string;
 
-  @IsOptional()
+  @ApiProperty()
   @IsString()
-  frameType?: string;
+  frameType!: string;
 
-  @IsOptional()
+  @ApiProperty()
   @IsString()
-  bridgeDesign?: string;
+  bridgeDesign!: string;
 
-  @IsOptional()
+  @ApiProperty()
   @IsString()
-  style?: string;
+  style!: string;
 
-  @IsOptional()
+  @ApiProperty()
   @IsBoolean()
-  springHinges?: boolean;
+  springHinges!: boolean;
 
-  @IsOptional()
+  @ApiProperty()
   @IsNumber()
-  weight?: number;
+  @Type(() => Number)
+  weight!: number;
 
-  @IsOptional()
+  @ApiProperty()
   @IsBoolean()
-  multifocal?: boolean;
+  multifocal!: boolean;
 }
 
 export class UpdateProductDetailDto extends CreateProductDetailDto {}

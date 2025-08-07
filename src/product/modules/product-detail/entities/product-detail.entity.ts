@@ -9,15 +9,15 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { ProductDetailModel } from '../models/product-detail.model';
-import { ProductColorEntity } from '../../product-color/entities/product-color.entity';
+import { ProductEntity } from '../../../entities/product.entity';
 
 @Entity('product_detail')
 export class ProductDetailEntity {
   @PrimaryGeneratedColumn('increment', { type: 'bigint' })
   id!: number;
 
-  @Column({ name: 'product_color_id', type: 'bigint' })
-  productColorId!: number;
+  @Column({ name: 'product_id', type: 'bigint' })
+  productId!: number;
 
   @Column({ name: 'bridge_width', type: 'double precision', nullable: true })
   bridgeWidth?: number;
@@ -89,18 +89,18 @@ export class ProductDetailEntity {
   @Column({ name: 'deleted_by', type: 'bigint', nullable: true })
   deletedBy?: number;
 
-  // Relations
-  @ManyToOne(
-    () => ProductColorEntity,
-    (productColor) => productColor.productDetails,
-  )
-  @JoinColumn({ name: 'product_color_id' })
-  productColor!: ProductColorEntity;
+  // Relations - TODO: Add to ProductEntity
+  // @ManyToOne(
+  //   () => ProductEntity,
+  //   (product) => product.productDetails,
+  // )
+  // @JoinColumn({ name: 'product_id' })
+  // product!: ProductEntity;
 
   toModel(): ProductDetailModel {
     return new ProductDetailModel(
       this.id,
-      this.productColorId,
+      this.productId,
       this.createdAt,
       this.createdBy,
       this.updatedAt,
