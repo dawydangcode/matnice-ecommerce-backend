@@ -38,6 +38,20 @@ export class ProductCategoryService {
     return productCategories.map((pc) => pc.categoryId);
   }
 
+  async getCategoriesWithDetailsByProductId(productId: number): Promise<any[]> {
+    const productCategories = await this.productCategoryRepository.find({
+      where: {
+        productId: productId,
+        deletedAt: IsNull(),
+      },
+      relations: ['category'],
+    });
+
+    return productCategories
+      .filter((pc) => pc.category) // Ensure category exists
+      .map((pc) => pc.category.toModel());
+  }
+
   async getProductsByCategoryId(categoryId: number): Promise<number[]> {
     const productCategories = await this.productCategoryRepository.find({
       where: {
