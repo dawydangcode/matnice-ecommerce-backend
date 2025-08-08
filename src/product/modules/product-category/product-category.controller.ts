@@ -18,10 +18,21 @@ import {
   UpdateProductCategoriesDto,
   ProductCategoryQueryDto,
 } from './dtos/product-category.dto';
+import { RoleType } from 'src/role/enum/role.enum';
+import { Roles } from 'src/role/decorators/roles.decorator';
 
 @ApiTags('Product Category')
 @Controller('api/v1/product-category')
+@Roles(RoleType.Admin)
 export class ProductCategoryController {
+  @Get('product/:productId/categories/details')
+  async getCategoriesWithDetailsByProduct(
+    @Param('productId') productId: number,
+  ): Promise<any[]> {
+    return await this.productCategoryService.getCategoriesWithDetailsByProductId(
+      productId,
+    );
+  }
   constructor(
     private readonly productCategoryService: ProductCategoryService,
   ) {}
@@ -67,6 +78,7 @@ export class ProductCategoryController {
   }
 
   @Put('product/:productId/categories')
+  @Roles(RoleType.Admin)
   async updateProductCategories(
     @Req() req: RequestModel,
     @Param('productId') productId: number,
@@ -80,6 +92,7 @@ export class ProductCategoryController {
   }
 
   @Delete('product/:productId/category/:categoryId')
+  @Roles(RoleType.Admin)
   async deleteProductCategory(
     @Req() req: RequestModel,
     @Param('productId') productId: number,

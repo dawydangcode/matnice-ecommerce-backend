@@ -49,7 +49,8 @@ export class ProductCategoryService {
 
     return productCategories
       .filter((pc) => pc.category) // Ensure category exists
-      .map((pc) => pc.category.toModel());
+      .map((pc) => (pc.category ? pc.category.toModel() : null))
+      .filter((category) => category !== null);
   }
 
   async getProductsByCategoryId(categoryId: number): Promise<number[]> {
