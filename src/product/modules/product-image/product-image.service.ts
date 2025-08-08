@@ -345,6 +345,62 @@ export class ProductImageService {
     }
   }
 
+  async uploadTemporaryImage(
+    file: Express.Multer.File,
+    reqUserId: number,
+  ): Promise<string> {
+    try {
+      this.log('Starting temporary upload process...');
+      this.log('File info:', {
+        originalname: file.originalname,
+        mimetype: file.mimetype,
+        size: file.size,
+        bufferLength: file.buffer?.length,
+      });
+
+      // Validate file
+      this.validateImageFile(file);
+
+      // Generate unique filename for temporary upload
+      const timestamp = Date.now();
+      const randomString = Math.random().toString(36).substring(2, 15);
+      const extension =
+        file.originalname.split('.').pop()?.toLowerCase() || 'jpg';
+      const fileName = `temp_${timestamp}_${randomString}.${extension}`;
+
+      this.log('Generated temporary filename:', fileName);
+
+      // Upload to S3 in temporary folder
+      this.log('Uploading to S3 temporary folder...');
+      const imageUrl = await this.awsS3Service.uploadFile(
+        file.buffer,
+        fileName,
+        file.mimetype,
+        'temporary-uploads', // Temporary folder
+        true, // Allow overwrite for temporary files
+      );
+      this.log('S3 temporary upload successful, URL:', imageUrl);
+
+      return imageUrl;
+    } catch (error) {
+      this.logError('Temporary upload error:', error);
+
+      if (error instanceof Error) {
+        this.logError('Error message:', error.message);
+        this.logError('Error stack:', error.stack);
+        throw new HttpException(
+          `Failed to upload temporary image: ${error.message}`,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+
+      throw new HttpException(
+        'Failed to upload temporary image',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   async updateProductImage(
     productImage: ProductImageModel,
     file: Express.Multer.File | undefined,

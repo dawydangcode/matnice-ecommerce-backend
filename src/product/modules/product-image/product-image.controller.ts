@@ -9,6 +9,7 @@ import {
   Query,
   Req,
   UploadedFile,
+  UploadedFiles,
   UseInterceptors,
   HttpException,
   HttpStatus,
@@ -20,7 +21,7 @@ import {
   ApiCreatedResponse,
   ApiConsumes,
 } from '@nestjs/swagger';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ProductImageService } from './product-image.service';
 import {
   CreateProductImageBodyDto,
@@ -92,6 +93,108 @@ export class ProductImageController {
       body.imageUrl,
       req.user.userId,
     );
+  }
+
+  @Post('product-image/upload-temporary')
+  @UseInterceptors(FilesInterceptor('images', 10)) // Support multiple files with field name 'images'
+  @ApiOperation({ summary: 'Upload temporary product image files' })
+  @ApiConsumes('multipart/form-data')
+  @ApiCreatedResponse({
+    description: 'Temporary product images uploaded successfully',
+  })
+  async uploadTemporaryProductImage(
+    @UploadedFiles() files: Express.Multer.File[],
+    @Req() req: RequestModel,
+  ): Promise<{ imageUrls: string[] }> {
+    if (!files || files.length === 0) {
+      throw new HttpException('No files uploaded', HttpStatus.BAD_REQUEST);
+    }
+
+    const imageUrls: string[] = [];
+
+    for (const file of files) {
+      // Validate file type
+      const allowedMimeTypes = [
+        'image/jpeg',
+        'image/png',
+        'image/jpg',
+        'image/webp',
+      ];
+      if (!allowedMimeTypes.includes(file.mimetype)) {
+        throw new HttpException(
+          `File ${file.originalname}: Only JPEG, PNG, JPG and WebP files are allowed`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      // Validate file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        throw new HttpException(
+          `File ${file.originalname}: File size cannot exceed 5MB`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const imageUrl = await this.productImageService.uploadTemporaryImage(
+        file,
+        req.user.userId,
+      );
+      imageUrls.push(imageUrl);
+    }
+
+    return { imageUrls };
+  }
+
+  @Post('product-image/upload-temporary-multiple')
+  @UseInterceptors(FilesInterceptor('images', 10)) // Allow up to 10 files with field name 'images'
+  @ApiOperation({ summary: 'Upload multiple temporary product image files' })
+  @ApiConsumes('multipart/form-data')
+  @ApiCreatedResponse({
+    description: 'Temporary product images uploaded successfully',
+  })
+  async uploadTemporaryProductImages(
+    @UploadedFiles() files: Express.Multer.File[],
+    @Req() req: RequestModel,
+  ): Promise<{ imageUrls: string[] }> {
+    if (!files || files.length === 0) {
+      throw new HttpException('No files uploaded', HttpStatus.BAD_REQUEST);
+    }
+
+    const imageUrls: string[] = [];
+
+    for (const file of files) {
+      // Validate file type
+      const allowedMimeTypes = [
+        'image/jpeg',
+        'image/png',
+        'image/jpg',
+        'image/webp',
+      ];
+      if (!allowedMimeTypes.includes(file.mimetype)) {
+        throw new HttpException(
+          `File ${file.originalname}: Only JPEG, PNG, JPG and WebP files are allowed`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      // Validate file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        throw new HttpException(
+          `File ${file.originalname}: File size cannot exceed 5MB`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const imageUrl = await this.productImageService.uploadTemporaryImage(
+        file,
+        req.user.userId,
+      );
+      imageUrls.push(imageUrl);
+    }
+
+    return { imageUrls };
   }
 
   @Post('product/:productId/image/upload')
