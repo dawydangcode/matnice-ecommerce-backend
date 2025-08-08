@@ -4,7 +4,6 @@ export class ProductImageModel {
   public readonly productColorId?: number;
   public readonly imageUrl: string;
   public readonly imageOrder?: string;
-  public readonly isThumbnail: boolean;
   public readonly createdAt: Date | undefined;
   public readonly createdBy: number | undefined;
   public readonly updatedAt: Date | undefined;
@@ -18,7 +17,6 @@ export class ProductImageModel {
     productColorId: number | undefined,
     imageUrl: string,
     imageOrder: string | undefined,
-    isThumbnail: boolean,
     createdAt: Date,
     createdBy: number | undefined,
     updatedAt: Date | undefined,
@@ -31,7 +29,6 @@ export class ProductImageModel {
     this.productColorId = productColorId;
     this.imageUrl = imageUrl;
     this.imageOrder = imageOrder;
-    this.isThumbnail = isThumbnail;
     this.createdAt = createdAt;
     this.createdBy = createdBy;
     this.updatedAt = updatedAt;

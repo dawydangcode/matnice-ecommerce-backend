@@ -29,9 +29,6 @@ export class ProductImageEntity {
   @Column({ name: 'image_order', type: 'varchar', length: 1, nullable: true })
   imageOrder?: string; // 'a', 'b', 'c', 'd', 'e'
 
-  @Column({ name: 'is_thumbnail', default: false })
-  isThumbnail!: boolean;
-
   @Column({ name: 'created_at' })
   createdAt!: Date;
 
@@ -68,7 +65,6 @@ export class ProductImageEntity {
       this.productColorId,
       this.imageUrl,
       this.imageOrder,
-      this.isThumbnail,
       this.createdAt,
       this.createdBy,
       this.updatedAt,

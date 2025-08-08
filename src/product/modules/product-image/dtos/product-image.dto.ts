@@ -20,9 +20,18 @@ export class ProductImageDto {
   productId!: number;
 
   @ApiProperty()
+  @IsNumber()
+  @Type(() => Number)
+  productIdColor!: number;
+
+  @ApiProperty()
   @IsString()
   @IsUrl()
   imageUrl!: string;
+
+  @ApiProperty()
+  @IsString()
+  imageOrder?: string; // 'a', 'b', 'c', 'd', 'e'
 
   @ApiProperty()
   @IsOptional()

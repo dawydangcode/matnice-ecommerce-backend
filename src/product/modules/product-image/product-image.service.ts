@@ -251,14 +251,12 @@ export class ProductImageService {
     reqUserId: number,
     productColorId?: number,
     imageOrder?: string,
-    isThumbnail: boolean = false,
   ): Promise<ProductImageModel> {
     const entity = new ProductImageEntity();
     entity.productId = productId;
     entity.imageUrl = imageUrl;
     entity.productColorId = productColorId;
     entity.imageOrder = imageOrder;
-    entity.isThumbnail = isThumbnail;
     entity.createdAt = new Date();
     entity.createdBy = reqUserId;
 
@@ -324,7 +322,6 @@ export class ProductImageService {
         reqUserId,
         undefined, // no productColorId for regular images
         undefined, // no imageOrder for regular images
-        false, // not thumbnail for regular images
       );
       this.log('Database save successful');
 
@@ -537,16 +534,12 @@ export class ProductImageService {
 
       this.log('S3 upload successful:', imageUrl);
 
-      // Determine if this is a thumbnail (a or b)
-      const isThumbnail = validatedOrder === 'a' || validatedOrder === 'b';
-
       if (existingImage) {
         // Update existing image
         await this.productImageRepository.update(
           { id: existingImage.id },
           {
             imageUrl,
-            isThumbnail,
             updatedAt: new Date(),
             updatedBy: reqUserId,
           },
@@ -558,7 +551,6 @@ export class ProductImageService {
         entity.productId = productId;
         entity.productColorId = productColorId;
         entity.imageOrder = validatedOrder;
-        entity.isThumbnail = isThumbnail;
         entity.imageUrl = imageUrl;
         entity.createdAt = new Date();
         entity.createdBy = reqUserId;
@@ -661,7 +653,7 @@ export class ProductImageService {
   }
 
   /**
-   * Get thumbnail images for product (only a and b orders)
+   * Get thumbnail images for product (images with order 'a' or 'b')
    */
   async getProductThumbnailImages(
     productId: number,
@@ -669,7 +661,7 @@ export class ProductImageService {
     const images = await this.productImageRepository.find({
       where: {
         productId,
-        isThumbnail: true,
+        imageOrder: In(['a', 'b']),
         deletedAt: IsNull(),
       },
       order: {
