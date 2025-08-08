@@ -4,10 +4,15 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   OneToMany,
+  ManyToOne,
+  JoinColumn,
+  OneToOne,
 } from 'typeorm';
 import { ProductGenderType, ProductType } from '../enum/product.type';
 import { ProductModel } from '../models/product.model';
 import { ProductColorEntity } from '../modules/product-color/entities/product-color.entity';
+import { BrandEntity } from '../../brand/entities/brand.entity';
+import { ProductDetailEntity } from '../modules/product-detail/entities/product-detail.entity';
 
 @Entity('product')
 export class ProductEntity {
@@ -57,8 +62,16 @@ export class ProductEntity {
   @OneToMany(() => ProductColorEntity, (productColor) => productColor.product)
   productColors!: ProductColorEntity[];
 
+  @ManyToOne(() => BrandEntity, { eager: false })
+  @JoinColumn({ name: 'brand_id' })
+  brand?: BrandEntity;
+
+  @OneToOne(() => ProductDetailEntity, { eager: false })
+  @JoinColumn({ name: 'id', referencedColumnName: 'productId' })
+  productDetail?: ProductDetailEntity;
+
   toModel(): ProductModel {
-    return new ProductModel(
+    const model = new ProductModel(
       this.id,
       this.productName,
       this.productType,
@@ -74,5 +87,25 @@ export class ProductEntity {
       this.deletedAt,
       this.deletedBy,
     );
+
+    // Add relations if they exist
+    if (this.brand) {
+      (model as any).brand = this.brand.toModel();
+    }
+    if (this.productDetail) {
+      (model as any).productDetail = this.productDetail.toModel();
+    }
+    if (this.productColors) {
+      (model as any).productColors = this.productColors.map((color) =>
+        color.toModel(),
+      );
+      // Calculate total stock from all colors
+      (model as any).stock = this.productColors.reduce(
+        (total, color) => total + color.stock,
+        0,
+      );
+    }
+
+    return model;
   }
 }

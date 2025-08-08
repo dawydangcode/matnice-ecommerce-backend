@@ -38,10 +38,26 @@ export class ProductService {
       ...pagination?.toQuery(),
     });
 
-    return new PageList<ProductModel>(
-      total,
-      products.map((product: ProductEntity) => product.toModel()),
+    // Load categories for each product
+    const productsWithCategories = await Promise.all(
+      products.map(async (product: ProductEntity) => {
+        const model = product.toModel();
+
+        // Load categories for this product
+        const categoryIds =
+          await this.productCategoryService.getCategoriesByProductId(
+            product.id,
+          );
+        if (categoryIds.length > 0) {
+          // You might want to load the actual category entities here
+          (model as any).categoryIds = categoryIds;
+        }
+
+        return model;
+      }),
     );
+
+    return new PageList<ProductModel>(total, productsWithCategories);
   }
 
   async getProductById(productId: number): Promise<ProductModel> {

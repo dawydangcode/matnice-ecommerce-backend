@@ -23,7 +23,7 @@ export class ProductColorService {
           productId: productId,
           deletedAt: IsNull(),
         },
-        relations: ['productDetails', 'productImages'],
+        relations: ['productImage'],
         ...pagination?.toQuery(),
       });
 
@@ -38,7 +38,7 @@ export class ProductColorService {
   ): Promise<ProductColorModel> {
     const productColor = await this.productColorRepository.findOne({
       where: { id: productColorId, deletedAt: IsNull() },
-      relations: ['productDetails', 'productImages'],
+      relations: ['productImage'],
     });
 
     if (!productColor) {
@@ -116,7 +116,7 @@ export class ProductColorService {
   ): Promise<ProductColorModel[]> {
     const productColors = await this.productColorRepository.find({
       where: { productId: productId, deletedAt: IsNull() },
-      relations: ['productDetails', 'productImages'],
+      relations: ['productImage'],
     });
 
     return productColors.map((color) => color.toModel());

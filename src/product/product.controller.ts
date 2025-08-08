@@ -37,7 +37,7 @@ export class ProductController {
       undefined,
       new PaginationParamsModel(query.page, query.limit),
       undefined,
-      undefined,
+      ['brand', 'productDetail', 'productColors'],
     );
   }
 
