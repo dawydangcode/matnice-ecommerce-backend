@@ -75,12 +75,37 @@ export class ProductImageService {
 
   /**
    * Get product color folder path for S3 storage
-   * Structure: product_image/{productNumber}/
+   * Structure: product_images/{productNumber}_{productName}/
    */
   private async getProductColorFolderPath(
+    productId: number,
     productNumber: string,
   ): Promise<string> {
-    return `product_image/${productNumber}`;
+    try {
+      // Get product information
+      const product = await this.productRepository.findOne({
+        where: { id: productId },
+      });
+
+      if (!product) {
+        // Fallback if product not found
+        return `product_images/${productNumber}`;
+      }
+
+      // Sanitize product name for folder name
+      const sanitizedProductName = this.awsS3Service.sanitizeFolderName(
+        product.productName,
+      );
+
+      // Create folder name: productNumber_productName
+      const folderName = `${productNumber}_${sanitizedProductName}`;
+
+      return `product_images/${folderName}`;
+    } catch (error) {
+      this.logError('Error creating product color folder path:', error);
+      // Fallback to simple structure
+      return `product_images/${productNumber}`;
+    }
   }
 
   /**
@@ -575,7 +600,10 @@ export class ProductImageService {
       );
 
       // Get folder path for this product color
-      const folderPath = await this.getProductColorFolderPath(productNumber);
+      const folderPath = await this.getProductColorFolderPath(
+        productId,
+        productNumber,
+      );
 
       this.log('Generated filename and path:', { fileName, folderPath });
 
