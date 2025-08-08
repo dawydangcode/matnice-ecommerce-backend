@@ -29,13 +29,7 @@ export class ProductThicknessCompatibilityController {
     private readonly compatibilityService: ProductThicknessCompatibilityService,
   ) {}
 
-  @Get('list')
-  @ApiOperation({ summary: 'Get all product thickness compatibilities' })
-  @ApiResponse({
-    status: 200,
-    description: 'List of product thickness compatibilities',
-    type: [ProductThicknessCompatibilityModel],
-  })
+  @Get('/list')
   async getCompatibilities(
     @Query() query: ProductThicknessCompatibilityQueryDto,
   ): Promise<ProductThicknessCompatibilityModel[]> {
