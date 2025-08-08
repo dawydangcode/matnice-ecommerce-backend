@@ -26,7 +26,7 @@ export class ProductColorEntity {
   productVariantName!: string;
 
   @Column({ name: 'product_number' })
-  productNumber!: number;
+  productNumber!: string;
 
   @Column({ name: 'color_name' })
   colorName!: string;

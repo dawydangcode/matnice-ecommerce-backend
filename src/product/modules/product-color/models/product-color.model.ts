@@ -2,7 +2,7 @@ export class ProductColorModel {
   public readonly id: number;
   public readonly productId: number;
   public readonly productVariantName: string;
-  public readonly productNumber: number;
+  public readonly productNumber: string;
   public readonly colorName: string;
   public readonly stock: number;
   public readonly isThumbnail: boolean;
@@ -17,7 +17,7 @@ export class ProductColorModel {
     id: number,
     productId: number,
     productVariantName: string,
-    productNumber: number,
+    productNumber: string,
     colorName: string,
     stock: number,
     isThumbnail: boolean,

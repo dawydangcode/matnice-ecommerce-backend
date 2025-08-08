@@ -22,9 +22,8 @@ export class ProductColorDto {
   productVariantName!: string;
 
   @ApiProperty()
-  @IsNumber()
-  @Type(() => Number)
-  productNumber!: number;
+  @IsString()
+  productNumber!: string;
 
   @ApiProperty()
   @IsNumber()
