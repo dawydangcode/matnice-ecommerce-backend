@@ -115,6 +115,11 @@ export class ProductController {
     };
   }
 
+  @Get('products/expiring-soon')
+  async getProductsExpiringSoon() {
+    return await this.productService.getProductsExpiringSoon();
+  }
+
   @Post('products/run-scheduler-now')
   async runSchedulerNow() {
     const result =

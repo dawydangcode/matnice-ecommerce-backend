@@ -153,21 +153,33 @@ export class ProductService {
     isBoutique: boolean | undefined,
     reqUserId: number,
   ): Promise<ProductModel> {
+    const updateData: any = {
+      productType: productType,
+      productName: productName,
+      brandId: brandId,
+      gender: gender,
+      price: price,
+      description: description,
+      isSustainable: isSustainable,
+      isNew: isNew,
+      isBoutique: isBoutique,
+      updatedAt: new Date(),
+      updatedBy: reqUserId,
+    };
+
+    // Nếu isNew được cập nhật thành true, set newUntil là 30 ngày từ bây giờ
+    if (isNew === true) {
+      const newUntilDate = new Date();
+      newUntilDate.setDate(newUntilDate.getDate() + 30);
+      updateData.newUntil = newUntilDate;
+    } else if (isNew === false) {
+      // Nếu isNew = false, xóa newUntil bằng cách set thành undefined
+      updateData.newUntil = undefined;
+    }
+
     await this.productRepository.update(
       { id: product.id, deletedAt: IsNull() },
-      {
-        productType: productType,
-        productName: productName,
-        brandId: brandId,
-        gender: gender,
-        price: price,
-        description: description,
-        isSustainable: isSustainable,
-        isNew: isNew,
-        isBoutique: isBoutique,
-        updatedAt: new Date(),
-        updatedBy: reqUserId,
-      },
+      updateData,
     );
 
     return await this.getProductById(product.id);
@@ -203,5 +215,24 @@ export class ProductService {
     );
 
     return result.affected || 0;
+  }
+
+  /**
+   * Lấy danh sách sản phẩm sắp hết hạn "new" (còn 3 ngày)
+   */
+  async getProductsExpiringSoon(): Promise<ProductModel[]> {
+    const threeDaysFromNow = new Date();
+    threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
+
+    const products = await this.productRepository.find({
+      where: {
+        isNew: true,
+        newUntil: LessThan(threeDaysFromNow),
+        deletedAt: IsNull(),
+      },
+      relations: ['brand'],
+    });
+
+    return products.map((product) => product.toModel());
   }
 }

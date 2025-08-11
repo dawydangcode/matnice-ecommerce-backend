@@ -103,7 +103,6 @@ export class CreateProductBodyDto extends PickType(ProductDto, [
   'isSustainable',
   'brandId',
   'isNew',
-  'newUntil',
   'isBoutique',
 ]) {
   @ApiProperty({
@@ -134,7 +133,6 @@ export class UpdateProductBodyDto extends PartialType(
     'isSustainable',
     'brandId',
     'isNew',
-    'newUntil',
     'isBoutique',
   ]),
 ) {}
