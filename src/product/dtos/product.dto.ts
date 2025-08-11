@@ -7,6 +7,7 @@ import {
   IsString,
   IsArray,
   IsOptional,
+  IsDate,
 } from 'class-validator';
 import { ProductGenderType, ProductType } from '../enum/product.type';
 
@@ -52,6 +53,18 @@ export class ProductDto {
   isSustainable!: boolean;
 
   @ApiProperty()
+  @IsBoolean()
+  isNew!: boolean;
+
+  @ApiProperty()
+  @IsDate()
+  newUntil!: Date;
+
+  @ApiProperty()
+  @IsBoolean()
+  isBoutique!: boolean;
+
+  @ApiProperty()
   @IsNumber()
   @Type(() => Number)
   reqUserId!: number;
@@ -89,6 +102,9 @@ export class CreateProductBodyDto extends PickType(ProductDto, [
   'description',
   'isSustainable',
   'brandId',
+  'isNew',
+  'newUntil',
+  'isBoutique',
 ]) {
   @ApiProperty({
     type: [Number],
@@ -117,6 +133,9 @@ export class UpdateProductBodyDto extends PartialType(
     'description',
     'isSustainable',
     'brandId',
+    'isNew',
+    'newUntil',
+    'isBoutique',
   ]),
 ) {}
 

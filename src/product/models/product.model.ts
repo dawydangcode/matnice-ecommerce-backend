@@ -9,6 +9,9 @@ export class ProductModel {
   public readonly price: number;
   public readonly description: string;
   public readonly isSustainable: boolean;
+  public readonly isNew: boolean;
+  public readonly isBoutique: boolean;
+  public readonly newUntil: Date | undefined;
   public readonly createdAt: Date | undefined;
   public readonly createdBy: number | undefined;
   public readonly updatedAt: Date | undefined;
@@ -25,6 +28,9 @@ export class ProductModel {
     price: number,
     description: string,
     isSustainable: boolean,
+    isNew: boolean,
+    isBoutique: boolean,
+    newUntil: Date | undefined,
     createdAt: Date | undefined,
     createdBy: number | undefined,
     updatedAt: Date | undefined,
@@ -40,6 +46,9 @@ export class ProductModel {
     this.price = price;
     this.description = description;
     this.isSustainable = isSustainable;
+    this.isNew = isNew;
+    this.isBoutique = isBoutique;
+    this.newUntil = newUntil;
     this.createdAt = createdAt;
     this.createdBy = createdBy;
     this.updatedAt = updatedAt;

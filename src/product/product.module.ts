@@ -8,6 +8,7 @@ import { ProductDetailModule } from './modules/product-detail/product-detail.mod
 import { ProductImageModule } from './modules/product-image/product-image.module';
 import { ProductCategoryModule } from './modules/product-category/product-category.module';
 import { ProductThicknessCompatibilityModule } from './modules/product-thickness-compatibility/product-thickness-compatibility.module';
+import { ProductSchedulerService } from './services/product-scheduler.service';
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import { ProductThicknessCompatibilityModule } from './modules/product-thickness
     forwardRef(() => ProductImageModule),
   ],
   controllers: [ProductController],
-  providers: [ProductService],
+  providers: [ProductService, ProductSchedulerService],
   exports: [
     ProductService,
     ProductColorModule,

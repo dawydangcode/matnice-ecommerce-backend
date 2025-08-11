@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ProductEntity } from './entities/product.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, IsNull, Like, Repository } from 'typeorm';
+import { In, IsNull, Like, Repository, LessThan } from 'typeorm';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
 import { PageList } from 'src/common/models/page-list.model';
 import { ProductModel } from './models/product.model';
@@ -16,8 +16,6 @@ export class ProductService {
     @InjectRepository(ProductEntity)
     private readonly productRepository: Repository<ProductEntity>,
     private readonly productCategoryService: ProductCategoryService,
-    private readonly productThicknessCompatibilityService: ProductThicknessCompatibilityService,
-    private readonly productColorService: ProductColorService,
   ) {}
 
   async getProducts(
@@ -97,6 +95,8 @@ export class ProductService {
     price: number,
     description: string,
     isSustainable: boolean,
+    isNew: boolean,
+    isBoutique: boolean,
     categoryIds: number[] | undefined,
     reqUserId: number,
   ): Promise<ProductModel> {
@@ -108,6 +108,15 @@ export class ProductService {
     entity.price = price;
     entity.description = description;
     entity.isSustainable = isSustainable;
+    entity.isNew = isNew;
+    entity.isBoutique = isBoutique;
+
+    if (isNew) {
+      const newUntilDate = new Date();
+      newUntilDate.setDate(newUntilDate.getDate() + 30);
+      entity.newUntil = newUntilDate;
+    }
+
     entity.createdAt = new Date();
     entity.createdBy = reqUserId;
     entity.updatedAt = new Date();
@@ -140,6 +149,8 @@ export class ProductService {
     price: number | undefined,
     description: string | undefined,
     isSustainable: boolean | undefined,
+    isNew: boolean | undefined,
+    isBoutique: boolean | undefined,
     reqUserId: number,
   ): Promise<ProductModel> {
     await this.productRepository.update(
@@ -152,6 +163,8 @@ export class ProductService {
         price: price,
         description: description,
         isSustainable: isSustainable,
+        isNew: isNew,
+        isBoutique: isBoutique,
         updatedAt: new Date(),
         updatedBy: reqUserId,
       },
@@ -172,5 +185,23 @@ export class ProductService {
       },
     );
     return true;
+  }
+
+  async updateExpiredNewProducts(): Promise<number> {
+    const now = new Date();
+
+    const result = await this.productRepository.update(
+      {
+        isNew: true,
+        newUntil: LessThan(now),
+        deletedAt: IsNull(),
+      },
+      {
+        isNew: false,
+        updatedAt: now,
+      },
+    );
+
+    return result.affected || 0;
   }
 }

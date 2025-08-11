@@ -23,12 +23,16 @@ import {
 import { RequestModel } from 'src/common/models/request.model';
 import { RoleType } from 'src/role/enum/role.enum';
 import { Roles } from 'src/role/decorators/roles.decorator';
+import { ProductSchedulerService } from './services/product-scheduler.service';
 
 @Controller('api/v1/')
 @ApiTags('Product')
 @Roles(RoleType.Admin)
 export class ProductController {
-  constructor(private readonly productService: ProductService) {}
+  constructor(
+    private readonly productService: ProductService,
+    private readonly productSchedulerService: ProductSchedulerService,
+  ) {}
 
   @Get('products/list')
   async getProducts(@Query() query: GetProductsQueryDto) {
@@ -64,6 +68,8 @@ export class ProductController {
       body.price,
       body.description,
       body.isSustainable,
+      body.isNew,
+      body.isBoutique,
       body.categoryIds,
       req.user.userId,
     );
@@ -85,6 +91,8 @@ export class ProductController {
       body.price,
       body.description,
       body.isSustainable,
+      body.isNew,
+      body.isBoutique,
       req.user.userId,
     );
   }
@@ -96,5 +104,24 @@ export class ProductController {
   ) {
     const product = await this.productService.getProductById(params.productId);
     return await this.productService.deleteProduct(product, req.user.userId);
+  }
+
+  @Post('products/update-expired-new')
+  async updateExpiredNewProducts() {
+    const count = await this.productService.updateExpiredNewProducts();
+    return {
+      message: `Updated ${count} expired products`,
+      updatedCount: count,
+    };
+  }
+
+  @Post('products/run-scheduler-now')
+  async runSchedulerNow() {
+    const result =
+      await this.productSchedulerService.runExpiredProductsUpdateNow();
+    return {
+      message: 'Scheduler executed successfully',
+      ...result,
+    };
   }
 }

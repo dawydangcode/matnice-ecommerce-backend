@@ -40,6 +40,15 @@ export class ProductEntity {
   @Column({ name: 'is_sustainable', default: false })
   isSustainable!: boolean;
 
+  @Column({ name: 'is_new', default: false })
+  isNew!: boolean;
+
+  @Column({ name: 'new_until', nullable: true })
+  newUntil!: Date;
+
+  @Column({ name: 'is_boutique', default: false })
+  isBoutique!: boolean;
+
   @Column({ name: 'created_at' })
   createdAt!: Date;
 
@@ -80,6 +89,9 @@ export class ProductEntity {
       this.price,
       this.description,
       this.isSustainable,
+      this.isNew,
+      this.isBoutique,
+      this.newUntil,
       this.createdAt,
       this.createdBy,
       this.updatedAt,

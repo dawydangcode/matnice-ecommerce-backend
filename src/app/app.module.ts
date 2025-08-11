@@ -16,12 +16,14 @@ import { CategoryModule } from 'src/category/category.module';
 import { BrandModule } from 'src/brand/brand.module';
 import { CartModule } from 'src/cart/cart.module';
 import { LensModule } from 'src/lens/lens.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       load: [database, app],
     }),
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
