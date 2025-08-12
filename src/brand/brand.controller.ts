@@ -80,4 +80,9 @@ export class BrandController {
     const brand = await this.brandService.getBrandById(params.brandId);
     return await this.brandService.deleteBrand(brand, req.user.userId);
   }
+
+  @Get('brand/getBrandsForFilter')
+  async getBrandsForFilter() {
+    return await this.brandService.getBrandsForFilter();
+  }
 }

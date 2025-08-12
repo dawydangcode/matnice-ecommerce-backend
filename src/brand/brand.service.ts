@@ -35,6 +35,17 @@ export class BrandService {
     );
   }
 
+  async getBrandsForFilter(): Promise<BrandModel[]> {
+    const brands = await this.brandRepository.find({
+      where: {
+        deletedAt: IsNull(),
+      },
+      order: { name: 'ASC' },
+    });
+
+    return brands.map((brand: BrandEntity) => brand.toModel());
+  }
+
   async getBrandById(brandId: number): Promise<BrandModel> {
     const brand = await this.brandRepository.findOne({
       where: {
