@@ -407,7 +407,7 @@ export class ProductService {
       const displayName =
         row.productColors_productVariantName ||
         row.productColors_product_variant_name
-          ? `${row.product_productName || row.product_product_name} - ${row.productColors_productVariantName || row.productColors_product_variant_name}`
+          ? `${row.product_productName || row.product_product_name} ${row.productColors_productVariantName || row.productColors_product_variant_name}`
           : row.product_productName || row.product_product_name;
 
       return {
