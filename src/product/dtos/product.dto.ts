@@ -90,6 +90,73 @@ export class GetProductsQueryDto extends PartialType(
   PickType(ProductDto, ['page', 'limit', 'q']),
 ) {}
 
+export class GetProductsForCardQueryDto {
+  @ApiProperty()
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  page?: number;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  limit?: number;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  search?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  @Type(() => Number)
+  productTypeIds?: number[];
+
+  @ApiProperty()
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  @Type(() => Number)
+  brandIds?: number[];
+
+  @ApiProperty()
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  @Type(() => Number)
+  categoryIds?: number[];
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  gender?: ProductGenderType;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  minPrice?: number;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  maxPrice?: number;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  sortBy?: 'price' | 'name' | 'newest';
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  sortOrder?: 'ASC' | 'DESC';
+}
+
 export class GetProductByIdParamsDto extends PickType(ProductDto, [
   'productId',
 ]) {}
@@ -105,12 +172,7 @@ export class CreateProductBodyDto extends PickType(ProductDto, [
   'isNew',
   'isBoutique',
 ]) {
-  @ApiProperty({
-    type: [Number],
-    description: 'Array of category IDs',
-    required: false,
-    example: [1, 2, 3],
-  })
+  @ApiProperty()
   @IsOptional()
   @IsArray()
   @IsNumber({}, { each: true })

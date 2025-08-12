@@ -235,4 +235,206 @@ export class ProductService {
 
     return products.map((product) => product.toModel());
   }
+
+  /**
+   * Get all products for card display with thumbnail image, brand, product name + variant, price
+   * Returns products with thumbnail image (order 'a'), brand name, product name + variant name, and price
+   */
+  async getProductsForCardDisplay(
+    pagination: PaginationParamsModel | undefined,
+    productTypeIds: number[] | undefined,
+    brandIds: number[] | undefined,
+    categoryIds: number[] | undefined,
+    genderFilter: ProductGenderType | undefined,
+    priceRange: { min?: number; max?: number } | undefined,
+    searchQuery: string | undefined,
+    sortBy: 'price' | 'name' | 'newest' | undefined,
+    sortOrder: 'ASC' | 'DESC' | undefined,
+  ): Promise<PageList<any>> {
+    const queryBuilder = this.productRepository
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.brand', 'brand')
+      .leftJoinAndSelect('product.productColors', 'productColors')
+      .leftJoin(
+        'product_image',
+        'thumbnailImage',
+        'thumbnailImage.product_id = product.id AND thumbnailImage.image_order = :imageOrder AND thumbnailImage.deleted_at IS NULL',
+        { imageOrder: 'a' },
+      )
+      .addSelect(['thumbnailImage.image_url as thumbnailUrl'])
+      .where('product.deletedAt IS NULL');
+
+    // Remove the productColors.deletedAt IS NULL condition as it might be filtering out products without colors
+
+    // Add filters
+    if (productTypeIds && productTypeIds.length > 0) {
+      queryBuilder.andWhere('product.productType IN (:...productTypes)', {
+        productTypes: productTypeIds,
+      });
+    }
+
+    if (brandIds && brandIds.length > 0) {
+      queryBuilder.andWhere('product.brandId IN (:...brands)', {
+        brands: brandIds,
+      });
+    }
+
+    if (categoryIds && categoryIds.length > 0) {
+      queryBuilder
+        .leftJoin('product.productDetail', 'productDetail')
+        .leftJoin('productDetail.category', 'category')
+        .andWhere('category.id IN (:...categories)', {
+          categories: categoryIds,
+        });
+    }
+
+    if (genderFilter) {
+      queryBuilder.andWhere('product.gender = :gender', {
+        gender: genderFilter,
+      });
+    }
+
+    if (priceRange) {
+      if (priceRange.min !== undefined) {
+        queryBuilder.andWhere('product.price >= :minPrice', {
+          minPrice: priceRange.min,
+        });
+      }
+      if (priceRange.max !== undefined) {
+        queryBuilder.andWhere('product.price <= :maxPrice', {
+          maxPrice: priceRange.max,
+        });
+      }
+    }
+
+    if (searchQuery) {
+      queryBuilder.andWhere(
+        '(product.productName LIKE :search OR product.description LIKE :search OR brand.name LIKE :search)',
+        { search: `%${searchQuery}%` },
+      );
+    }
+
+    // Add sorting
+    switch (sortBy) {
+      case 'price':
+        queryBuilder.orderBy('product.price', sortOrder || 'ASC');
+        break;
+      case 'name':
+        queryBuilder.orderBy('product.productName', sortOrder || 'ASC');
+        break;
+      case 'newest':
+        queryBuilder.orderBy('product.createdAt', 'DESC');
+        break;
+      default:
+        queryBuilder.orderBy('product.id', 'DESC');
+    }
+
+    // Add pagination
+    if (pagination) {
+      const query = pagination.toQuery();
+      queryBuilder.skip(query.skip).take(query.take);
+    }
+
+    // Get total count first
+    const totalQueryBuilder = this.productRepository
+      .createQueryBuilder('product')
+      .leftJoin('product.productColors', 'productColors')
+      .where('product.deletedAt IS NULL');
+
+    // Apply same filters for count
+    if (productTypeIds && productTypeIds.length > 0) {
+      totalQueryBuilder.andWhere('product.productType IN (:...productTypes)', {
+        productTypes: productTypeIds,
+      });
+    }
+
+    if (brandIds && brandIds.length > 0) {
+      totalQueryBuilder.andWhere('product.brandId IN (:...brands)', {
+        brands: brandIds,
+      });
+    }
+
+    if (categoryIds && categoryIds.length > 0) {
+      totalQueryBuilder
+        .leftJoin('product.productDetail', 'productDetail')
+        .leftJoin('productDetail.category', 'category')
+        .andWhere('category.id IN (:...categories)', {
+          categories: categoryIds,
+        });
+    }
+
+    if (genderFilter) {
+      totalQueryBuilder.andWhere('product.gender = :gender', {
+        gender: genderFilter,
+      });
+    }
+
+    if (priceRange) {
+      if (priceRange.min !== undefined) {
+        totalQueryBuilder.andWhere('product.price >= :minPrice', {
+          minPrice: priceRange.min,
+        });
+      }
+      if (priceRange.max !== undefined) {
+        totalQueryBuilder.andWhere('product.price <= :maxPrice', {
+          maxPrice: priceRange.max,
+        });
+      }
+    }
+
+    if (searchQuery) {
+      totalQueryBuilder
+        .leftJoin('product.brand', 'brandForSearch')
+        .andWhere(
+          '(product.productName LIKE :search OR product.description LIKE :search OR brandForSearch.name LIKE :search)',
+          { search: `%${searchQuery}%` },
+        );
+    }
+
+    const total = await totalQueryBuilder.getCount();
+
+    // Get the actual data with getRawMany to include addSelect fields
+    const rawResults = await queryBuilder.getRawMany();
+
+    // Log the first result to see the structure
+    if (rawResults.length > 0) {
+      console.log('Raw result structure:', Object.keys(rawResults[0]));
+      console.log('First raw result:', rawResults[0]);
+    }
+
+    // Transform raw results to proper format
+    const productCards = rawResults.map((row: any) => {
+      const displayName =
+        row.productColors_productVariantName ||
+        row.productColors_product_variant_name
+          ? `${row.product_productName || row.product_product_name} - ${row.productColors_productVariantName || row.productColors_product_variant_name}`
+          : row.product_productName || row.product_product_name;
+
+      return {
+        id: row.product_id,
+        productName: row.product_productName || row.product_product_name,
+        displayName: displayName,
+        brandName: row.brand_name || 'Unknown Brand',
+        price: row.product_price,
+        thumbnailUrl: row.thumbnailUrl || null,
+        // Additional useful info for cards
+        productType: row.product_productType || row.product_product_type,
+        gender: row.product_gender,
+        isNew: row.product_isNew || row.product_is_new,
+        isBoutique: row.product_isBoutique || row.product_is_boutique,
+        isSustainable: row.product_isSustainable || row.product_is_sustainable,
+        // Variant info
+        variantName:
+          row.productColors_productVariantName ||
+          row.productColors_product_variant_name ||
+          null,
+        colorName:
+          row.productColors_colorName || row.productColors_color_name || null,
+        stock: row.productColors_stock || 0,
+        totalVariants: 1, // We'll calculate this properly later
+      };
+    });
+
+    return new PageList<any>(total, productCards);
+  }
 }

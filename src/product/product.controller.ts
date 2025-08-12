@@ -17,6 +17,7 @@ import {
   DeleteProductParamsDto,
   GetProductByIdParamsDto,
   GetProductsQueryDto,
+  GetProductsForCardQueryDto,
   UpdateProductBodyDto,
   UpdateProductParamsDto,
 } from './dtos/product.dto';
@@ -24,6 +25,7 @@ import { RequestModel } from 'src/common/models/request.model';
 import { RoleType } from 'src/role/enum/role.enum';
 import { Roles } from 'src/role/decorators/roles.decorator';
 import { ProductSchedulerService } from './services/product-scheduler.service';
+import { Public } from 'src/middlewares/guards/jwt-auth.guard';
 
 @Controller('api/v1/')
 @ApiTags('Product')
@@ -42,6 +44,28 @@ export class ProductController {
       new PaginationParamsModel(query.page, query.limit),
       undefined,
       ['brand', 'productDetail', 'productColors'],
+    );
+  }
+
+  @Get('products/cards')
+  @Roles()
+  async getProductsForCardDisplay(@Query() query: GetProductsForCardQueryDto) {
+    const pagination = new PaginationParamsModel(query.page, query.limit);
+    const priceRange =
+      query.minPrice !== undefined || query.maxPrice !== undefined
+        ? { min: query.minPrice, max: query.maxPrice }
+        : undefined;
+
+    return await this.productService.getProductsForCardDisplay(
+      pagination,
+      query.productTypeIds,
+      query.brandIds,
+      query.categoryIds,
+      query.gender,
+      priceRange,
+      query.search,
+      query.sortBy,
+      query.sortOrder,
     );
   }
 
@@ -113,11 +137,6 @@ export class ProductController {
       message: `Updated ${count} expired products`,
       updatedCount: count,
     };
-  }
-
-  @Get('products/expiring-soon')
-  async getProductsExpiringSoon() {
-    return await this.productService.getProductsExpiringSoon();
   }
 
   @Post('products/run-scheduler-now')
