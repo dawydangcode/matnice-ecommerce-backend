@@ -71,6 +71,8 @@ export class ProductController {
       query.frameMaterial,
       query.bridgeDesign,
       query.style,
+      query.frameWidthMin,
+      query.frameWidthMax,
     );
   }
 

@@ -255,6 +255,8 @@ export class ProductService {
     frameMaterial?: string[],
     bridgeDesign?: string[],
     style?: string[],
+    frameWidthMin?: number,
+    frameWidthMax?: number,
   ): Promise<PageList<any>> {
     const queryBuilder = this.productRepository
       .createQueryBuilder('product')
@@ -369,6 +371,17 @@ export class ProductService {
         styles: style,
       });
     }
+    // Add frameWidthMin/frameWidthMax filter
+    if (frameWidthMin !== undefined) {
+      queryBuilder.andWhere('productDetail.frame_width >= :frameWidthMin', {
+        frameWidthMin,
+      });
+    }
+    if (frameWidthMax !== undefined) {
+      queryBuilder.andWhere('productDetail.frame_width <= :frameWidthMax', {
+        frameWidthMax,
+      });
+    }
 
     if (searchQuery) {
       queryBuilder.andWhere(
@@ -402,6 +415,7 @@ export class ProductService {
     const totalQueryBuilder = this.productRepository
       .createQueryBuilder('product')
       .leftJoin('product.productColors', 'productColors')
+      .leftJoin('product.productDetail', 'productDetail')
       .where('product.deletedAt IS NULL');
 
     // Apply same filters for count
@@ -419,7 +433,6 @@ export class ProductService {
 
     if (categoryIds && categoryIds.length > 0) {
       totalQueryBuilder
-        .leftJoin('product.productDetail', 'productDetail')
         .leftJoin('productDetail.category', 'category')
         .andWhere('category.id IN (:...categories)', {
           categories: categoryIds,
@@ -443,6 +456,23 @@ export class ProductService {
           maxPrice: priceRange.max,
         });
       }
+    }
+    // Add frameWidthMin/frameWidthMax filter for count
+    if (frameWidthMin !== undefined) {
+      totalQueryBuilder.andWhere(
+        'productDetail.frame_width >= :frameWidthMin',
+        {
+          frameWidthMin,
+        },
+      );
+    }
+    if (frameWidthMax !== undefined) {
+      totalQueryBuilder.andWhere(
+        'productDetail.frame_width <= :frameWidthMax',
+        {
+          frameWidthMax,
+        },
+      );
     }
 
     if (searchQuery) {

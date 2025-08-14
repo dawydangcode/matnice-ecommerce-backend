@@ -209,6 +209,18 @@ export class GetProductsForCardQueryDto {
     Array.isArray(value) ? value : value ? [value] : [],
   )
   style?: string[];
+
+  @ApiProperty({ required: false, type: Number })
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  frameWidthMin?: number;
+
+  @ApiProperty({ required: false, type: Number })
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  frameWidthMax?: number;
 }
 
 export class GetProductByIdParamsDto extends PickType(ProductDto, [
