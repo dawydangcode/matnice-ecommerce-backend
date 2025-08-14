@@ -66,6 +66,11 @@ export class ProductController {
       query.search,
       query.sortBy,
       query.sortOrder,
+      query.frameType,
+      query.frameShape,
+      query.frameMaterial,
+      query.bridgeDesign,
+      query.style,
     );
   }
 

@@ -1,5 +1,5 @@
 import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 import {
   IsBoolean,
   IsNumber,
@@ -113,6 +113,9 @@ export class GetProductsForCardQueryDto {
   @IsArray()
   @IsNumber({}, { each: true })
   @Type(() => Number)
+  @Transform(({ value }) =>
+    Array.isArray(value) ? value : value ? [value] : [],
+  )
   productTypeIds?: number[];
 
   @ApiProperty()
@@ -120,6 +123,9 @@ export class GetProductsForCardQueryDto {
   @IsArray()
   @IsNumber({}, { each: true })
   @Type(() => Number)
+  @Transform(({ value }) =>
+    Array.isArray(value) ? value : value ? [value] : [],
+  )
   brandIds?: number[];
 
   @ApiProperty()
@@ -127,6 +133,9 @@ export class GetProductsForCardQueryDto {
   @IsArray()
   @IsNumber({}, { each: true })
   @Type(() => Number)
+  @Transform(({ value }) =>
+    Array.isArray(value) ? value : value ? [value] : [],
+  )
   categoryIds?: number[];
 
   @ApiProperty()
@@ -155,6 +164,51 @@ export class GetProductsForCardQueryDto {
   @IsOptional()
   @IsString()
   sortOrder?: 'ASC' | 'DESC';
+  // Filter productDetail
+  @ApiProperty({ required: false, type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @Transform(({ value }) =>
+    Array.isArray(value) ? value : value ? [value] : [],
+  )
+  frameType?: string[];
+
+  @ApiProperty({ required: false, type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @Transform(({ value }) =>
+    Array.isArray(value) ? value : value ? [value] : [],
+  )
+  frameShape?: string[];
+
+  @ApiProperty({ required: false, type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @Transform(({ value }) =>
+    Array.isArray(value) ? value : value ? [value] : [],
+  )
+  frameMaterial?: string[];
+
+  @ApiProperty({ required: false, type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @Transform(({ value }) =>
+    Array.isArray(value) ? value : value ? [value] : [],
+  )
+  bridgeDesign?: string[];
+
+  @ApiProperty({ required: false, type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @Transform(({ value }) =>
+    Array.isArray(value) ? value : value ? [value] : [],
+  )
+  style?: string[];
 }
 
 export class GetProductByIdParamsDto extends PickType(ProductDto, [

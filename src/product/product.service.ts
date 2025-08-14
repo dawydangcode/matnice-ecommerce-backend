@@ -250,11 +250,17 @@ export class ProductService {
     searchQuery: string | undefined,
     sortBy: 'price' | 'name' | 'newest' | undefined,
     sortOrder: 'ASC' | 'DESC' | undefined,
+    frameType?: string[],
+    frameShape?: string[],
+    frameMaterial?: string[],
+    bridgeDesign?: string[],
+    style?: string[],
   ): Promise<PageList<any>> {
     const queryBuilder = this.productRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.brand', 'brand')
       .leftJoinAndSelect('product.productColors', 'productColors')
+      .leftJoin('product.productDetail', 'productDetail')
       .leftJoin(
         'product_image',
         'thumbnailImage',
@@ -262,6 +268,30 @@ export class ProductService {
         { imageOrder: 'a' },
       )
       .addSelect(['thumbnailImage.image_url as thumbnailUrl'])
+      // Select thêm các trường productDetail
+      .addSelect([
+        'productDetail.id as productDetailId',
+        'productDetail.product_id as productDetailProductId',
+        'productDetail.bridge_width as bridgeWidth',
+        'productDetail.frame_width as frameWidth',
+        'productDetail.lens_height as lensHeight',
+        'productDetail.lens_width as lensWidth',
+        'productDetail.temple_length as templeLength',
+        'productDetail.frame_material as frameMaterial',
+        'productDetail.frame_shape as frameShape',
+        'productDetail.frame_type as frameType',
+        'productDetail.bridge_design as bridgeDesign',
+        'productDetail.style as style',
+        'productDetail.spring_hinges as springHinges',
+        'productDetail.weight as weight',
+        'productDetail.multifocal as multifocal',
+        'productDetail.created_at as createdAt',
+        'productDetail.created_by as createdBy',
+        'productDetail.updated_at as updatedAt',
+        'productDetail.updated_by as updatedBy',
+        'productDetail.deleted_at as deletedAt',
+        'productDetail.deleted_by as deletedBy',
+      ])
       .where('product.deletedAt IS NULL');
 
     // Remove the productColors.deletedAt IS NULL condition as it might be filtering out products without colors
@@ -305,6 +335,39 @@ export class ProductService {
           maxPrice: priceRange.max,
         });
       }
+    }
+
+    // Filter productDetail
+    if (frameType && frameType.length > 0) {
+      queryBuilder.andWhere('productDetail.frame_type IN (:...frameTypes)', {
+        frameTypes: frameType,
+      });
+    }
+    if (frameShape && frameShape.length > 0) {
+      queryBuilder.andWhere('productDetail.frame_shape IN (:...frameShapes)', {
+        frameShapes: frameShape,
+      });
+    }
+    if (frameMaterial && frameMaterial.length > 0) {
+      queryBuilder.andWhere(
+        'productDetail.frame_material IN (:...frameMaterials)',
+        {
+          frameMaterials: frameMaterial,
+        },
+      );
+    }
+    if (bridgeDesign && bridgeDesign.length > 0) {
+      queryBuilder.andWhere(
+        'productDetail.bridge_design IN (:...bridgeDesigns)',
+        {
+          bridgeDesigns: bridgeDesign,
+        },
+      );
+    }
+    if (style && style.length > 0) {
+      queryBuilder.andWhere('productDetail.style IN (:...styles)', {
+        styles: style,
+      });
     }
 
     if (searchQuery) {
@@ -432,6 +495,30 @@ export class ProductService {
           row.productColors_colorName || row.productColors_color_name || null,
         stock: row.productColors_stock || 0,
         totalVariants: 1, // We'll calculate this properly later
+        // Thông tin productDetail
+        productDetail: {
+          id: row.productDetailId || null,
+          productId: row.productDetailProductId || null,
+          bridgeWidth: row.bridgeWidth || null,
+          frameWidth: row.frameWidth || null,
+          lensHeight: row.lensHeight || null,
+          lensWidth: row.lensWidth || null,
+          templeLength: row.templeLength || null,
+          frameMaterial: row.frameMaterial || null,
+          frameShape: row.frameShape || null,
+          frameType: row.frameType || null,
+          bridgeDesign: row.bridgeDesign || null,
+          style: row.style || null,
+          springHinges: row.springHinges || null,
+          weight: row.weight || null,
+          multifocal: row.multifocal || null,
+          createdAt: row.createdAt || null,
+          createdBy: row.createdBy || null,
+          updatedAt: row.updatedAt || null,
+          updatedBy: row.updatedBy || null,
+          deletedAt: row.deletedAt || null,
+          deletedBy: row.deletedBy || null,
+        },
       };
     });
 
