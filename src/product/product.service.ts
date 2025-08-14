@@ -245,7 +245,7 @@ export class ProductService {
     productTypeIds: number[] | undefined,
     brandIds: number[] | undefined,
     categoryIds: number[] | undefined,
-    genderFilter: ProductGenderType | undefined,
+    genderFilter: ProductGenderType[] | undefined,
     priceRange: { min?: number; max?: number } | undefined,
     searchQuery: string | undefined,
     sortBy: 'price' | 'name' | 'newest' | undefined,
@@ -321,9 +321,15 @@ export class ProductService {
     }
 
     if (genderFilter) {
-      queryBuilder.andWhere('product.gender = :gender', {
-        gender: genderFilter,
-      });
+      if (Array.isArray(genderFilter) && genderFilter.length > 0) {
+        queryBuilder.andWhere('product.gender IN (:...genders)', {
+          genders: genderFilter,
+        });
+      } else if (typeof genderFilter === 'string' && genderFilter) {
+        queryBuilder.andWhere('product.gender = :gender', {
+          gender: genderFilter,
+        });
+      }
     }
 
     if (priceRange) {
@@ -440,9 +446,15 @@ export class ProductService {
     }
 
     if (genderFilter) {
-      totalQueryBuilder.andWhere('product.gender = :gender', {
-        gender: genderFilter,
-      });
+      if (Array.isArray(genderFilter) && genderFilter.length > 0) {
+        totalQueryBuilder.andWhere('product.gender IN (:...genders)', {
+          genders: genderFilter,
+        });
+      } else if (typeof genderFilter === 'string' && genderFilter) {
+        totalQueryBuilder.andWhere('product.gender = :gender', {
+          gender: genderFilter,
+        });
+      }
     }
 
     if (priceRange) {

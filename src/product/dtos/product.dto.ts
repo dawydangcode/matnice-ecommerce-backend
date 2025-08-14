@@ -138,10 +138,14 @@ export class GetProductsForCardQueryDto {
   )
   categoryIds?: number[];
 
-  @ApiProperty()
+  @ApiProperty({ type: [String], required: false })
   @IsOptional()
-  @IsString()
-  gender?: ProductGenderType;
+  @IsArray()
+  @IsString({ each: true })
+  @Transform(({ value }) =>
+    Array.isArray(value) ? value : value ? [value] : [],
+  )
+  gender?: ProductGenderType[];
 
   @ApiProperty()
   @IsOptional()

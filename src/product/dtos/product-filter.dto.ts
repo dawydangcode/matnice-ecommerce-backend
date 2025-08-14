@@ -9,6 +9,8 @@ import {
 import { ProductType } from '../enum/product.type';
 
 export class ProductFilterDto {
+  @ApiProperty({ type: [String], required: false })
+  gender?: string[];
   @ApiProperty()
   brandIds?: number[];
 
