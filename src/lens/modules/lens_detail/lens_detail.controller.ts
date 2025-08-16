@@ -54,8 +54,7 @@ export class LensDetailController {
       body.pdLeft,
       body.pdRight,
       body.prescriptionDate,
-      body.material,
-      body.coating,
+      body.hasAxisCorrection,
       req.user.userId,
     );
   }
@@ -84,8 +83,7 @@ export class LensDetailController {
       updateLensDetailDto.pdLeft,
       updateLensDetailDto.pdRight,
       updateLensDetailDto.prescriptionDate,
-      updateLensDetailDto.material,
-      updateLensDetailDto.coating,
+      updateLensDetailDto.hasAxisCorrection,
       req.user.userId,
     );
   }

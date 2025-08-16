@@ -55,11 +55,8 @@ export class LensDetailEntity {
   @Column({ name: 'prescription_date', type: 'date', nullable: true })
   prescriptionDate!: Date;
 
-  @Column({ name: 'material', type: 'varchar', length: 255, nullable: true })
-  material!: string;
-
-  @Column({ name: 'coating', type: 'varchar', length: 255, nullable: true })
-  coating!: string;
+  @Column({ name: 'has_axis_correction' })
+  hasAxisCorrection!: boolean;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt!: Date;
@@ -100,8 +97,7 @@ export class LensDetailEntity {
       this.pdLeft,
       this.pdRight,
       this.prescriptionDate,
-      this.material,
-      this.coating,
+      this.hasAxisCorrection,
       this.createdAt,
       this.createdBy,
       this.updatedAt,

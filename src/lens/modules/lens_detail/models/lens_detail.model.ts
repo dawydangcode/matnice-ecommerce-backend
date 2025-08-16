@@ -12,13 +12,12 @@ export class LensDetailModel {
   public readonly axisRight: number | undefined;
   public readonly pdLeft: number | undefined;
   public readonly pdRight: number | undefined;
-  public readonly prescriptionDate: Date;
-  public readonly material: string | undefined;
-  public readonly coating: string | undefined;
-  public readonly createdAt: Date;
-  public readonly createdBy: number;
-  public readonly updatedAt: Date;
-  public readonly updatedBy: number;
+  public readonly prescriptionDate: Date | undefined;
+  public readonly hasAxisCorrection: boolean | undefined;
+  public readonly createdAt: Date | undefined;
+  public readonly createdBy: number | undefined;
+  public readonly updatedAt: Date | undefined;
+  public readonly updatedBy: number | undefined;
   public readonly deletedAt: Date | undefined;
   public readonly deletedBy: number | undefined;
 
@@ -37,12 +36,11 @@ export class LensDetailModel {
     pdLeft: number | undefined,
     pdRight: number | undefined,
     prescriptionDate: Date,
-    material: string | undefined,
-    coating: string | undefined,
-    createdAt: Date,
-    createdBy: number,
-    updatedAt: Date,
-    updatedBy: number,
+    hasAxisCorrection: boolean | undefined,
+    createdAt: Date | undefined,
+    createdBy: number | undefined,
+    updatedAt: Date | undefined,
+    updatedBy: number | undefined,
     deletedAt: Date | undefined,
     deletedBy: number | undefined,
   ) {
@@ -60,8 +58,7 @@ export class LensDetailModel {
     this.pdLeft = pdLeft;
     this.pdRight = pdRight;
     this.prescriptionDate = prescriptionDate;
-    this.material = material;
-    this.coating = coating;
+    this.hasAxisCorrection = hasAxisCorrection;
     this.createdAt = createdAt;
     this.createdBy = createdBy;
     this.updatedAt = updatedAt;

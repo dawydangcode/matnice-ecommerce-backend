@@ -56,8 +56,7 @@ export class LensDetailService {
     pdLeft: number,
     pdRight: number,
     prescriptionDate: Date,
-    material: string,
-    coating: string,
+    hasAxisCorrection: boolean,
     reqUserId: number,
   ): Promise<LensDetailModel> {
     const entity = new LensDetailEntity();
@@ -74,8 +73,8 @@ export class LensDetailService {
     entity.pdLeft = pdLeft;
     entity.pdRight = pdRight;
     entity.prescriptionDate = prescriptionDate;
-    entity.material = material;
-    entity.coating = coating;
+    entity.hasAxisCorrection = hasAxisCorrection;
+    entity.createdAt = new Date();
     entity.createdBy = reqUserId;
 
     const savedLensDetail = await this.lensDetailRepository.save(entity);
@@ -97,8 +96,7 @@ export class LensDetailService {
     pdLeft: number | undefined,
     pdRight: number | undefined,
     prescriptionDate: Date | undefined,
-    material: string | undefined,
-    coating: string | undefined,
+    hasAxisCorrection: boolean | undefined,
     reqUserId: number,
   ): Promise<LensDetailModel> {
     await this.lensDetailRepository.update(
@@ -117,8 +115,7 @@ export class LensDetailService {
         pdLeft,
         pdRight,
         prescriptionDate,
-        material,
-        coating,
+        hasAxisCorrection,
         updatedAt: new Date(),
         updatedBy: reqUserId,
       },

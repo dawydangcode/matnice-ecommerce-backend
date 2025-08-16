@@ -1,4 +1,10 @@
-import { IsString, IsNumber, IsOptional, IsDateString } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsDateString,
+  IsBoolean,
+} from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
 
@@ -83,13 +89,8 @@ export class LensDetailDto {
 
   @ApiProperty()
   @IsOptional()
-  @IsString()
-  material!: string;
-
-  @ApiProperty()
-  @IsOptional()
-  @IsString()
-  coating!: string;
+  @IsBoolean()
+  hasAxisCorrection!: boolean;
 }
 
 export class CreateLensDetailBodyDto extends PickType(LensDetailDto, [
@@ -106,8 +107,7 @@ export class CreateLensDetailBodyDto extends PickType(LensDetailDto, [
   'pdLeft',
   'pdRight',
   'prescriptionDate',
-  'material',
-  'coating',
+  'hasAxisCorrection',
 ]) {}
 
 export class UpdateLensDetailParamsDto extends PickType(LensDetailDto, [
@@ -129,7 +129,6 @@ export class UpdateLensDetailBodyDto extends PartialType(
     'pdLeft',
     'pdRight',
     'prescriptionDate',
-    'material',
-    'coating',
+    'hasAxisCorrection',
   ]),
 ) {}
