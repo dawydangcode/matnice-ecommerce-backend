@@ -13,6 +13,10 @@ export class LensDto {
   name!: string;
 
   @ApiProperty()
+  @IsString()
+  description!: string;
+
+  @ApiProperty()
   @IsNumber()
   @Type(() => Number)
   @IsPositive()
@@ -32,12 +36,15 @@ export class GetLensesQueryDto extends PartialType(
   PickType(LensDto, ['page', 'limit', 'q']),
 ) {}
 
-export class CreateLensBodyDto extends PickType(LensDto, ['name']) {}
+export class CreateLensBodyDto extends PickType(LensDto, [
+  'name',
+  'description',
+]) {}
 
 export class UpdateLensParamsDto extends PickType(LensDto, ['lensId']) {}
 
 export class UpdateLensBodyDto extends PartialType(
-  PickType(LensDto, ['name']),
+  PickType(LensDto, ['name', 'description']),
 ) {}
 
 export class DeleteLensParamsDto extends PickType(LensDto, ['lensId']) {}

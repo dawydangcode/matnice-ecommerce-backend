@@ -88,27 +88,43 @@ export class LensDetailDto {
   prescriptionDate!: Date;
 
   @ApiProperty()
+  @IsString()
+  lensType!: string;
+
+  @ApiProperty()
   @IsOptional()
   @IsBoolean()
   hasAxisCorrection!: boolean;
+
+  @ApiProperty()
+  @IsBoolean()
+  isNonPrescription!: boolean;
 }
 
 export class CreateLensDetailBodyDto extends PickType(LensDetailDto, [
   'lensId',
-  'lensThicknessId',
-  'lensQualityId',
-  'tintId',
-  'powerSphereLeft',
-  'powerSphereRight',
-  'powerCylinderLeft',
-  'powerCylinderRight',
-  'axisLeft',
-  'axisRight',
-  'pdLeft',
-  'pdRight',
-  'prescriptionDate',
+  'lensType',
   'hasAxisCorrection',
-]) {}
+  'isNonPrescription',
+]) {
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  lensThicknessId?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  lensQualityId?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  tintId?: number;
+}
 
 export class UpdateLensDetailParamsDto extends PickType(LensDetailDto, [
   'lensDetailId',
@@ -129,6 +145,8 @@ export class UpdateLensDetailBodyDto extends PartialType(
     'pdLeft',
     'pdRight',
     'prescriptionDate',
+    'lensType',
     'hasAxisCorrection',
+    'isNonPrescription',
   ]),
 ) {}

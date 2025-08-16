@@ -42,20 +42,13 @@ export class LensDetailController {
   ) {
     return this.lensDetailService.createLensDetail(
       body.lensId,
+      body.lensType,
+      body.hasAxisCorrection,
+      body.isNonPrescription,
+      req.user.userId,
       body.lensThicknessId,
       body.lensQualityId,
       body.tintId,
-      body.powerSphereLeft,
-      body.powerSphereRight,
-      body.powerCylinderLeft,
-      body.powerCylinderRight,
-      body.axisLeft,
-      body.axisRight,
-      body.pdLeft,
-      body.pdRight,
-      body.prescriptionDate,
-      body.hasAxisCorrection,
-      req.user.userId,
     );
   }
 

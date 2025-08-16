@@ -20,12 +20,22 @@ export class LensService {
     search: string | undefined,
     relations: string[] | undefined,
   ): Promise<PageList<LensModel>> {
+    const whereCondition: any = {
+      deletedAt: IsNull(),
+    };
+
+    if (lensIds) {
+      whereCondition.id = In(lensIds);
+    }
+
+    if (search) {
+      whereCondition.name = Like(`%${search}%`);
+    } else if (name) {
+      whereCondition.name = name;
+    }
+
     const [lenses, total] = await this.lensRepository.findAndCount({
-      where: {
-        id: lensIds ? In(lensIds) : undefined,
-        name: search ? Like(`%${search}%`) : name,
-        deletedAt: IsNull(),
-      },
+      where: whereCondition,
       relations: relations,
       ...pagination?.toQuery(),
     });
@@ -48,9 +58,14 @@ export class LensService {
     return lens.toModel();
   }
 
-  async createLens(name: string, reqUserId: number): Promise<LensModel> {
+  async createLens(
+    name: string,
+    description: string | undefined,
+    reqUserId: number,
+  ): Promise<LensModel> {
     const entity = new LensEntity();
     entity.name = name;
+    entity.description = description;
     entity.createdAt = new Date();
     entity.createdBy = reqUserId;
 
@@ -60,12 +75,14 @@ export class LensService {
   async updateLens(
     lens: LensModel,
     name: string | undefined,
+    description: string | undefined,
     reqUserId: number,
   ): Promise<LensModel> {
     await this.lensRepository.update(
       { id: lens.id, deletedAt: IsNull() },
       {
         name: name,
+        description: description,
         updatedAt: new Date(),
         updatedBy: reqUserId,
       },

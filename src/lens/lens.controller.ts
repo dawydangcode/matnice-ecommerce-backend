@@ -16,10 +16,10 @@ import {
   DeleteLensParamsDto,
   GetLensesQueryDto,
   UpdateLensParamsDto,
+  UpdateLensBodyDto,
 } from './dtos/lens.dto';
 import { RequestModel } from '../common/models/request.model';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
-import { UpdateBrandBodyDto } from 'src/brand/dtos/brand.dto';
 import { ApiTags } from '@nestjs/swagger';
 
 @Controller('api/v1')
@@ -33,7 +33,7 @@ export class LensController {
       undefined,
       undefined,
       new PaginationParamsModel(query.page, query.limit),
-      undefined,
+      query.q,
       undefined,
     );
   }
@@ -45,17 +45,26 @@ export class LensController {
 
   @Post('lens/create')
   async createLens(@Body() body: CreateLensBodyDto, @Req() req: RequestModel) {
-    return this.lensService.createLens(body.name, req.user.userId);
+    return this.lensService.createLens(
+      body.name,
+      body.description,
+      req.user.userId,
+    );
   }
 
   @Put('lens/:lensId/update')
   async updateLens(
     @Param() params: UpdateLensParamsDto,
-    @Body() body: UpdateBrandBodyDto,
+    @Body() body: UpdateLensBodyDto,
     @Req() req: RequestModel,
   ) {
     const lens = await this.lensService.getLensById(params.lensId);
-    return this.lensService.updateLens(lens, body.name, req.user.userId);
+    return this.lensService.updateLens(
+      lens,
+      body.name,
+      body.description,
+      req.user.userId,
+    );
   }
 
   @Delete('lens/:lensId/delete')

@@ -55,8 +55,19 @@ export class LensDetailEntity {
   @Column({ name: 'prescription_date', type: 'date', nullable: true })
   prescriptionDate!: Date;
 
+  @Column({
+    name: 'lens_type',
+    type: 'enum',
+    enum: ['single_vision', 'progressive', 'office', 'non_prescription'],
+    default: 'single_vision',
+  })
+  lensType!: string;
+
   @Column({ name: 'has_axis_correction' })
   hasAxisCorrection!: boolean;
+
+  @Column({ name: 'is_non_prescription', default: false })
+  isNonPrescription!: boolean;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt!: Date;
@@ -97,7 +108,9 @@ export class LensDetailEntity {
       this.pdLeft,
       this.pdRight,
       this.prescriptionDate,
+      this.lensType,
       this.hasAxisCorrection,
+      this.isNonPrescription,
       this.createdAt,
       this.createdBy,
       this.updatedAt,

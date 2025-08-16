@@ -44,36 +44,19 @@ export class LensDetailService {
 
   async createLensDetail(
     lensId: number,
-    lensThicknessId: number,
-    lensQualityId: number,
-    tintId: number,
-    powerSphereLeft: number,
-    powerSphereRight: number,
-    powerCylinderLeft: number,
-    powerCylinderRight: number,
-    axisLeft: number,
-    axisRight: number,
-    pdLeft: number,
-    pdRight: number,
-    prescriptionDate: Date,
+    lensType: string,
     hasAxisCorrection: boolean,
+    isNonPrescription: boolean,
     reqUserId: number,
+    lensThicknessId?: number,
+    lensQualityId?: number,
+    tintId?: number,
   ): Promise<LensDetailModel> {
     const entity = new LensDetailEntity();
     entity.lensId = lensId;
-    entity.lensThicknessId = lensThicknessId;
-    entity.lensQualityId = lensQualityId;
-    entity.tintId = tintId;
-    entity.powerSphereLeft = powerSphereLeft;
-    entity.powerSphereRight = powerSphereRight;
-    entity.powerCylinderLeft = powerCylinderLeft;
-    entity.powerCylinderRight = powerCylinderRight;
-    entity.axisLeft = axisLeft;
-    entity.axisRight = axisRight;
-    entity.pdLeft = pdLeft;
-    entity.pdRight = pdRight;
-    entity.prescriptionDate = prescriptionDate;
+    entity.lensType = lensType;
     entity.hasAxisCorrection = hasAxisCorrection;
+    entity.isNonPrescription = isNonPrescription;
     entity.createdAt = new Date();
     entity.createdBy = reqUserId;
 

@@ -13,7 +13,9 @@ export class LensDetailModel {
   public readonly pdLeft: number | undefined;
   public readonly pdRight: number | undefined;
   public readonly prescriptionDate: Date | undefined;
+  public readonly lensType: string;
   public readonly hasAxisCorrection: boolean | undefined;
+  public readonly isNonPrescription: boolean;
   public readonly createdAt: Date | undefined;
   public readonly createdBy: number | undefined;
   public readonly updatedAt: Date | undefined;
@@ -36,7 +38,9 @@ export class LensDetailModel {
     pdLeft: number | undefined,
     pdRight: number | undefined,
     prescriptionDate: Date,
+    lensType: string,
     hasAxisCorrection: boolean | undefined,
+    isNonPrescription: boolean,
     createdAt: Date | undefined,
     createdBy: number | undefined,
     updatedAt: Date | undefined,
@@ -58,7 +62,9 @@ export class LensDetailModel {
     this.pdLeft = pdLeft;
     this.pdRight = pdRight;
     this.prescriptionDate = prescriptionDate;
+    this.lensType = lensType;
     this.hasAxisCorrection = hasAxisCorrection;
+    this.isNonPrescription = isNonPrescription;
     this.createdAt = createdAt;
     this.createdBy = createdBy;
     this.updatedAt = updatedAt;

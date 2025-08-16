@@ -1,6 +1,7 @@
 export class LensModel {
   public readonly id: number;
   public readonly name: string;
+  public readonly description: string | undefined;
   public readonly createdAt: Date;
   public readonly createdBy: number;
   public readonly updatedAt: Date;
@@ -11,6 +12,7 @@ export class LensModel {
   constructor(
     id: number,
     name: string,
+    description: string | undefined,
     createdAt: Date,
     createdBy: number,
     updatedAt: Date,
@@ -20,6 +22,7 @@ export class LensModel {
   ) {
     this.id = id;
     this.name = name;
+    this.description = description;
     this.createdAt = createdAt;
     this.createdBy = createdBy;
     this.updatedAt = updatedAt;

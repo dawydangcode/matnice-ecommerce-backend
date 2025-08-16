@@ -19,6 +19,9 @@ export class LensEntity {
   @Column({ name: 'name', type: 'varchar', length: 255 })
   name!: string;
 
+  @Column({ name: 'description', type: 'text', nullable: true })
+  description!: string | undefined;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt!: Date;
 
@@ -52,6 +55,7 @@ export class LensEntity {
     return new LensModel(
       this.id,
       this.name,
+      this.description,
       this.createdAt,
       this.createdBy,
       this.updatedAt,
