@@ -12,7 +12,6 @@ export class LensService {
     @InjectRepository(LensEntity)
     private readonly lensRepository: Repository<LensEntity>,
   ) {}
-
   async getLenses(
     lensIds: number[] | undefined,
     name: string | undefined,
