@@ -4,12 +4,14 @@ import { IsNull, Repository } from 'typeorm';
 import { TintColorEntity } from './entities/tint_color.entity';
 import { TintColorModel } from './models/tint_color.model';
 import { CreateTintColorDto, UpdateTintColorDto } from './dtos/tint_color.dto';
+import { AwsS3Service } from '../../../common/services/aws-s3.service';
 
 @Injectable()
 export class TintColorService {
   constructor(
     @InjectRepository(TintColorEntity)
     private readonly tintColorRepository: Repository<TintColorEntity>,
+    private readonly awsS3Service: AwsS3Service,
   ) {}
 
   async findAll(): Promise<TintColorModel[]> {
@@ -197,5 +199,58 @@ export class TintColorService {
       .getMany();
 
     return tintColors.map((color) => color.toModel());
+  }
+
+  async uploadImage(file: Express.Multer.File): Promise<string> {
+    try {
+      // Validate file type
+      const allowedTypes = [
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/webp',
+      ];
+      if (!allowedTypes.includes(file.mimetype)) {
+        throw new HttpException(
+          'Invalid file type. Only JPEG, PNG and WebP images are allowed.',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      // Validate file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        throw new HttpException(
+          'File size too large. Maximum size is 5MB.',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      // Generate unique filename
+      const timestamp = Date.now();
+      const randomString = Math.random().toString(36).substring(2, 8);
+      const fileExtension = file.originalname.split('.').pop();
+      const fileName = `tint-color-${timestamp}-${randomString}.${fileExtension}`;
+
+      // Upload to S3
+      const imageUrl = await this.awsS3Service.uploadFile(
+        file.buffer,
+        fileName,
+        file.mimetype,
+        'tint-color-image', // folder name
+        false, // don't overwrite
+      );
+
+      return imageUrl;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      console.error('Error uploading tint color image:', error);
+      throw new HttpException(
+        'Failed to upload image',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }

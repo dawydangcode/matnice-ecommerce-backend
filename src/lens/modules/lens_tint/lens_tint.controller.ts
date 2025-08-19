@@ -20,12 +20,7 @@ import {
   CreateLensTintDto,
   UpdateLensTintDto,
   LensTintParamsDto,
-  TintColorParamsDto,
 } from './dtos/lens_tint.dto';
-import {
-  CreateTintColorDto,
-  UpdateTintColorDto,
-} from '../tint_color/dtos/tint_color.dto';
 import { RequestModel } from 'src/common/models/request.model';
 import { LensTintModel } from './models/lens_tint.model';
 import { TintColorModel } from './models/tint_color.model';
@@ -137,100 +132,5 @@ export class LensTintController {
     @Param() params: LensTintParamsDto,
   ): Promise<TintColorModel[]> {
     return await this.lensTintService.findTintColorsByTintId(params.lensTintId);
-  }
-
-  @Get('tint-color/list')
-  @ApiOperation({ summary: 'Get all tint colors' })
-  @ApiOkResponse({
-    description: 'List of all tint colors retrieved successfully',
-  })
-  async findAllTintColors(): Promise<TintColorModel[]> {
-    return await this.lensTintService.findAllTintColors();
-  }
-
-  @Get('tint-color/list-with-tint')
-  @ApiOperation({ summary: 'Get all tint colors with tint information' })
-  @ApiOkResponse({
-    description:
-      'List of all tint colors with tint names retrieved successfully',
-  })
-  async findTintColorsWithTint(): Promise<
-    (TintColorModel & { tintName: string })[]
-  > {
-    return await this.lensTintService.findTintColorsWithTint();
-  }
-
-  @Get('tint-color/:tintColorId')
-  @ApiOperation({ summary: 'Get tint color by ID' })
-  @ApiParam({
-    name: 'tintColorId',
-    description: 'Tint color ID',
-    example: 1,
-  })
-  @ApiOkResponse({
-    description: 'Tint color retrieved successfully',
-  })
-  async findTintColorById(
-    @Param() params: TintColorParamsDto,
-  ): Promise<TintColorModel> {
-    return await this.lensTintService.findTintColorById(params.tintColorId);
-  }
-
-  @Post('tint-color/create')
-  @ApiOperation({ summary: 'Create a new tint color' })
-  @ApiCreatedResponse({
-    description: 'Tint color created successfully',
-  })
-  async createTintColor(
-    @Body() createTintColorDto: CreateTintColorDto,
-    @Req() req: RequestModel,
-  ): Promise<TintColorModel> {
-    return await this.lensTintService.createTintColor(
-      createTintColorDto,
-      req.user.userId,
-    );
-  }
-
-  @Put('tint-color/:tintColorId')
-  @ApiOperation({ summary: 'Update tint color' })
-  @ApiParam({
-    name: 'tintColorId',
-    description: 'Tint color ID',
-    example: 1,
-  })
-  @ApiOkResponse({
-    description: 'Tint color updated successfully',
-  })
-  async updateTintColor(
-    @Param() params: TintColorParamsDto,
-    @Body() updateTintColorDto: UpdateTintColorDto,
-    @Req() req: RequestModel,
-  ): Promise<TintColorModel> {
-    return await this.lensTintService.updateTintColor(
-      params.tintColorId,
-      updateTintColorDto,
-      req.user.userId,
-    );
-  }
-
-  @Delete('tint-color/:tintColorId')
-  @ApiOperation({ summary: 'Delete tint color' })
-  @ApiParam({
-    name: 'tintColorId',
-    description: 'Tint color ID',
-    example: 1,
-  })
-  @ApiOkResponse({
-    description: 'Tint color deleted successfully',
-  })
-  async deleteTintColor(
-    @Param() params: TintColorParamsDto,
-    @Req() req: RequestModel,
-  ): Promise<{ success: boolean }> {
-    const result = await this.lensTintService.deleteTintColor(
-      params.tintColorId,
-      req.user.userId,
-    );
-    return { success: result };
   }
 }

@@ -20,6 +20,7 @@ export class CreateTintColorDto {
   @IsNotEmpty()
   @IsInt()
   @Min(1)
+  @Transform(({ value }) => parseInt(value, 10))
   tintId!: number;
 
   @ApiProperty({
@@ -60,6 +61,7 @@ export class UpdateTintColorDto {
   @IsOptional()
   @IsInt()
   @Min(1)
+  @Transform(({ value }) => (value ? parseInt(value, 10) : value))
   tintId?: number;
 
   @ApiPropertyOptional({

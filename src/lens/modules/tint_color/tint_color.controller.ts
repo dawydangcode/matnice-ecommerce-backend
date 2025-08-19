@@ -8,6 +8,8 @@ import {
   Put,
   Query,
   Req,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -16,7 +18,9 @@ import {
   ApiCreatedResponse,
   ApiParam,
   ApiQuery,
+  ApiConsumes,
 } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { TintColorService } from './tint_color.service';
 import {
   CreateTintColorDto,
@@ -190,5 +194,20 @@ export class TintColorController {
       req.user.userId,
     );
     return { success: result };
+  }
+
+  @Post('tint-color/upload-image')
+  @ApiOperation({ summary: 'Upload image for tint color' })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
+  async uploadImage(
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<{ imageUrl: string }> {
+    if (!file) {
+      throw new Error('No file uploaded');
+    }
+
+    const imageUrl = await this.tintColorService.uploadImage(file);
+    return { imageUrl };
   }
 }
