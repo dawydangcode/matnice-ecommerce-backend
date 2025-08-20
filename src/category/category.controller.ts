@@ -50,6 +50,7 @@ export class CategoryController {
   ) {
     return await this.categoryService.createCategory(
       body.name,
+      body.type,
       body.description,
       req.user.userId,
     );
@@ -68,6 +69,7 @@ export class CategoryController {
     return await this.categoryService.updateCategory(
       category,
       body.name,
+      body.type,
       body.description,
       req.user.userId,
     );

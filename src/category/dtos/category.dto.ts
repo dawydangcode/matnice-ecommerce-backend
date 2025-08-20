@@ -1,6 +1,7 @@
 import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsNumber, IsPositive, IsString } from 'class-validator';
+import { CategoryType } from '../enum/category.type';
 
 export class CategoryDto {
   @ApiProperty()
@@ -11,6 +12,10 @@ export class CategoryDto {
   @ApiProperty()
   @IsString()
   name!: string;
+
+  @ApiProperty()
+  @IsString()
+  type!: CategoryType;
 
   @ApiProperty()
   @IsString()
@@ -48,6 +53,7 @@ export class GetCategoryByIdParamsDto extends PickType(CategoryDto, [
 
 export class CategoryCreateBodyDto extends PickType(CategoryDto, [
   'name',
+  'type',
   'description',
 ]) {}
 
@@ -56,7 +62,7 @@ export class CategoryUpdateParamsDto extends PickType(CategoryDto, [
 ]) {}
 
 export class CategoryUpdateBodyDto extends PartialType(
-  PickType(CategoryDto, ['name', 'description']),
+  PickType(CategoryDto, ['name', 'type', 'description']),
 ) {}
 
 export class CategoryDeleteParamsDto extends PickType(CategoryDto, [

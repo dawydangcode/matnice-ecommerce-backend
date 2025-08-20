@@ -1,6 +1,7 @@
 export class LensModel {
   public readonly id: number;
   public readonly name: string;
+  public readonly brandId: number;
   public readonly description: string | undefined;
   public readonly createdAt: Date;
   public readonly createdBy: number;

@@ -5,6 +5,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { BrandModel } from '../models/brand.model';
+import { BrandType } from '../enum/brand.type';
 
 @Entity('brand')
 export class BrandEntity {
@@ -13,6 +14,9 @@ export class BrandEntity {
 
   @Column({ name: 'name' })
   name!: string;
+
+  @Column({ name: 'type' })
+  type!: BrandType;
 
   @Column({ name: 'description' })
   description!: string;
@@ -39,6 +43,7 @@ export class BrandEntity {
     return new BrandModel(
       this.id,
       this.name,
+      this.type,
       this.description,
       this.createdAt,
       this.createdBy,

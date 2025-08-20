@@ -5,6 +5,7 @@ import { In, IsNull, Like, Repository } from 'typeorm';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
 import { PageList } from 'src/common/models/page-list.model';
 import { BrandModel } from './models/brand.model';
+import { BrandType } from './enum/brand.type';
 
 @Injectable()
 export class BrandService {
@@ -63,11 +64,13 @@ export class BrandService {
 
   async createBrand(
     name: string,
+    type: BrandType,
     description: string,
     reqUserId: number,
   ): Promise<BrandModel> {
     const entity = new BrandEntity();
     entity.name = name;
+    entity.type = type;
     entity.description = description;
     entity.createdAt = new Date();
     entity.createdBy = reqUserId;
@@ -78,6 +81,7 @@ export class BrandService {
   async updateBrand(
     brand: BrandModel,
     name: string | undefined,
+    type: BrandType | undefined,
     description: string | undefined,
     reqUserId: number,
   ): Promise<BrandModel> {
@@ -85,6 +89,7 @@ export class BrandService {
       { id: brand.id },
       {
         name: name,
+        type: type,
         description: description,
         updatedAt: new Date(),
         updatedBy: reqUserId,
