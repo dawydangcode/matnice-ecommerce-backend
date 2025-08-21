@@ -1,106 +1,98 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger';
 import {
+  ApiProperty,
+  ApiPropertyOptional,
+  PartialType,
+  PickType,
+} from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import {
+  IsNumber,
   IsString,
   IsOptional,
-  IsBoolean,
-  IsDecimal,
-  MaxLength,
-  IsNumber,
+  IsPositive,
   Min,
+  IsBoolean,
+  MaxLength,
 } from 'class-validator';
-import { Transform, Type } from 'class-transformer';
 
-export class CreateLensThicknessDto {
-  @ApiProperty({ example: 'Standard 1.5mm', description: 'Thickness name' })
+export class LensThicknessDto {
+  @ApiProperty()
+  @IsNumber()
+  @Type(() => Number)
+  lensThicknessId!: number;
+
+  @ApiProperty()
   @IsString()
   @MaxLength(100)
   name!: string;
 
-  @ApiProperty({
-    example: 'Standard lens thickness for regular prescriptions',
-    description: 'Thickness description',
-    required: false,
-  })
-  @IsOptional()
+  @ApiProperty()
   @IsString()
-  description?: string;
-
-  @ApiProperty({
-    example: 1.5,
-    description: 'Thickness value in specified unit',
-    required: false,
-  })
   @IsOptional()
-  @IsNumber({ maxDecimalPlaces: 2 })
+  description!: string;
+
+  @ApiProperty()
+  @IsNumber()
+  @Type(() => Number)
   @Min(0)
-  thickness?: number;
-
-  @ApiProperty({
-    example: 'mm',
-    description: 'Unit of thickness measurement',
-    required: false,
-  })
   @IsOptional()
+  thickness!: number;
+
+  @ApiProperty()
   @IsString()
   @MaxLength(20)
-  unit?: string;
-
-  @ApiProperty({ example: true, description: 'Active status', required: false })
   @IsOptional()
+  unit!: string;
+
+  @ApiProperty()
   @IsBoolean()
-  isActive?: boolean;
+  @IsOptional()
+  isActive!: boolean;
+
+  @ApiProperty()
+  @IsNumber()
+  @Type(() => Number)
+  @IsPositive()
+  @IsOptional()
+  page!: number;
+
+  @ApiPropertyOptional({ example: 10, description: 'Number of items per page' })
+  @IsNumber()
+  @Type(() => Number)
+  @IsPositive()
+  @IsOptional()
+  limit!: number;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  q!: string;
 }
 
-export class UpdateLensThicknessDto extends PartialType(
-  CreateLensThicknessDto,
+export class GetLensThicknessesQueryDto extends PartialType(
+  PickType(LensThicknessDto, ['page', 'limit', 'q', 'isActive']),
 ) {}
 
-export class LensThicknessFilterDto {
-  @ApiProperty({ required: false, example: 1 })
-  @IsOptional()
-  @Type(() => Number)
-  page?: number;
+export class GetLensThicknessParamsDto extends PickType(LensThicknessDto, [
+  'lensThicknessId',
+]) {}
 
-  @ApiProperty({ required: false, example: 10 })
-  @IsOptional()
-  @Type(() => Number)
-  limit?: number;
-
-  @ApiProperty({ required: false, example: 'Standard' })
-  @IsOptional()
-  @IsString()
-  search?: string;
-
-  @ApiProperty({ required: false, example: true })
-  @IsOptional()
-  @Transform(({ value }) => {
-    if (typeof value === 'string') {
-      return value === 'true';
-    }
-    return value;
-  })
-  @IsBoolean()
-  isActive?: boolean;
-}
-
-export const LensThicknessSelectFields = [
-  'id',
+export class CreateLensThicknessBodyDto extends PickType(LensThicknessDto, [
   'name',
   'description',
   'thickness',
   'unit',
   'isActive',
-  'createdAt',
-  'updatedAt',
-  'createdBy',
-  'updatedBy',
-] as const;
+]) {}
 
-export const LensThicknessPublicFields = [
-  'id',
-  'name',
-  'description',
-  'thickness',
-  'unit',
-  'isActive',
-] as const;
+export class UpdateLensThicknessParamsDto extends PickType(LensThicknessDto, [
+  'lensThicknessId',
+]) {}
+
+export class UpdateLensThicknessBodyDto extends PartialType(
+  PickType(LensThicknessDto, ['name', 'description', 'thickness', 'unit', 'isActive']),
+) {}
+
+export class DeleteLensThicknessParamsDto extends PickType(LensThicknessDto, [
+  'lensThicknessId',
+]) {}

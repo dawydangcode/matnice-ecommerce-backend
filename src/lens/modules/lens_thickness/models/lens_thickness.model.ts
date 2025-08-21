@@ -1,26 +1,26 @@
 export class LensThicknessModel {
   public readonly id: number;
   public readonly name: string;
-  public readonly description?: string;
-  public readonly thickness?: number;
-  public readonly unit?: string;
+  public readonly description: string;
+  public readonly thickness: number;
+  public readonly unit: string;
   public readonly isActive: boolean;
-  public readonly createdAt: Date;
-  public readonly updatedAt: Date;
-  public readonly createdBy?: number;
-  public readonly updatedBy?: number;
-  public readonly deletedAt?: Date;
-  public readonly deletedBy?: number;
+  public readonly createdAt: Date | undefined;
+  public readonly updatedAt: Date | undefined;
+  public readonly createdBy: number | undefined;
+  public readonly updatedBy: number | undefined;
+  public readonly deletedAt: Date | undefined;
+  public readonly deletedBy: number | undefined;
 
   constructor(
     id: number,
     name: string,
-    description: string | undefined,
-    thickness: number | undefined,
-    unit: string | undefined,
+    description: string,
+    thickness: number,
+    unit: string,
     isActive: boolean,
-    createdAt: Date,
-    updatedAt: Date,
+    createdAt: Date | undefined,
+    updatedAt: Date | undefined,
     createdBy: number | undefined,
     updatedBy: number | undefined,
     deletedAt: Date | undefined,

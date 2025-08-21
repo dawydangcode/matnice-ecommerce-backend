@@ -2,96 +2,109 @@ import {
   Controller,
   Get,
   Post,
-  Body,
-  Patch,
-  Param,
+  Put,
   Delete,
+  Body,
+  Param,
   Query,
-  ParseIntPipe,
-  HttpCode,
-  HttpStatus,
+  Req,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiQuery,
-  ApiParam,
-} from '@nestjs/swagger';
-import { LensThicknessService } from './lens_thickness.service';
+  LensThicknessService,
+  LensThicknessResponse,
+} from './lens_thickness.service';
+import { LensThicknessModel } from './models/lens_thickness.model';
 import {
-  CreateLensThicknessDto,
-  UpdateLensThicknessDto,
-  LensThicknessFilterDto,
+  CreateLensThicknessBodyDto,
+  DeleteLensThicknessParamsDto,
+  GetLensThicknessParamsDto,
+  GetLensThicknessesQueryDto,
+  UpdateLensThicknessBodyDto,
+  UpdateLensThicknessParamsDto,
 } from './dtos/lens_thickness.dto';
+import { RequestModel } from '../../../common/models/request.model';
+import { RoleType } from 'src/role/enum/role.enum';
+import { Roles } from 'src/role/decorators/roles.decorator';
+import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
 
 @ApiTags('Lens Thickness')
-@Controller('api/v1/lens-thickness')
+@Controller('api/v1/')
+@Roles(RoleType.Admin)
 export class LensThicknessController {
   constructor(private readonly lensThicknessService: LensThicknessService) {}
 
-  @Get()
-  @ApiOperation({ summary: 'Get all lens thickness options' })
-  @ApiResponse({
-    status: 200,
-    description: 'List of lens thickness options retrieved successfully',
-  })
-  @ApiQuery({ name: 'page', required: false, example: 1 })
-  @ApiQuery({ name: 'limit', required: false, example: 10 })
-  @ApiQuery({ name: 'search', required: false, example: 'Standard' })
-  @ApiQuery({ name: 'isActive', required: false, example: true })
-  async findAll(@Query() filters: LensThicknessFilterDto) {
-    return this.lensThicknessService.findAll(filters);
+  @Get('lens-thickness/list')
+  async findAll(@Query() query: GetLensThicknessesQueryDto) {
+    return await this.lensThicknessService.getLensThicknesses(
+      undefined,
+      undefined,
+      new PaginationParamsModel(query.page, query.limit),
+      query.q,
+      query.isActive,
+      undefined,
+    );
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get lens thickness by ID' })
-  @ApiResponse({
-    status: 200,
-    description: 'Lens thickness retrieved successfully',
-  })
-  @ApiResponse({ status: 404, description: 'Lens thickness not found' })
-  @ApiParam({ name: 'id', example: 1 })
-  async findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.lensThicknessService.findOne(id);
+  @Get('lens-thickness/:lensThicknessId')
+  async findOne(
+    @Param() params: GetLensThicknessParamsDto,
+  ): Promise<LensThicknessModel> {
+    return await this.lensThicknessService.getLensThicknessById(
+      params.lensThicknessId,
+    );
   }
 
-  @Post()
-  @ApiOperation({ summary: 'Create new lens thickness' })
-  @ApiResponse({
-    status: 201,
-    description: 'Lens thickness created successfully',
-  })
-  @ApiResponse({ status: 400, description: 'Bad request' })
-  async create(@Body() createDto: CreateLensThicknessDto) {
-    return this.lensThicknessService.create(createDto);
+  @Post('lens-thickness')
+  async create(
+    @Body() body: CreateLensThicknessBodyDto,
+    @Req() req: RequestModel,
+  ): Promise<LensThicknessModel> {
+    return await this.lensThicknessService.createLensThickness(
+      body.name,
+      body.description,
+      body.thickness,
+      body.unit,
+      body.isActive,
+      req.user.userId,
+    );
   }
 
-  @Patch(':id')
-  @ApiOperation({ summary: 'Update lens thickness' })
-  @ApiResponse({
-    status: 200,
-    description: 'Lens thickness updated successfully',
-  })
-  @ApiResponse({ status: 404, description: 'Lens thickness not found' })
-  @ApiParam({ name: 'id', example: 1 })
+  @Put('lens-thickness/:lensThicknessId')
   async update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateDto: UpdateLensThicknessDto,
-  ) {
-    return this.lensThicknessService.update(id, updateDto);
+    @Param() params: UpdateLensThicknessParamsDto,
+    @Body() body: UpdateLensThicknessBodyDto,
+    @Req() req: RequestModel,
+  ): Promise<LensThicknessModel> {
+    const lensThickness = await this.lensThicknessService.getLensThicknessById(
+      params.lensThicknessId,
+    );
+
+    return await this.lensThicknessService.updateLensThickness(
+      lensThickness,
+      body.name,
+      body.description,
+      body.thickness,
+      body.unit,
+      body.isActive,
+      req.user.userId,
+    );
   }
 
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete lens thickness' })
-  @ApiResponse({
-    status: 204,
-    description: 'Lens thickness deleted successfully',
-  })
-  @ApiResponse({ status: 404, description: 'Lens thickness not found' })
-  @ApiParam({ name: 'id', example: 1 })
-  async remove(@Param('id', ParseIntPipe) id: number) {
-    return this.lensThicknessService.remove(id);
+  @Delete('lens-thickness/:lensThicknessId')
+  async remove(
+    @Param() params: DeleteLensThicknessParamsDto,
+    @Req() req: RequestModel,
+  ): Promise<boolean> {
+    const lensThickness = await this.lensThicknessService.getLensThicknessById(
+      params.lensThicknessId,
+    );
+
+    const success = await this.lensThicknessService.deleteLensThickness(
+      lensThickness,
+      req.user.userId,
+    );
+
+    return true;
   }
 }

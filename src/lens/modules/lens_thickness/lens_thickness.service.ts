@@ -1,14 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { IsNull, Repository, Like, In } from 'typeorm';
 import { LensThicknessEntity } from './entities/lens_thickness.entity';
-import {
-  CreateLensThicknessDto,
-  UpdateLensThicknessDto,
-  LensThicknessFilterDto,
-  LensThicknessSelectFields,
-} from './dtos/lens_thickness.dto';
 import { LensThicknessModel } from './models/lens_thickness.model';
+import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
+import { PageList } from 'src/common/models/page-list.model';
+
+export interface LensThicknessResponse {
+  data: LensThicknessModel[];
+  total: number;
+  page: number;
+  limit: number;
+}
 
 @Injectable()
 export class LensThicknessService {
@@ -17,131 +20,106 @@ export class LensThicknessService {
     private readonly lensThicknessRepository: Repository<LensThicknessEntity>,
   ) {}
 
-  async findAll(filters: LensThicknessFilterDto): Promise<{
-    data: LensThicknessModel[];
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  }> {
-    const { page = 1, limit = 10, search, isActive } = filters;
-
-    const queryBuilder: SelectQueryBuilder<LensThicknessEntity> =
-      this.lensThicknessRepository
-        .createQueryBuilder('thickness')
-        .select(LensThicknessSelectFields.map((field) => `thickness.${field}`))
-        .where('thickness.deletedAt IS NULL');
-
-    if (search) {
-      queryBuilder.andWhere(
-        '(thickness.name ILIKE :search OR thickness.description ILIKE :search)',
-        {
-          search: `%${search}%`,
+  async getLensThicknesses(
+    lensThicknessIds: number[] | undefined,
+    name: string | undefined,
+    pagination: PaginationParamsModel | undefined,
+    search: string | undefined,
+    isActive: boolean | undefined,
+    relations: string[] | undefined,
+  ): Promise<PageList<LensThicknessModel>> {
+    const [lensThicknesses, total] =
+      await this.lensThicknessRepository.findAndCount({
+        where: {
+          id: lensThicknessIds ? In(lensThicknessIds) : undefined,
+          name: search ? Like(`%${search}%`) : name,
+          isActive: isActive,
+          deletedAt: IsNull(),
         },
-      );
-    }
-
-    if (isActive !== undefined) {
-      queryBuilder.andWhere('thickness.isActive = :isActive', {
-        isActive,
+        relations: relations,
+        ...pagination?.toQuery(),
       });
-    }
 
-    queryBuilder
-      .orderBy('thickness.name', 'ASC')
-      .skip((page - 1) * limit)
-      .limit(limit);
-
-    const [entities, total] = await queryBuilder.getManyAndCount();
-    const models = entities.map((entity) => entity.toModel());
-
-    return {
-      data: models,
+    return new PageList<LensThicknessModel>(
       total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-    };
+      lensThicknesses.map((thickness: LensThicknessEntity) =>
+        thickness.toModel(),
+      ),
+    );
   }
 
-  async findOne(id: number): Promise<LensThicknessModel> {
-    const whereCondition = { id } as any;
-    whereCondition.deletedAt = null;
-
-    const entity = await this.lensThicknessRepository.findOne({
-      where: whereCondition,
-    });
-
-    if (!entity) {
-      throw new NotFoundException(`Lens thickness with ID ${id} not found`);
-    }
-
-    return entity.toModel();
-  }
-
-  async findByIds(ids: number[]): Promise<LensThicknessModel[]> {
-    const entities = await this.lensThicknessRepository
-      .createQueryBuilder('thickness')
-      .whereInIds(ids)
-      .andWhere('thickness.deletedAt IS NULL')
-      .getMany();
-
-    return entities.map((entity) => entity.toModel());
-  }
-
-  async create(
-    createDto: CreateLensThicknessDto,
-    userId?: number,
+  async getLensThicknessById(
+    lensThicknessId: number,
   ): Promise<LensThicknessModel> {
-    const entity = this.lensThicknessRepository.create({
-      name: createDto.name,
-      description: createDto.description,
-      thickness: createDto.thickness,
-      unit: createDto.unit,
-      isActive: createDto.isActive ?? true,
-      createdBy: userId,
+    const lensThickness = await this.lensThicknessRepository.findOne({
+      where: { id: lensThicknessId, deletedAt: IsNull() },
     });
 
-    const savedEntity = await this.lensThicknessRepository.save(entity);
-    return savedEntity.toModel();
+    if (!lensThickness) {
+      throw new HttpException('Lens thickness not found', HttpStatus.NOT_FOUND);
+    }
+
+    return lensThickness.toModel();
   }
 
-  async update(
-    id: number,
-    updateDto: UpdateLensThicknessDto,
-    userId?: number,
+  async createLensThickness(
+    name: string,
+    description: string,
+    thickness: number,
+    unit: string,
+    isActive: boolean,
+    reqUserId: number,
   ): Promise<LensThicknessModel> {
-    const entity = await this.lensThicknessRepository.findOne({
-      where: { id, deletedAt: null } as any,
-    });
+    const entity = new LensThicknessEntity();
+    entity.name = name;
+    entity.description = description;
+    entity.thickness = thickness;
+    entity.unit = unit;
+    entity.isActive = isActive;
+    entity.createdAt = new Date();
+    entity.createdBy = reqUserId;
 
-    if (!entity) {
-      throw new NotFoundException(`Lens thickness with ID ${id} not found`);
-    }
-
-    entity.name = updateDto.name ?? entity.name;
-    entity.description = updateDto.description ?? entity.description;
-    entity.thickness = updateDto.thickness ?? entity.thickness;
-    entity.unit = updateDto.unit ?? entity.unit;
-    entity.isActive = updateDto.isActive ?? entity.isActive;
-    entity.updatedBy = userId;
-
-    const savedEntity = await this.lensThicknessRepository.save(entity);
-    return savedEntity.toModel();
+    const savedThickness = await this.lensThicknessRepository.save(entity);
+    return savedThickness.toModel();
   }
 
-  async remove(id: number, userId?: number): Promise<void> {
-    const entity = await this.lensThicknessRepository.findOne({
-      where: { id, deletedAt: null } as any,
-    });
+  async updateLensThickness(
+    lensThickness: LensThicknessModel,
+    name: string | undefined,
+    description: string | undefined,
+    thickness: number | undefined,
+    unit: string | undefined,
+    isActive: boolean | undefined,
+    reqUserId: number,
+  ): Promise<LensThicknessModel> {
+    await this.lensThicknessRepository.update(
+      { id: lensThickness.id, deletedAt: IsNull() },
+      {
+        name: name,
+        description: description,
+        thickness: thickness,
+        unit: unit,
+        isActive: isActive,
+        updatedAt: new Date(),
+        updatedBy: reqUserId,
+      },
+    );
 
-    if (!entity) {
-      throw new NotFoundException(`Lens thickness with ID ${id} not found`);
-    }
+    return await this.getLensThicknessById(lensThickness.id);
+  }
 
-    entity.deletedAt = new Date();
-    entity.deletedBy = userId;
+  async deleteLensThickness(
+    lensThickness: LensThicknessModel,
+    reqUserId: number,
+  ): Promise<boolean> {
+    await this.lensThicknessRepository.update(
+      { id: lensThickness.id, deletedAt: IsNull() },
+      {
+        deletedAt: new Date(),
+        deletedBy: reqUserId,
+      },
+    );
 
-    await this.lensThicknessRepository.save(entity);
+    return true;
   }
 }

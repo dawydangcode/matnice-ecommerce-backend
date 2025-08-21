@@ -16,13 +16,13 @@ export class LensThicknessEntity {
   name!: string;
 
   @Column({ type: 'text', nullable: true })
-  description?: string;
+  description!: string;
 
   @Column({ type: 'decimal', precision: 8, scale: 2, nullable: true })
-  thickness?: number;
+  thickness!: number;
 
   @Column({ type: 'varchar', length: 20, nullable: true })
-  unit?: string;
+  unit!: string;
 
   @Column({ type: 'boolean', default: true })
   isActive!: boolean;
@@ -34,16 +34,16 @@ export class LensThicknessEntity {
   updatedAt!: Date;
 
   @Column({ name: 'created_by', type: 'bigint', nullable: true })
-  createdBy?: number;
+  createdBy!: number;
 
   @Column({ name: 'updated_by', type: 'bigint', nullable: true })
-  updatedBy?: number;
+  updatedBy!: number;
 
   @Column({ name: 'deleted_at', type: 'timestamp', nullable: true })
-  deletedAt?: Date;
+  deletedAt!: Date;
 
   @Column({ name: 'deleted_by', type: 'bigint', nullable: true })
-  deletedBy?: number;
+  deletedBy!: number;
 
   toModel(): LensThicknessModel {
     return new LensThicknessModel(
