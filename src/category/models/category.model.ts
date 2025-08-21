@@ -1,9 +1,6 @@
-import { CategoryType } from '../enum/category.type';
-
 export class CategoryModel {
   public readonly id: number;
   public readonly name: string;
-  public readonly type: CategoryType;
   public readonly description: string;
   public readonly createdAt: Date | undefined;
   public readonly createdBy: number | undefined;
@@ -15,7 +12,6 @@ export class CategoryModel {
   constructor(
     id: number,
     name: string,
-    type: CategoryType,
     description: string,
     createdAt: Date | undefined,
     createdBy: number | undefined,
@@ -26,7 +22,6 @@ export class CategoryModel {
   ) {
     this.id = id;
     this.name = name;
-    this.type = type;
     this.description = description;
     this.createdAt = createdAt;
     this.createdBy = createdBy;

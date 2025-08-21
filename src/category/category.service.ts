@@ -6,7 +6,6 @@ import { PaginationParamsModel } from 'src/common/models/pagination-params.model
 import { CategoryModule } from './category.module';
 import { CategoryModel } from './models/category.model';
 import { PageList } from 'src/common/models/page-list.model';
-import { CategoryType } from './enum/category.type';
 
 @Injectable()
 export class CategoryService {
@@ -56,13 +55,11 @@ export class CategoryService {
 
   async createCategory(
     name: string,
-    type: CategoryType,
     description: string,
     reqUserId: number,
   ): Promise<CategoryModel> {
     const entity = new CategoryEntity();
     entity.name = name;
-    entity.type = type;
     entity.description = description;
     entity.createdAt = new Date();
     entity.createdBy = reqUserId;
@@ -73,7 +70,6 @@ export class CategoryService {
   async updateCategory(
     category: CategoryModel,
     name: string | undefined,
-    type: CategoryType | undefined,
     description: string | undefined,
     reqUserId: number,
   ): Promise<CategoryModel> {
@@ -81,7 +77,6 @@ export class CategoryService {
       { id: category.id, deletedAt: IsNull() },
       {
         name: name,
-        type: type,
         description: description,
         updatedAt: new Date(),
         updatedBy: reqUserId,
