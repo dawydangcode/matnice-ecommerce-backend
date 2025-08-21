@@ -10,35 +10,35 @@ import { LensCoatingModel } from '../models/lens_coating.model';
 
 @Entity('lens_coating')
 export class LensCoatingEntity {
-  @PrimaryGeneratedColumn('increment', { type: 'bigint' })
+  @PrimaryGeneratedColumn({ name: 'id' })
   id!: number;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ name: 'name' })
   name!: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column({ name: 'price' })
   price!: number;
 
-  @Column({ type: 'varchar', length: 500, nullable: true })
-  description?: string;
+  @Column({ name: 'description' })
+  description!: string;
 
-  @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
+  @Column({ name: 'created_at' })
   createdAt!: Date;
 
-  @Column({ name: 'created_by', type: 'bigint' })
+  @Column({ name: 'created_by' })
   createdBy!: number;
 
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp', nullable: true })
-  updatedAt?: Date;
+  @Column({ name: 'updated_at' })
+  updatedAt!: Date;
 
-  @Column({ name: 'updated_by', type: 'bigint', nullable: true })
-  updatedBy?: number;
+  @Column({ name: 'updated_by' })
+  updatedBy!: number;
 
-  @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
-  deletedAt?: Date;
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deletedAt!: Date;
 
-  @Column({ name: 'deleted_by', type: 'bigint', nullable: true })
-  deletedBy?: number;
+  @Column({ name: 'deleted_by' })
+  deletedBy!: number;
 
   toModel(): LensCoatingModel {
     return new LensCoatingModel(

@@ -14,72 +14,68 @@ import {
 } from 'class-validator';
 
 export class LensCoatingDto {
-  @ApiProperty({ example: 1, description: 'Lens coating ID' })
+  @ApiProperty()
   @IsNumber()
   @Type(() => Number)
-  id!: number;
+  lensCoatingId!: number;
 
-  @ApiProperty({
-    example: 'Anti-Reflective Coating',
-    description: 'Coating name',
-  })
+  @ApiProperty()
   @IsString()
   name!: string;
 
-  @ApiProperty({ example: 50000, description: 'Additional price for coating' })
+  @ApiProperty()
   @IsNumber()
   @Type(() => Number)
   @Min(0)
   price!: number;
 
-  @ApiPropertyOptional({
-    example: 'Reduces glare and reflections',
-    description: 'Coating description',
-  })
+  @ApiProperty()
   @IsString()
   @IsOptional()
-  description?: string;
+  description!: string;
 
-  @ApiPropertyOptional({
-    example: 1,
-    description: 'Page number for pagination',
-  })
+  @ApiProperty()
   @IsNumber()
   @Type(() => Number)
   @IsPositive()
   @IsOptional()
-  page?: number;
+  page!: number;
 
   @ApiPropertyOptional({ example: 10, description: 'Number of items per page' })
   @IsNumber()
   @Type(() => Number)
   @IsPositive()
   @IsOptional()
-  limit?: number;
+  limit!: number;
 
-  @ApiPropertyOptional({
-    example: 'anti-reflective',
-    description: 'Search term',
-  })
+  @ApiPropertyOptional()
   @IsString()
   @IsOptional()
-  search?: string;
+  q!: string;
 }
 
-// Filters for listing
-export class LensCoatingFiltersDto extends PartialType(
-  PickType(LensCoatingDto, ['page', 'limit', 'search']),
+export class GetLensCoatingsQueryDto extends PartialType(
+  PickType(LensCoatingDto, ['page', 'limit', 'q']),
 ) {}
 
-// Params for getting by ID
-export class LensCoatingParamsDto extends PickType(LensCoatingDto, ['id']) {}
+export class GetLensCoatingParamsDto extends PickType(LensCoatingDto, [
+  'lensCoatingId',
+]) {}
 
-// Create DTO
-export class CreateLensCoatingDto extends PickType(LensCoatingDto, [
+export class CreateLensCoatingBodyDto extends PickType(LensCoatingDto, [
   'name',
   'price',
   'description',
 ]) {}
 
-// Update DTO
-export class UpdateLensCoatingDto extends PartialType(CreateLensCoatingDto) {}
+export class UpdateLensCoatingParamsDto extends PickType(LensCoatingDto, [
+  'lensCoatingId',
+]) {}
+
+export class UpdateLensCoatingBodyDto extends PartialType(
+  PickType(LensCoatingDto, ['name', 'price', 'description']),
+) {}
+
+export class DeleteLensCoatingParamsDto extends PickType(LensCoatingDto, [
+  'lensCoatingId',
+]) {}

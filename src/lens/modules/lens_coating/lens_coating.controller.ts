@@ -23,107 +23,86 @@ import {
 } from './lens_coating.service';
 import { LensCoatingModel } from './models/lens_coating.model';
 import {
-  CreateLensCoatingDto,
-  UpdateLensCoatingDto,
-  LensCoatingFiltersDto,
-  LensCoatingParamsDto,
+  CreateLensCoatingBodyDto,
+  DeleteLensCoatingParamsDto,
+  GetLensCoatingParamsDto,
+  GetLensCoatingsQueryDto,
+  UpdateLensCoatingBodyDto,
+  UpdateLensCoatingParamsDto,
 } from './dtos/lens_coating.dto';
 import { RequestModel } from '../../../common/models/request.model';
 import { RoleType } from 'src/role/enum/role.enum';
 import { Roles } from 'src/role/decorators/roles.decorator';
+import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
 
 @ApiTags('Lens Coating')
-@Controller('api/v1/lens-coating')
+@Controller('api/v1/')
 @Roles(RoleType.Admin)
 export class LensCoatingController {
   constructor(private readonly lensCoatingService: LensCoatingService) {}
 
-  @Get('list')
-  @ApiOperation({ summary: 'Get all lens coatings with pagination and search' })
-  @ApiQuery({ name: 'page', required: false, example: 1 })
-  @ApiQuery({ name: 'limit', required: false, example: 10 })
-  @ApiQuery({ name: 'search', required: false, example: 'anti-reflective' })
-  @ApiResponse({
-    status: 200,
-    description: 'List of lens coatings retrieved successfully',
-  })
-  async findAll(
-    @Query() filters: LensCoatingFiltersDto,
-  ): Promise<LensCoatingResponse> {
-    return await this.lensCoatingService.findAll(filters);
+  @Get('lens-coating/list')
+  async findAll(@Query() query: GetLensCoatingsQueryDto) {
+    return await this.lensCoatingService.getLensCoatings(
+      undefined,
+      undefined,
+      new PaginationParamsModel(query.page, query.limit),
+      query.q,
+      undefined,
+    );
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get lens coating by ID' })
-  @ApiParam({ name: 'id', description: 'Lens coating ID', example: 1 })
-  @ApiResponse({
-    status: 200,
-    description: 'Lens coating retrieved successfully',
-  })
-  @ApiResponse({ status: 404, description: 'Lens coating not found' })
-  async findById(
-    @Param() params: LensCoatingParamsDto,
+  @Get('lens-coating/:lensCoatingId/detail')
+  async getLensCoatingById(
+    @Param() params: GetLensCoatingParamsDto,
   ): Promise<LensCoatingModel> {
-    return await this.lensCoatingService.findById(params.id);
+    return await this.lensCoatingService.getLensCoatingById(
+      params.lensCoatingId,
+    );
   }
 
-  @Post('create')
-  @ApiOperation({ summary: 'Create a new lens coating' })
-  @ApiResponse({
-    status: 201,
-    description: 'Lens coating created successfully',
-  })
-  @ApiResponse({
-    status: 409,
-    description: 'Coating with this name already exists',
-  })
+  @Post('lens-coating/create')
   async create(
-    @Body() createDto: CreateLensCoatingDto,
+    @Body() body: CreateLensCoatingBodyDto,
     @Req() req: RequestModel,
   ): Promise<LensCoatingModel> {
-    return await this.lensCoatingService.create(createDto, req.user.userId);
-  }
-
-  @Put(':id')
-  @ApiOperation({ summary: 'Update lens coating by ID' })
-  @ApiParam({ name: 'id', description: 'Lens coating ID', example: 1 })
-  @ApiResponse({
-    status: 200,
-    description: 'Lens coating updated successfully',
-  })
-  @ApiResponse({ status: 404, description: 'Lens coating not found' })
-  @ApiResponse({
-    status: 409,
-    description: 'Coating with this name already exists',
-  })
-  async update(
-    @Param() params: LensCoatingParamsDto,
-    @Body() updateDto: UpdateLensCoatingDto,
-    @Req() req: RequestModel,
-  ): Promise<LensCoatingModel> {
-    return await this.lensCoatingService.update(
-      params.id,
-      updateDto,
+    return await this.lensCoatingService.createLensCoating(
+      body.name,
+      body.price,
+      body.description,
       req.user.userId,
     );
   }
 
-  @Delete(':id')
-  @ApiOperation({ summary: 'Delete lens coating by ID (soft delete)' })
-  @ApiParam({ name: 'id', description: 'Lens coating ID', example: 1 })
-  @ApiResponse({
-    status: 200,
-    description: 'Lens coating deleted successfully',
-  })
-  @ApiResponse({ status: 404, description: 'Lens coating not found' })
+  @Put('lens-coating/:lensCoatingId/update')
+  async updateLensCoating(
+    @Param() params: UpdateLensCoatingParamsDto,
+    @Body() body: UpdateLensCoatingBodyDto,
+    @Req() req: RequestModel,
+  ): Promise<LensCoatingModel> {
+    const lensCoating = await this.lensCoatingService.getLensCoatingById(
+      params.lensCoatingId,
+    );
+    return await this.lensCoatingService.updateLensCoating(
+      lensCoating,
+      body.name,
+      body.price,
+      body.description,
+      req.user.userId,
+    );
+  }
+
+  @Delete('lens-coating/:lensCoatingId/delete')
   async delete(
-    @Param() params: LensCoatingParamsDto,
+    @Param() params: DeleteLensCoatingParamsDto,
     @Req() req: RequestModel,
-  ): Promise<{ success: boolean }> {
-    const success = await this.lensCoatingService.delete(
-      params.id,
+  ) {
+    const lensCoating = await this.lensCoatingService.getLensCoatingById(
+      params.lensCoatingId,
+    );
+    return await this.lensCoatingService.deleteLensCoating(
+      lensCoating,
       req.user.userId,
     );
-    return { success };
   }
 }
