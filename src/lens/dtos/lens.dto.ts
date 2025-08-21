@@ -1,6 +1,8 @@
 import { IsString, IsNumber, IsPositive } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
+import { LensType } from '../enum/lens.type';
+import { LensStatusType } from '../enum/lens-status.type';
 
 export class LensDto {
   @ApiProperty()
@@ -11,6 +13,23 @@ export class LensDto {
   @ApiProperty()
   @IsString()
   name!: string;
+
+  @ApiProperty()
+  @IsString()
+  origin!: string;
+
+  @ApiProperty()
+  @IsNumber()
+  @Type(() => Number)
+  brandId!: number;
+
+  @ApiProperty()
+  @IsString()
+  lensType!: LensType;
+
+  @ApiProperty()
+  @IsString()
+  status!: LensStatusType;
 
   @ApiProperty()
   @IsString()
@@ -38,13 +57,24 @@ export class GetLensesQueryDto extends PartialType(
 
 export class CreateLensBodyDto extends PickType(LensDto, [
   'name',
+  'origin',
+  'brandId',
+  'lensType',
+  'status',
   'description',
 ]) {}
 
 export class UpdateLensParamsDto extends PickType(LensDto, ['lensId']) {}
 
 export class UpdateLensBodyDto extends PartialType(
-  PickType(LensDto, ['name', 'description']),
+  PickType(LensDto, [
+    'name',
+    'origin',
+    'brandId',
+    'lensType',
+    'status',
+    'description',
+  ]),
 ) {}
 
 export class DeleteLensParamsDto extends PickType(LensDto, ['lensId']) {}

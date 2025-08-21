@@ -47,6 +47,10 @@ export class LensController {
   async createLens(@Body() body: CreateLensBodyDto, @Req() req: RequestModel) {
     return this.lensService.createLens(
       body.name,
+      body.brandId,
+      body.origin,
+      body.lensType,
+      body.status,
       body.description,
       req.user.userId,
     );
@@ -62,6 +66,10 @@ export class LensController {
     return this.lensService.updateLens(
       lens,
       body.name,
+      body.brandId,
+      body.origin,
+      body.lensType,
+      body.status,
       body.description,
       req.user.userId,
     );

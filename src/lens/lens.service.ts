@@ -5,6 +5,8 @@ import { LensEntity } from './entities/lens.entity';
 import { LensModel } from './models/lens.model';
 import { PageList } from 'src/common/models/page-list.model';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
+import { LensType } from './enum/lens.type';
+import { LensStatusType } from './enum/lens-status.type';
 
 @Injectable()
 export class LensService {
@@ -59,11 +61,19 @@ export class LensService {
 
   async createLens(
     name: string,
+    brandId: number,
+    origin: string,
+    lensType: LensType,
+    status: LensStatusType,
     description: string | undefined,
     reqUserId: number,
   ): Promise<LensModel> {
     const entity = new LensEntity();
     entity.name = name;
+    entity.brandId = brandId;
+    entity.origin = origin;
+    entity.lensType = lensType;
+    entity.status = status;
     entity.description = description;
     entity.createdAt = new Date();
     entity.createdBy = reqUserId;
@@ -74,6 +84,10 @@ export class LensService {
   async updateLens(
     lens: LensModel,
     name: string | undefined,
+    brandId: number | undefined,
+    origin: string | undefined,
+    lensType: LensType | undefined,
+    status: LensStatusType | undefined,
     description: string | undefined,
     reqUserId: number,
   ): Promise<LensModel> {
@@ -81,6 +95,10 @@ export class LensService {
       { id: lens.id, deletedAt: IsNull() },
       {
         name: name,
+        brandId: brandId,
+        origin: origin,
+        lensType: lensType,
+        status: status,
         description: description,
         updatedAt: new Date(),
         updatedBy: reqUserId,

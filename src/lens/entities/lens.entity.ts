@@ -5,11 +5,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
-  ManyToOne,
-  OneToMany,
-  JoinColumn,
 } from 'typeorm';
 import { LensModel } from '../models/lens.model';
+import { LensStatusType } from '../enum/lens-status.type';
+import { LensType } from '../enum/lens.type';
 
 @Entity('lens')
 export class LensEntity {
@@ -18,6 +17,18 @@ export class LensEntity {
 
   @Column({ name: 'name', type: 'varchar', length: 255 })
   name!: string;
+
+  @Column({ name: 'brand_id' })
+  brandId!: number;
+
+  @Column({ name: 'origin' })
+  origin!: string;
+
+  @Column({ name: 'lens_type' })
+  lensType!: LensType;
+
+  @Column({ name: 'status' })
+  status!: LensStatusType;
 
   @Column({ name: 'description', type: 'text', nullable: true })
   description!: string | undefined;
@@ -55,6 +66,10 @@ export class LensEntity {
     return new LensModel(
       this.id,
       this.name,
+      this.brandId,
+      this.origin,
+      this.lensType,
+      this.status,
       this.description,
       this.createdAt,
       this.createdBy,
