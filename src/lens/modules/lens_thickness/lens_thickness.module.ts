@@ -8,6 +8,6 @@ import { LensThicknessController } from './lens_thickness.controller';
   imports: [TypeOrmModule.forFeature([LensThicknessEntity])],
   controllers: [LensThicknessController],
   providers: [LensThicknessService],
-  exports: [LensThicknessService, TypeOrmModule],
+  exports: [LensThicknessService],
 })
 export class LensThicknessModule {}

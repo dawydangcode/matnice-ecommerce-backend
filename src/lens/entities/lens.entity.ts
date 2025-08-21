@@ -21,13 +21,12 @@ export class LensEntity {
   @Column({ name: 'brand_id' })
   brandId!: number;
 
-  @Column({ name: 'origin' })
   origin!: string;
 
   @Column({ name: 'lens_type' })
   lensType!: LensType;
 
-  @Column({ name: 'status' })
+  @Column({ name: 'status', type: 'varchar', length: 50 })
   status!: LensStatusType;
 
   @Column({ name: 'description', type: 'text', nullable: true })

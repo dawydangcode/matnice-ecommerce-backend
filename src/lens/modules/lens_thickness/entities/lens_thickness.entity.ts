@@ -4,60 +4,58 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-  DeleteDateColumn,
 } from 'typeorm';
 import { LensThicknessModel } from '../models/lens_thickness.model';
 
 @Entity('lens_thickness')
 export class LensThicknessEntity {
-  @PrimaryGeneratedColumn({ name: 'id' })
+  @PrimaryGeneratedColumn({ type: 'bigint' })
   id!: number;
 
-  @Column({ name: 'name', type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 100, unique: true })
   name!: string;
 
-  @Column({ name: 'index_value', type: 'double' })
-  indexValue!: number;
+  @Column({ type: 'text', nullable: true })
+  description?: string;
 
-  @Column({
-    name: 'price',
-    type: 'decimal',
-    precision: 10,
-    scale: 2,
-  })
-  price!: number;
+  @Column({ type: 'decimal', precision: 8, scale: 2, nullable: true })
+  thickness?: number;
 
-  @Column({ name: 'description', type: 'varchar', length: 500, nullable: true })
-  description!: string | undefined;
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  unit?: string;
 
-  @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
+  @Column({ type: 'boolean', default: true })
+  isActive!: boolean;
+
+  @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
-  @Column({ name: 'created_by', type: 'bigint' })
-  createdBy!: number;
-
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt!: Date;
 
-  @Column({ name: 'updated_by', type: 'bigint' })
-  updatedBy!: number;
+  @Column({ name: 'created_by', type: 'bigint', nullable: true })
+  createdBy?: number;
 
-  @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
-  deletedAt!: Date | undefined;
+  @Column({ name: 'updated_by', type: 'bigint', nullable: true })
+  updatedBy?: number;
+
+  @Column({ name: 'deleted_at', type: 'timestamp', nullable: true })
+  deletedAt?: Date;
 
   @Column({ name: 'deleted_by', type: 'bigint', nullable: true })
-  deletedBy!: number | undefined;
+  deletedBy?: number;
 
   toModel(): LensThicknessModel {
     return new LensThicknessModel(
       this.id,
       this.name,
-      this.indexValue,
-      this.price,
       this.description,
+      this.thickness,
+      this.unit,
+      this.isActive,
       this.createdAt,
-      this.createdBy,
       this.updatedAt,
+      this.createdBy,
       this.updatedBy,
       this.deletedAt,
       this.deletedBy,
