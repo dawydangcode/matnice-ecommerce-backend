@@ -52,7 +52,6 @@ export class BrandController {
   ) {
     return await this.brandService.createBrand(
       body.name,
-      body.type,
       body.description,
       req.user.userId,
     );
@@ -68,7 +67,6 @@ export class BrandController {
     return await this.brandService.updateBrand(
       brand,
       body.name,
-      body.type,
       body.description,
       req.user.userId,
     );
