@@ -13,13 +13,13 @@ import { LensVariantEntity } from '../../lens_variant/entities/lens_variant.enti
 
 @Entity('lens_refraction_range')
 export class LensRefractionRangeEntity {
-  @PrimaryGeneratedColumn('increment', { type: 'bigint' })
+  @PrimaryGeneratedColumn({ name: 'id' })
   id!: number;
 
-  @Column({ name: 'lens_variant_id', type: 'bigint' })
+  @Column({ name: 'lens_variant_id' })
   lensVariantId!: number;
 
-  @Column({ name: 'refraction_type', type: 'varchar', length: 50 })
+  @Column({ name: 'refraction_type' })
   refractionType!: string; // SPH, CYL, ADD, AXIS
 
   @Column({ name: 'min_value', type: 'decimal', precision: 4, scale: 2 })
@@ -31,28 +31,28 @@ export class LensRefractionRangeEntity {
   @Column({ name: 'step_value', type: 'decimal', precision: 4, scale: 2 })
   stepValue!: number;
 
-  @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
+  @Column({ name: 'created_at', type: 'timestamp' })
   createdAt!: Date;
 
   @Column({ name: 'created_by', type: 'bigint' })
   createdBy!: number;
 
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp', nullable: true })
-  updatedAt?: Date;
+  @Column({ name: 'updated_at', type: 'timestamp', nullable: true })
+  updatedAt!: Date;
 
   @Column({ name: 'updated_by', type: 'bigint', nullable: true })
-  updatedBy?: number;
+  updatedBy!: number;
 
   @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
-  deletedAt?: Date;
+  deletedAt!: Date;
 
   @Column({ name: 'deleted_by', type: 'bigint', nullable: true })
-  deletedBy?: number;
+  deletedBy!: number;
 
   // Relations
   @ManyToOne(() => LensVariantEntity, { eager: false })
   @JoinColumn({ name: 'lens_variant_id' })
-  lensVariant?: LensVariantEntity;
+  lensVariant!: LensVariantEntity;
 
   toModel(): LensRefractionRangeModel {
     return new LensRefractionRangeModel(

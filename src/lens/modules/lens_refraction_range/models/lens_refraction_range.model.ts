@@ -5,12 +5,12 @@ export class LensRefractionRangeModel {
   public readonly minValue: number;
   public readonly maxValue: number;
   public readonly stepValue: number;
-  public readonly createdAt: Date;
-  public readonly createdBy: number;
-  public readonly updatedAt?: Date;
-  public readonly updatedBy?: number;
-  public readonly deletedAt?: Date;
-  public readonly deletedBy?: number;
+  public readonly createdAt: Date | undefined;
+  public readonly createdBy: number | undefined;
+  public readonly updatedAt: Date | undefined;
+  public readonly updatedBy: number | undefined;
+  public readonly deletedAt: Date | undefined;
+  public readonly deletedBy: number | undefined;
 
   constructor(
     id: number,
@@ -19,12 +19,12 @@ export class LensRefractionRangeModel {
     minValue: number,
     maxValue: number,
     stepValue: number,
-    createdAt: Date = new Date(),
-    createdBy: number = 0,
-    updatedAt?: Date,
-    updatedBy?: number,
-    deletedAt?: Date,
-    deletedBy?: number,
+    createdAt: Date | undefined,
+    createdBy: number | undefined,
+    updatedAt: Date | undefined,
+    updatedBy: number | undefined,
+    deletedAt: Date | undefined,
+    deletedBy: number | undefined,
   ) {
     this.id = id;
     this.lensVariantId = lensVariantId;
