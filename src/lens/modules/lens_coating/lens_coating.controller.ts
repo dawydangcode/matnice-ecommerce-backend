@@ -8,15 +8,8 @@ import {
   Param,
   Query,
   Req,
-  UseGuards,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiParam,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import {
   LensCoatingService,
   LensCoatingResponse,
@@ -34,16 +27,21 @@ import { RequestModel } from '../../../common/models/request.model';
 import { RoleType } from 'src/role/enum/role.enum';
 import { Roles } from 'src/role/decorators/roles.decorator';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
+import { LensService } from 'src/lens/lens.service';
 
 @ApiTags('Lens Coating')
 @Controller('api/v1/')
 @Roles(RoleType.Admin)
 export class LensCoatingController {
-  constructor(private readonly lensCoatingService: LensCoatingService) {}
+  constructor(
+    private readonly lensCoatingService: LensCoatingService,
+    private readonly lensService: LensService,
+  ) {}
 
   @Get('lens-coating/list')
   async findAll(@Query() query: GetLensCoatingsQueryDto) {
     return await this.lensCoatingService.getLensCoatings(
+      undefined,
       undefined,
       undefined,
       new PaginationParamsModel(query.page, query.limit),
@@ -66,7 +64,9 @@ export class LensCoatingController {
     @Body() body: CreateLensCoatingBodyDto,
     @Req() req: RequestModel,
   ): Promise<LensCoatingModel> {
+    const lens = await this.lensService.getLensById(body.lensId);
     return await this.lensCoatingService.createLensCoating(
+      lens,
       body.name,
       body.price,
       body.description,
@@ -85,6 +85,7 @@ export class LensCoatingController {
     );
     return await this.lensCoatingService.updateLensCoating(
       lensCoating,
+      body.lensId,
       body.name,
       body.price,
       body.description,

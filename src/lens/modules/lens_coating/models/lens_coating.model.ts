@@ -1,5 +1,6 @@
 export class LensCoatingModel {
   public readonly id: number;
+  public readonly lensId: number;
   public readonly name: string;
   public readonly price: number;
   public readonly description: string;
@@ -12,6 +13,7 @@ export class LensCoatingModel {
 
   constructor(
     id: number,
+    lensId: number,
     name: string,
     price: number,
     description: string,
@@ -23,6 +25,7 @@ export class LensCoatingModel {
     deletedBy: number | undefined,
   ) {
     this.id = id;
+    this.lensId = lensId;
     this.name = name;
     this.price = price;
     this.description = description;

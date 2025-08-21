@@ -20,6 +20,11 @@ export class LensCoatingDto {
   lensCoatingId!: number;
 
   @ApiProperty()
+  @IsNumber()
+  @Type(() => Number)
+  lensId!: number;
+
+  @ApiProperty()
   @IsString()
   name!: string;
 
@@ -63,6 +68,7 @@ export class GetLensCoatingParamsDto extends PickType(LensCoatingDto, [
 ]) {}
 
 export class CreateLensCoatingBodyDto extends PickType(LensCoatingDto, [
+  'lensId',
   'name',
   'price',
   'description',
@@ -73,7 +79,7 @@ export class UpdateLensCoatingParamsDto extends PickType(LensCoatingDto, [
 ]) {}
 
 export class UpdateLensCoatingBodyDto extends PartialType(
-  PickType(LensCoatingDto, ['name', 'price', 'description']),
+  PickType(LensCoatingDto, ['lensId', 'name', 'price', 'description']),
 ) {}
 
 export class DeleteLensCoatingParamsDto extends PickType(LensCoatingDto, [

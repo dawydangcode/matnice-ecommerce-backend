@@ -13,6 +13,9 @@ export class LensCoatingEntity {
   @PrimaryGeneratedColumn({ name: 'id' })
   id!: number;
 
+  @Column({ name: 'lens_id' })
+  lensId!: number;
+
   @Column({ name: 'name' })
   name!: string;
 
@@ -43,6 +46,7 @@ export class LensCoatingEntity {
   toModel(): LensCoatingModel {
     return new LensCoatingModel(
       this.id,
+      this.lensId,
       this.name,
       this.price,
       this.description,
