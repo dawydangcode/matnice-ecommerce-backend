@@ -33,12 +33,6 @@ export class LensThicknessDto {
   indexValue!: number;
 
   @ApiProperty()
-  @IsNumber()
-  @Type(() => Number)
-  @Min(0)
-  price!: number;
-
-  @ApiProperty()
   @IsString()
   @IsOptional()
   description!: string;
@@ -75,7 +69,6 @@ export class CreateLensThicknessBodyDto extends PickType(LensThicknessDto, [
   'name',
   'description',
   'indexValue',
-  'price',
 ]) {}
 
 export class UpdateLensThicknessParamsDto extends PickType(LensThicknessDto, [
@@ -83,7 +76,7 @@ export class UpdateLensThicknessParamsDto extends PickType(LensThicknessDto, [
 ]) {}
 
 export class UpdateLensThicknessBodyDto extends PartialType(
-  PickType(LensThicknessDto, ['name', 'description', 'indexValue', 'price']),
+  PickType(LensThicknessDto, ['name', 'description', 'indexValue']),
 ) {}
 
 export class DeleteLensThicknessParamsDto extends PickType(LensThicknessDto, [

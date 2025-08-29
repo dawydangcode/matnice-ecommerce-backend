@@ -64,14 +64,12 @@ export class LensThicknessService {
     name: string,
     description: string,
     indexValue: number,
-    price: number,
     reqUserId: number,
   ): Promise<LensThicknessModel> {
     const entity = new LensThicknessEntity();
     entity.name = name;
     entity.description = description;
     entity.indexValue = indexValue;
-    entity.price = price;
     entity.createdAt = new Date();
     entity.createdBy = reqUserId;
 
@@ -84,7 +82,6 @@ export class LensThicknessService {
     name: string | undefined,
     description: string | undefined,
     indexValue: number | undefined,
-    price: number | undefined,
     reqUserId: number,
   ): Promise<LensThicknessModel> {
     await this.lensThicknessRepository.update(
@@ -93,7 +90,6 @@ export class LensThicknessService {
         name: name,
         description: description,
         indexValue: indexValue,
-        price: price,
         updatedAt: new Date(),
         updatedBy: reqUserId,
       },

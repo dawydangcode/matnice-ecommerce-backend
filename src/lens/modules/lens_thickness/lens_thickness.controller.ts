@@ -60,7 +60,6 @@ export class LensThicknessController {
       body.name,
       body.description,
       body.indexValue,
-      body.price,
       req.user.userId,
     );
   }
@@ -80,7 +79,6 @@ export class LensThicknessController {
       body.name,
       body.description,
       body.indexValue,
-      body.price,
       req.user.userId,
     );
   }

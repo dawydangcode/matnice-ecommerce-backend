@@ -12,9 +12,6 @@ export class LensThicknessEntity {
   @Column({ name: 'index_value', type: 'decimal', precision: 3, scale: 2 })
   indexValue!: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  price!: number;
-
   @Column({ type: 'text', nullable: true })
   description!: string;
 
@@ -41,7 +38,6 @@ export class LensThicknessEntity {
       this.id,
       this.name,
       this.indexValue,
-      this.price,
       this.description,
       this.createdAt,
       this.updatedAt,

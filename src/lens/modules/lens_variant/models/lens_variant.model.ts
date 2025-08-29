@@ -2,31 +2,31 @@ export class LensVariantModel {
   public readonly id: number;
   public readonly lensId: number;
   public readonly lensThicknessId: number;
-  public readonly design?: string;
-  public readonly material?: string;
+  public readonly design: string;
+  public readonly material: string;
   public readonly price: number;
   public readonly stock: number;
-  public readonly createdAt: Date;
-  public readonly createdBy: number;
-  public readonly updatedAt?: Date;
-  public readonly updatedBy?: number;
-  public readonly deletedAt?: Date;
-  public readonly deletedBy?: number;
+  public readonly createdAt: Date | undefined;
+  public readonly createdBy: number | undefined;
+  public readonly updatedAt: Date | undefined;
+  public readonly updatedBy: number | undefined;
+  public readonly deletedAt: Date | undefined;
+  public readonly deletedBy: number | undefined;
 
   constructor(
     id: number,
     lensId: number,
     lensThicknessId: number,
-    design?: string,
-    material?: string,
-    price: number = 0,
-    stock: number = 0,
-    createdAt: Date = new Date(),
-    createdBy: number = 0,
-    updatedAt?: Date,
-    updatedBy?: number,
-    deletedAt?: Date,
-    deletedBy?: number,
+    design: string,
+    material: string,
+    price: number,
+    stock: number,
+    createdAt: Date | undefined,
+    createdBy: number | undefined,
+    updatedAt: Date | undefined,
+    updatedBy: number | undefined,
+    deletedAt: Date | undefined,
+    deletedBy: number | undefined,
   ) {
     this.id = id;
     this.lensId = lensId;

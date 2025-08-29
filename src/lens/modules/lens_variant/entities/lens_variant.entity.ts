@@ -14,20 +14,20 @@ import { LensVariantModel } from '../models/lens_variant.model';
 
 @Entity('lens_variant')
 export class LensVariantEntity {
-  @PrimaryGeneratedColumn('increment', { type: 'bigint' })
+  @PrimaryGeneratedColumn('increment', {})
   id!: number;
 
-  @Column({ name: 'lens_id', type: 'bigint' })
+  @Column({ name: 'lens_id' })
   lensId!: number;
 
-  @Column({ name: 'lens_thickness_id', type: 'bigint' })
+  @Column({ name: 'lens_thickness_id' })
   lensThicknessId!: number;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  design?: string;
+  @Column({ type: 'varchar', length: 255 })
+  design!: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  material?: string;
+  @Column({ type: 'varchar', length: 255 })
+  material!: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   price!: number;
@@ -35,32 +35,32 @@ export class LensVariantEntity {
   @Column({ type: 'int', default: 0 })
   stock!: number;
 
-  @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
+  @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
-  @Column({ name: 'created_by', type: 'bigint' })
+  @Column({ name: 'created_by' })
   createdBy!: number;
 
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp', nullable: true })
-  updatedAt?: Date;
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt!: Date;
 
-  @Column({ name: 'updated_by', type: 'bigint', nullable: true })
-  updatedBy?: number;
+  @Column({ name: 'updated_by' })
+  updatedBy!: number;
 
-  @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
-  deletedAt?: Date;
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deletedAt!: Date;
 
-  @Column({ name: 'deleted_by', type: 'bigint', nullable: true })
-  deletedBy?: number;
+  @Column({ name: 'deleted_by' })
+  deletedBy!: number;
 
   // Relations
   @ManyToOne(() => LensEntity, { eager: false })
   @JoinColumn({ name: 'lens_id' })
-  lens?: LensEntity;
+  lens!: LensEntity;
 
   @ManyToOne(() => LensThicknessEntity, { eager: false })
   @JoinColumn({ name: 'lens_thickness_id' })
-  lensThickness?: LensThicknessEntity;
+  lensThickness!: LensThicknessEntity;
 
   toModel(): LensVariantModel {
     return new LensVariantModel(

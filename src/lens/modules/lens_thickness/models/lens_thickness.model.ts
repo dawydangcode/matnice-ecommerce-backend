@@ -2,7 +2,6 @@ export class LensThicknessModel {
   public readonly id: number;
   public readonly name: string;
   public readonly indexValue: number;
-  public readonly price: number;
   public readonly description: string;
   public readonly createdAt: Date | undefined;
   public readonly updatedAt: Date | undefined;
@@ -15,7 +14,6 @@ export class LensThicknessModel {
     id: number,
     name: string,
     indexValue: number,
-    price: number,
     description: string,
     createdAt: Date | undefined,
     updatedAt: Date | undefined,
@@ -27,7 +25,6 @@ export class LensThicknessModel {
     this.id = id;
     this.name = name;
     this.indexValue = indexValue;
-    this.price = price;
     this.description = description;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
