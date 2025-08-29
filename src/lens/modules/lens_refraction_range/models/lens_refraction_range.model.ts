@@ -1,7 +1,9 @@
+import { LensRefractionType } from '../enum/lens-refraction.type';
+
 export class LensRefractionRangeModel {
   public readonly id: number;
   public readonly lensVariantId: number;
-  public readonly refractionType: string; // Cận, Loạn, Viễn, ADD
+  public readonly refractionType: LensRefractionType; // Cận, Loạn, Viễn, ADD
   public readonly minValue: number;
   public readonly maxValue: number;
   public readonly stepValue: number;
@@ -15,7 +17,7 @@ export class LensRefractionRangeModel {
   constructor(
     id: number,
     lensVariantId: number,
-    refractionType: string,
+    refractionType: LensRefractionType,
     minValue: number,
     maxValue: number,
     stepValue: number,

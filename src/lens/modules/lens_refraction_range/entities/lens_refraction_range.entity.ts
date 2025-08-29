@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { LensRefractionRangeModel } from '../models/lens_refraction_range.model';
 import { LensVariantEntity } from '../../lens_variant/entities/lens_variant.entity';
+import { LensRefractionType } from '../enum/lens-refraction.type';
 
 @Entity('lens_refraction_range')
 export class LensRefractionRangeEntity {
@@ -20,7 +21,7 @@ export class LensRefractionRangeEntity {
   lensVariantId!: number;
 
   @Column({ name: 'refraction_type' })
-  refractionType!: string; // SPH, CYL, ADD, AXIS
+  refractionType!: LensRefractionType; // SPH, CYL, ADD, AXIS
 
   @Column({ name: 'min_value', type: 'decimal', precision: 4, scale: 2 })
   minValue!: number;

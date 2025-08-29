@@ -26,8 +26,8 @@ export class LensRefractionRangeDto {
   @Type(() => Number)
   lensVariantId!: number;
 
-  @ApiProperty({ enum: LensRefractionType })
-  @IsEnum(LensRefractionType)
+  @ApiProperty()
+  @IsString()
   refractionType!: LensRefractionType;
 
   @ApiProperty()

@@ -11,13 +11,6 @@ import { LensVariantCoatingEntity } from '../lens_variant_coating/entities/lens_
 import { LensVariantEntity } from '../lens_variant/entities/lens_variant.entity';
 import { LensService } from 'src/lens/lens.service';
 
-export interface LensCoatingResponse {
-  data: LensCoatingModel[];
-  total: number;
-  page: number;
-  limit: number;
-}
-
 @Injectable()
 export class LensCoatingService {
   constructor(

@@ -10,10 +10,7 @@ import {
   Req,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import {
-  LensRefractionRangeService,
-  LensRefractionRangeResponse,
-} from './lens_refraction_range.service';
+import { LensRefractionRangeService } from './lens_refraction_range.service';
 import { LensRefractionRangeModel } from './models/lens_refraction_range.model';
 import {
   CreateLensRefractionRangeBodyDto,

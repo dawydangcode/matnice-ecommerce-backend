@@ -10,10 +10,7 @@ import {
   Req,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import {
-  LensThicknessService,
-  LensThicknessResponse,
-} from './lens_thickness.service';
+import { LensThicknessService } from './lens_thickness.service';
 import { LensThicknessModel } from './models/lens_thickness.model';
 import {
   CreateLensThicknessBodyDto,
@@ -41,7 +38,6 @@ export class LensThicknessController {
       undefined,
       new PaginationParamsModel(query.page, query.limit),
       query.q,
-      query.isActive,
       undefined,
     );
   }
@@ -63,9 +59,8 @@ export class LensThicknessController {
     return await this.lensThicknessService.createLensThickness(
       body.name,
       body.description,
-      body.thickness,
-      body.unit,
-      body.isActive,
+      body.indexValue,
+      body.price,
       req.user.userId,
     );
   }
@@ -84,9 +79,8 @@ export class LensThicknessController {
       lensThickness,
       body.name,
       body.description,
-      body.thickness,
-      body.unit,
-      body.isActive,
+      body.indexValue,
+      body.price,
       req.user.userId,
     );
   }

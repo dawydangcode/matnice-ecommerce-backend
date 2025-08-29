@@ -10,10 +10,7 @@ import {
   Req,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import {
-  LensCoatingService,
-  LensCoatingResponse,
-} from './lens_coating.service';
+import { LensCoatingService } from './lens_coating.service';
 import { LensCoatingModel } from './models/lens_coating.model';
 import {
   CreateLensCoatingBodyDto,

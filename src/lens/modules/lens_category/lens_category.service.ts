@@ -1,12 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { In, IsNull, Repository, SelectQueryBuilder } from 'typeorm';
 import { LensCategoryEntity } from './entities/lens_category.entity';
-import {
-  CreateLensCategoryDto,
-  LensCategoryFilterDto,
-} from './dtos/lens_category.dto';
+import { LensCategoryFilterDto } from './dtos/lens_category.dto';
 import { LensCategoryModel } from './models/lens_category.model';
+import { PageList } from 'src/common/models/page-list.model';
+import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
 
 @Injectable()
 export class LensCategoryService {
@@ -15,42 +14,28 @@ export class LensCategoryService {
     private readonly lensCategoryRepository: Repository<LensCategoryEntity>,
   ) {}
 
-  async findAll(filters: LensCategoryFilterDto): Promise<{
-    data: LensCategoryModel[];
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  }> {
-    const { page = 1, limit = 10, search } = filters;
-
-    const queryBuilder: SelectQueryBuilder<LensCategoryEntity> =
-      this.lensCategoryRepository
-        .createQueryBuilder('lensCategory')
-        .leftJoinAndSelect('lensCategory.lens', 'lens')
-        .where('lensCategory.deletedAt IS NULL');
-
-    if (search) {
-      queryBuilder.andWhere('lens.name ILIKE :search', {
-        search: `%${search}%`,
+  async getLensCategories(
+    lensCategoryIds: number[] | undefined,
+    lensIds: number[] | undefined,
+    categoryIds: number[] | undefined,
+    pagination: PaginationParamsModel | undefined,
+    relations: string[] | undefined,
+  ): Promise<PageList<LensCategoryModel>> {
+    const [lensCategories, total] =
+      await this.lensCategoryRepository.findAndCount({
+        where: {
+          id: lensCategoryIds ? In(lensCategoryIds) : undefined,
+          lensId: lensIds ? In(lensIds) : undefined,
+          categoryId: categoryIds ? In(categoryIds) : undefined,
+          deletedAt: IsNull(),
+        },
+        relations: relations,
+        ...pagination?.toQuery(),
       });
-    }
-
-    queryBuilder
-      .orderBy('lensCategory.id', 'ASC')
-      .skip((page - 1) * limit)
-      .limit(limit);
-
-    const [entities, total] = await queryBuilder.getManyAndCount();
-    const models = entities.map((entity) => entity.toModel());
-
-    return {
-      data: models,
+    return new PageList<LensCategoryModel>(
       total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-    };
+      lensCategories.map((category: LensCategoryEntity) => category.toModel()),
+    );
   }
 
   async findOne(id: number): Promise<LensCategoryModel> {
@@ -80,21 +65,23 @@ export class LensCategoryService {
     return entities.map((entity) => entity.toModel());
   }
 
-  async create(
-    createDto: CreateLensCategoryDto,
-    userId?: number,
+  async createLensCategory(
+    lensId: number,
+    categoryId: number,
+    reqUserId: number,
   ): Promise<LensCategoryModel> {
     const entity = this.lensCategoryRepository.create({
-      lensId: createDto.lensId,
-      categoryId: createDto.categoryId,
-      createdBy: userId || 0,
+      lensId: lensId,
+      categoryId: categoryId,
+      createdAt: new Date(),
+      createdBy: reqUserId,
     });
 
     const savedEntity = await this.lensCategoryRepository.save(entity);
     return savedEntity.toModel();
   }
 
-  async remove(id: number, userId?: number): Promise<void> {
+  async remove(id: number, reqUserId: number): Promise<void> {
     const entity = await this.lensCategoryRepository.findOne({
       where: { id, deletedAt: null } as any,
     });
@@ -104,7 +91,7 @@ export class LensCategoryService {
     }
 
     entity.deletedAt = new Date();
-    entity.deletedBy = userId;
+    entity.deletedBy = reqUserId;
 
     await this.lensCategoryRepository.save(entity);
   }

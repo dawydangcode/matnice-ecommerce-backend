@@ -1,10 +1,9 @@
 export class LensThicknessModel {
   public readonly id: number;
   public readonly name: string;
+  public readonly indexValue: number;
+  public readonly price: number;
   public readonly description: string;
-  public readonly thickness: number;
-  public readonly unit: string;
-  public readonly isActive: boolean;
   public readonly createdAt: Date | undefined;
   public readonly updatedAt: Date | undefined;
   public readonly createdBy: number | undefined;
@@ -15,10 +14,9 @@ export class LensThicknessModel {
   constructor(
     id: number,
     name: string,
+    indexValue: number,
+    price: number,
     description: string,
-    thickness: number,
-    unit: string,
-    isActive: boolean,
     createdAt: Date | undefined,
     updatedAt: Date | undefined,
     createdBy: number | undefined,
@@ -28,10 +26,9 @@ export class LensThicknessModel {
   ) {
     this.id = id;
     this.name = name;
+    this.indexValue = indexValue;
+    this.price = price;
     this.description = description;
-    this.thickness = thickness;
-    this.unit = unit;
-    this.isActive = isActive;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
     this.createdBy = createdBy;

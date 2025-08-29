@@ -25,7 +25,6 @@ export class LensThicknessService {
     name: string | undefined,
     pagination: PaginationParamsModel | undefined,
     search: string | undefined,
-    isActive: boolean | undefined,
     relations: string[] | undefined,
   ): Promise<PageList<LensThicknessModel>> {
     const [lensThicknesses, total] =
@@ -33,7 +32,6 @@ export class LensThicknessService {
         where: {
           id: lensThicknessIds ? In(lensThicknessIds) : undefined,
           name: search ? Like(`%${search}%`) : name,
-          isActive: isActive,
           deletedAt: IsNull(),
         },
         relations: relations,
@@ -65,17 +63,15 @@ export class LensThicknessService {
   async createLensThickness(
     name: string,
     description: string,
-    thickness: number,
-    unit: string,
-    isActive: boolean,
+    indexValue: number,
+    price: number,
     reqUserId: number,
   ): Promise<LensThicknessModel> {
     const entity = new LensThicknessEntity();
     entity.name = name;
     entity.description = description;
-    entity.thickness = thickness;
-    entity.unit = unit;
-    entity.isActive = isActive;
+    entity.indexValue = indexValue;
+    entity.price = price;
     entity.createdAt = new Date();
     entity.createdBy = reqUserId;
 
@@ -87,9 +83,8 @@ export class LensThicknessService {
     lensThickness: LensThicknessModel,
     name: string | undefined,
     description: string | undefined,
-    thickness: number | undefined,
-    unit: string | undefined,
-    isActive: boolean | undefined,
+    indexValue: number | undefined,
+    price: number | undefined,
     reqUserId: number,
   ): Promise<LensThicknessModel> {
     await this.lensThicknessRepository.update(
@@ -97,9 +92,8 @@ export class LensThicknessService {
       {
         name: name,
         description: description,
-        thickness: thickness,
-        unit: unit,
-        isActive: isActive,
+        indexValue: indexValue,
+        price: price,
         updatedAt: new Date(),
         updatedBy: reqUserId,
       },

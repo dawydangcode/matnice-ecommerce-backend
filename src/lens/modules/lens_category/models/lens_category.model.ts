@@ -2,23 +2,23 @@ export class LensCategoryModel {
   public readonly id: number;
   public readonly lensId: number;
   public readonly categoryId: number;
-  public readonly createdAt: Date;
-  public readonly createdBy: number;
-  public readonly updatedAt?: Date;
-  public readonly updatedBy?: number;
-  public readonly deletedAt?: Date;
-  public readonly deletedBy?: number;
+  public readonly createdAt: Date | undefined;
+  public readonly createdBy: number | undefined;
+  public readonly updatedAt: Date | undefined;
+  public readonly updatedBy: number | undefined;
+  public readonly deletedAt: Date | undefined;
+  public readonly deletedBy: number | undefined;
 
   constructor(
     id: number,
     lensId: number,
     categoryId: number,
-    createdAt: Date = new Date(),
-    createdBy: number = 0,
-    updatedAt?: Date,
-    updatedBy?: number,
-    deletedAt?: Date,
-    deletedBy?: number,
+    createdAt: Date | undefined,
+    createdBy: number | undefined,
+    updatedAt: Date | undefined,
+    updatedBy: number | undefined,
+    deletedAt: Date | undefined,
+    deletedBy: number | undefined,
   ) {
     this.id = id;
     this.lensId = lensId;

@@ -1,18 +1,59 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsString, IsOptional, IsNumber, Min } from 'class-validator';
-import { Transform, Type } from 'class-transformer';
+import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  Min,
+  IsPositive,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 
-export class CreateLensCategoryDto {
+export class LensCategoryDto {
   @ApiProperty()
   @IsNumber()
+  @Type(() => Number)
+  id!: number;
+
+  @ApiProperty()
+  @IsNumber()
+  @Type(() => Number)
   lensId!: number;
 
   @ApiProperty()
   @IsNumber()
+  @Type(() => Number)
   categoryId!: number;
+
+  @ApiProperty()
+  @IsPositive()
+  page!: number;
+
+  @ApiProperty()
+  @IsPositive()
+  limit!: number;
+
+  @ApiProperty()
+  @IsString()
+  q!: string;
 }
 
-export class UpdateLensCategoryDto extends PartialType(CreateLensCategoryDto) {}
+export class GetLensCategoriesQueryDto extends PartialType(
+  PickType(LensCategoryDto, ['page', 'limit', 'q']),
+) {}
+
+export class CreateLensCategoryBodyDto extends PickType(LensCategoryDto, [
+  'lensId',
+  'categoryId',
+]) {}
+
+export class UpdateLensCategoryDto extends PartialType(
+  PickType(LensCategoryDto, ['lensId', 'categoryId']),
+) {}
+
+export class GetLensCategoryByLensIdParamsDto extends PickType(
+  LensCategoryDto,
+  ['lensId'],
+) {}
 
 export class LensCategoryFilterDto {
   @ApiProperty({ required: false, example: 1 })
