@@ -13,43 +13,42 @@ import { LensVariantEntity } from '../../lens_variant/entities/lens_variant.enti
 
 @Entity('lens_tint_color')
 export class LensTintColorEntity {
-  @PrimaryGeneratedColumn('increment', { type: 'bigint' })
+  @PrimaryGeneratedColumn({ name: 'id' })
   id!: number;
 
-  @Column({ name: 'lens_variant_id', type: 'bigint' })
+  @Column({ name: 'lens_variant_id' })
   lensVariantId!: number;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar' })
   name!: string;
 
-  @Column({ name: 'image_url', type: 'varchar', length: 500, nullable: true })
-  imageUrl?: string;
+  @Column({ name: 'image_url' })
+  imageUrl!: string;
 
-  @Column({ name: 'color_code', type: 'varchar', length: 7, nullable: true })
-  colorCode?: string; // Hex color code like #808080
+  @Column({ name: 'color_code' })
+  colorCode!: string; // Hex color code like #808080
 
-  @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
+  @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
-  @Column({ name: 'created_by', type: 'bigint' })
+  @Column({ name: 'created_by' })
   createdBy!: number;
 
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp', nullable: true })
-  updatedAt?: Date;
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt!: Date;
 
-  @Column({ name: 'updated_by', type: 'bigint', nullable: true })
-  updatedBy?: number;
+  @Column({ name: 'updated_by' })
+  updatedBy!: number;
 
-  @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
-  deletedAt?: Date;
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deletedAt!: Date;
 
-  @Column({ name: 'deleted_by', type: 'bigint', nullable: true })
-  deletedBy?: number;
+  @Column({ name: 'deleted_by' })
+  deletedBy!: number;
 
-  // Relations
   @ManyToOne(() => LensVariantEntity, { eager: false })
   @JoinColumn({ name: 'lens_variant_id' })
-  lensVariant?: LensVariantEntity;
+  lensVariant!: LensVariantEntity;
 
   toModel(): LensTintColorModel {
     return new LensTintColorModel(
