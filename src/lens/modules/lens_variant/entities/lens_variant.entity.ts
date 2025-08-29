@@ -11,6 +11,7 @@ import {
 import { LensEntity } from '../../../entities/lens.entity';
 import { LensThicknessEntity } from '../../lens_thickness/entities/lens_thickness.entity';
 import { LensVariantModel } from '../models/lens_variant.model';
+import { LensMaterialsType } from '../enum/lens-materials.type';
 
 @Entity('lens_variant')
 export class LensVariantEntity {
@@ -27,7 +28,7 @@ export class LensVariantEntity {
   design!: string;
 
   @Column({ type: 'varchar', length: 255 })
-  material!: string;
+  material!: LensMaterialsType;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   price!: number;

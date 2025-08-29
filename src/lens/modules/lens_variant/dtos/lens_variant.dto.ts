@@ -12,12 +12,13 @@ import {
   IsPositive,
   Min,
 } from 'class-validator';
+import { LensMaterialsType } from '../enum/lens-materials.type';
 
 export class LensVariantDto {
   @ApiProperty()
   @IsNumber()
   @Type(() => Number)
-  id!: number;
+  lensVariantId!: number;
 
   @ApiProperty()
   @IsNumber()
@@ -37,7 +38,7 @@ export class LensVariantDto {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  material!: string;
+  material!: LensMaterialsType;
 
   @ApiProperty()
   @IsNumber()
@@ -71,6 +72,19 @@ export class LensVariantDto {
   search!: string;
 }
 
+export class GetLensVariantsQueryDto extends PartialType(
+  PickType(LensVariantDto, [
+    'page',
+    'limit',
+    'search',
+    'lensId',
+    'lensThicknessId',
+  ]),
+) {}
+
+export class GetLensVariantByIdParamsDto extends PickType(LensVariantDto, [
+  'lensVariantId',
+]) {}
 // Filters for listing
 export class LensVariantFiltersDto extends PartialType(
   PickType(LensVariantDto, [
@@ -81,10 +95,7 @@ export class LensVariantFiltersDto extends PartialType(
     'lensThicknessId',
   ]),
 ) {}
-
-export class LensVariantParamsDto extends PickType(LensVariantDto, ['id']) {}
-
-export class CreateLensVariantDto extends PickType(LensVariantDto, [
+export class CreateLensVariantBodyDto extends PickType(LensVariantDto, [
   'lensId',
   'lensThicknessId',
   'design',
@@ -93,6 +104,13 @@ export class CreateLensVariantDto extends PickType(LensVariantDto, [
   'stock',
 ]) {}
 
-export class UpdateLensVariantDto extends PartialType(
-  PickType(CreateLensVariantDto, ['design', 'material', 'price', 'stock']),
+export class UpdateLensVariantParamsDto extends PickType(LensVariantDto, [
+  'lensVariantId',
+]) {}
+export class UpdateLensVariantBodyDto extends PartialType(
+  PickType(CreateLensVariantBodyDto, ['design', 'material', 'price', 'stock']),
 ) {}
+
+export class DeleteLensVariantParamsDto extends PickType(LensVariantDto, [
+  'lensVariantId',
+]) {}

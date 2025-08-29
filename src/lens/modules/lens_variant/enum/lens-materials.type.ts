@@ -1,0 +1,8 @@
+export enum LensMaterialsType {
+  CR39 = 'CR39',
+  POLYCARBONATE = 'POLYCARBONATE',
+  HIGH_INDEX = 'HIGH_INDEX',
+  PHOTOCHROMIC = 'PHOTOCHROMIC',
+  TRIVEX = 'TRIVEX',
+  GLASS = 'GLASS',
+}

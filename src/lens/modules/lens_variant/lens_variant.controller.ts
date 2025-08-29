@@ -8,153 +8,105 @@ import {
   Param,
   Query,
   Req,
-  UseGuards,
-  Patch,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiParam,
-  ApiQuery,
-} from '@nestjs/swagger';
-import {
-  LensVariantService,
-  LensVariantResponse,
-} from './lens_variant.service';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { LensVariantService } from './lens_variant.service';
 import { LensVariantModel } from './models/lens_variant.model';
 import {
-  CreateLensVariantDto,
-  UpdateLensVariantDto,
-  LensVariantFiltersDto,
-  LensVariantParamsDto,
+  GetLensVariantByIdParamsDto,
+  GetLensVariantsQueryDto,
+  CreateLensVariantBodyDto,
+  UpdateLensVariantParamsDto,
+  UpdateLensVariantBodyDto,
+  DeleteLensVariantParamsDto,
 } from './dtos/lens_variant.dto';
 import { RequestModel } from '../../../common/models/request.model';
 import { RoleType } from 'src/role/enum/role.enum';
 import { Roles } from 'src/role/decorators/roles.decorator';
+import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
 
 @ApiTags('Lens Variant')
-@Controller('lens-variant')
+@Controller('api/v1/')
 @Roles(RoleType.Admin)
 export class LensVariantController {
   constructor(private readonly lensVariantService: LensVariantService) {}
 
-  @Get('list')
-  @ApiOperation({
-    summary: 'Get all lens variants with pagination and filters',
-  })
-  @ApiQuery({ name: 'page', required: false, example: 1 })
-  @ApiQuery({ name: 'limit', required: false, example: 10 })
-  @ApiQuery({ name: 'search', required: false, example: 'FSV' })
-  @ApiQuery({ name: 'lensId', required: false, example: 1 })
-  @ApiQuery({ name: 'lensThicknessId', required: false, example: 1 })
-  @ApiResponse({
-    status: 200,
-    description: 'List of lens variants retrieved successfully',
-  })
-  async findAll(
-    @Query() filters: LensVariantFiltersDto,
-  ): Promise<LensVariantResponse> {
-    return await this.lensVariantService.findAll(filters);
+  @Get('lens-variants/list')
+  async getLensVariant(@Query() query: GetLensVariantsQueryDto) {
+    return await this.lensVariantService.getLensVariants(
+      undefined,
+      query.lensId,
+      query.lensThicknessId,
+      new PaginationParamsModel(query.page, query.limit),
+      query.search,
+      undefined,
+    );
   }
 
-  @Get('by-lens/:lensId')
-  @ApiOperation({ summary: 'Get all variants for a specific lens' })
-  @ApiParam({ name: 'lensId', description: 'Lens ID', example: 1 })
-  @ApiResponse({
-    status: 200,
-    description: 'Lens variants retrieved successfully',
-  })
+  @Get('lens-variants/by-lens/:lensId')
   async findByLensId(
     @Param('lensId') lensId: number,
   ): Promise<LensVariantModel[]> {
     return await this.lensVariantService.findByLensId(lensId);
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get lens variant by ID' })
-  @ApiParam({ name: 'id', description: 'Lens variant ID', example: 1 })
-  @ApiResponse({
-    status: 200,
-    description: 'Lens variant retrieved successfully',
-  })
-  @ApiResponse({ status: 404, description: 'Lens variant not found' })
-  async findById(
-    @Param() params: LensVariantParamsDto,
+  @Get('lens-variant/:lensVariantId')
+  async getLensVariantById(
+    @Param() params: GetLensVariantByIdParamsDto,
   ): Promise<LensVariantModel> {
-    return await this.lensVariantService.findById(params.id);
+    return await this.lensVariantService.findById(params.lensVariantId);
   }
 
-  @Post('create')
-  @ApiOperation({ summary: 'Create a new lens variant' })
-  @ApiResponse({
-    status: 201,
-    description: 'Lens variant created successfully',
-  })
-  @ApiResponse({
-    status: 409,
-    description: 'Lens variant with this combination already exists',
-  })
-  async create(
-    @Body() createDto: CreateLensVariantDto,
+  @Post('lens-variant/create')
+  async createLensVariant(
+    @Body() body: CreateLensVariantBodyDto,
     @Req() req: RequestModel,
   ): Promise<LensVariantModel> {
-    return await this.lensVariantService.create(createDto, req.user.userId);
+    return await this.lensVariantService.createLensVariant(
+      body.lensId,
+      body.lensThicknessId,
+      body.design,
+      body.material,
+      body.price,
+      body.stock,
+      req.user.userId,
+    );
   }
 
-  @Put(':id')
-  @ApiOperation({ summary: 'Update lens variant by ID' })
-  @ApiParam({ name: 'id', description: 'Lens variant ID', example: 1 })
-  @ApiResponse({
-    status: 200,
-    description: 'Lens variant updated successfully',
-  })
-  @ApiResponse({ status: 404, description: 'Lens variant not found' })
+  @Put('lens-variant/:lensVariantId/update')
   async update(
-    @Param() params: LensVariantParamsDto,
-    @Body() updateDto: UpdateLensVariantDto,
+    @Param() params: UpdateLensVariantParamsDto,
+    @Body() body: UpdateLensVariantBodyDto,
     @Req() req: RequestModel,
   ): Promise<LensVariantModel> {
+    const lensVariant = await this.lensVariantService.findById(
+      params.lensVariantId,
+    );
+
     return await this.lensVariantService.update(
-      params.id,
-      updateDto,
+      lensVariant,
+      undefined,
+      undefined,
+      body.design,
+      body.material,
+      body.price,
+      body.stock,
       req.user.userId,
     );
   }
 
-  @Patch(':id/stock')
-  @ApiOperation({ summary: 'Update lens variant stock' })
-  @ApiParam({ name: 'id', description: 'Lens variant ID', example: 1 })
-  @ApiResponse({ status: 200, description: 'Stock updated successfully' })
-  @ApiResponse({ status: 404, description: 'Lens variant not found' })
-  async updateStock(
-    @Param() params: LensVariantParamsDto,
-    @Body('stock') stock: number,
+  @Delete('lens-variant/:lensVariantId/delete')
+  async deleteLensVariant(
+    @Param() params: DeleteLensVariantParamsDto,
     @Req() req: RequestModel,
-  ): Promise<LensVariantModel> {
-    return await this.lensVariantService.updateStock(
-      params.id,
-      stock,
-      req.user.userId,
+  ): Promise<boolean> {
+    const lensVariant = await this.lensVariantService.findById(
+      params.lensVariantId,
     );
-  }
 
-  @Delete(':id')
-  @ApiOperation({ summary: 'Delete lens variant by ID (soft delete)' })
-  @ApiParam({ name: 'id', description: 'Lens variant ID', example: 1 })
-  @ApiResponse({
-    status: 200,
-    description: 'Lens variant deleted successfully',
-  })
-  @ApiResponse({ status: 404, description: 'Lens variant not found' })
-  async delete(
-    @Param() params: LensVariantParamsDto,
-    @Req() req: RequestModel,
-  ): Promise<{ success: boolean }> {
-    const success = await this.lensVariantService.delete(
-      params.id,
+    return await this.lensVariantService.deleteLensVariant(
+      lensVariant,
       req.user.userId,
     );
-    return { success };
   }
 }

@@ -1,13 +1,12 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, Repository } from 'typeorm';
+import { In, IsNull, Repository } from 'typeorm';
 import { LensVariantEntity } from './entities/lens_variant.entity';
 import { LensVariantModel } from './models/lens_variant.model';
-import {
-  CreateLensVariantDto,
-  UpdateLensVariantDto,
-  LensVariantFiltersDto,
-} from './dtos/lens_variant.dto';
+import {} from './dtos/lens_variant.dto';
+import { PageList } from 'src/common/models/page-list.model';
+import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
+import { LensMaterialsType } from './enum/lens-materials.type';
 
 export interface LensVariantResponse {
   data: LensVariantModel[];
@@ -23,47 +22,29 @@ export class LensVariantService {
     private readonly lensVariantRepository: Repository<LensVariantEntity>,
   ) {}
 
-  async findAll(
-    filters: LensVariantFiltersDto = {},
-  ): Promise<LensVariantResponse> {
-    const { page = 1, limit = 10, search, lensId, lensThicknessId } = filters;
-    const skip = (page - 1) * limit;
+  async getLensVariants(
+    lensVariantIds: number[] | undefined,
+    lensId: number | undefined,
+    lensThicknessId: number | undefined,
+    pagination: PaginationParamsModel | undefined,
+    search: string | undefined,
+    relations: string[] | undefined,
+  ): Promise<PageList<LensVariantModel>> {
+    const [variants, total] = await this.lensVariantRepository.findAndCount({
+      where: {
+        id: lensVariantIds ? In(lensVariantIds) : undefined,
+        lensId: lensId,
+        lensThicknessId: lensThicknessId,
+        deletedAt: IsNull(),
+      },
+      relations: relations,
+      ...pagination?.toQuery(),
+    });
 
-    const queryBuilder = this.lensVariantRepository
-      .createQueryBuilder('variant')
-      .leftJoinAndSelect('variant.lens', 'lens')
-      .leftJoinAndSelect('variant.lensThickness', 'thickness')
-      .where('variant.deleted_at IS NULL');
-
-    if (search) {
-      queryBuilder.andWhere(
-        '(variant.design LIKE :search OR variant.material LIKE :search OR lens.name LIKE :search)',
-        { search: `%${search}%` },
-      );
-    }
-
-    if (lensId) {
-      queryBuilder.andWhere('variant.lens_id = :lensId', { lensId });
-    }
-
-    if (lensThicknessId) {
-      queryBuilder.andWhere('variant.lens_thickness_id = :lensThicknessId', {
-        lensThicknessId,
-      });
-    }
-
-    const [variants, total] = await queryBuilder
-      .orderBy('variant.created_at', 'DESC')
-      .skip(skip)
-      .take(limit)
-      .getManyAndCount();
-
-    return {
-      data: variants.map((variant) => variant.toModel()),
+    return new PageList<LensVariantModel>(
       total,
-      page,
-      limit,
-    };
+      variants.map((variant: LensVariantEntity) => variant.toModel()),
+    );
   }
 
   async findById(id: number): Promise<LensVariantModel> {
@@ -89,109 +70,68 @@ export class LensVariantService {
     return variants.map((variant) => variant.toModel());
   }
 
-  async create(
-    createDto: CreateLensVariantDto,
+  async createLensVariant(
+    lensId: number,
+    lensThicknessId: number,
+    design: string,
+    material: LensMaterialsType,
+    price: number,
+    stock: number,
     reqUserId: number,
   ): Promise<LensVariantModel> {
-    // Check if lens and thickness exist (basic validation)
-    const whereCondition: any = {
-      lensId: createDto.lensId,
-      lensThicknessId: createDto.lensThicknessId,
-      deletedAt: IsNull(),
-    };
+    const entity = new LensVariantEntity();
+    entity.lensId = lensId;
+    entity.lensThicknessId = lensThicknessId;
+    entity.design = design;
+    entity.material = material;
+    entity.price = price;
+    entity.stock = stock;
+    entity.createdAt = new Date();
+    entity.createdBy = reqUserId;
 
-    if (createDto.design) {
-      whereCondition.design = createDto.design;
-    }
-
-    if (createDto.material) {
-      whereCondition.material = createDto.material;
-    }
-
-    const existingVariant = await this.lensVariantRepository.findOne({
-      where: whereCondition,
-    });
-
-    if (existingVariant) {
-      throw new HttpException(
-        'Lens variant with this combination already exists',
-        HttpStatus.CONFLICT,
-      );
-    }
-
-    const variant = new LensVariantEntity();
-    variant.lensId = createDto.lensId;
-    variant.lensThicknessId = createDto.lensThicknessId;
-    variant.design = createDto.design;
-    variant.material = createDto.material;
-    variant.price = createDto.price;
-    variant.stock = createDto.stock || 0;
-    variant.createdAt = new Date();
-    variant.createdBy = reqUserId;
-
-    const savedVariant = await this.lensVariantRepository.save(variant);
+    const savedVariant = await this.lensVariantRepository.save(entity);
     return savedVariant.toModel();
   }
 
   async update(
-    id: number,
-    updateDto: UpdateLensVariantDto,
+    lensVariant: LensVariantModel,
+    lensId: number | undefined,
+    lensThicknessId: number | undefined,
+    design: string | undefined,
+    material: LensMaterialsType | undefined,
+    price: number | undefined,
+    stock: number | undefined,
     reqUserId: number,
   ): Promise<LensVariantModel> {
-    const variant = await this.lensVariantRepository.findOne({
-      where: { id, deletedAt: IsNull() },
-    });
+    await this.lensVariantRepository.update(
+      { id: lensVariant.id, deletedAt: IsNull() },
+      {
+        lensId: lensId,
+        lensThicknessId: lensThicknessId,
+        design: design,
+        material: material,
+        price: price,
+        stock: stock,
+        updatedAt: new Date(),
+        updatedBy: reqUserId,
+      },
+    );
 
-    if (!variant) {
-      throw new HttpException('Lens variant not found', HttpStatus.NOT_FOUND);
-    }
-
-    if (updateDto.design !== undefined) variant.design = updateDto.design;
-    if (updateDto.material !== undefined) variant.material = updateDto.material;
-    if (updateDto.price !== undefined) variant.price = updateDto.price;
-    if (updateDto.stock !== undefined) variant.stock = updateDto.stock;
-
-    variant.updatedAt = new Date();
-    variant.updatedBy = reqUserId;
-
-    const savedVariant = await this.lensVariantRepository.save(variant);
-    return savedVariant.toModel();
+    return await this.findById(lensVariant.id);
   }
 
-  async updateStock(
-    id: number,
-    newStock: number,
+  async deleteLensVariant(
+    lensVariant: LensVariantModel,
     reqUserId: number,
-  ): Promise<LensVariantModel> {
-    const variant = await this.lensVariantRepository.findOne({
-      where: { id, deletedAt: IsNull() },
-    });
+  ): Promise<boolean> {
+    await this.lensVariantRepository.update(
+      { id: lensVariant.id, deletedAt: IsNull() },
+      {
+        deletedAt: new Date(),
+        deletedBy: reqUserId,
+      },
+    );
 
-    if (!variant) {
-      throw new HttpException('Lens variant not found', HttpStatus.NOT_FOUND);
-    }
-
-    variant.stock = newStock;
-    variant.updatedAt = new Date();
-    variant.updatedBy = reqUserId;
-
-    const savedVariant = await this.lensVariantRepository.save(variant);
-    return savedVariant.toModel();
-  }
-
-  async delete(id: number, reqUserId: number): Promise<boolean> {
-    const variant = await this.lensVariantRepository.findOne({
-      where: { id, deletedAt: IsNull() },
-    });
-
-    if (!variant) {
-      throw new HttpException('Lens variant not found', HttpStatus.NOT_FOUND);
-    }
-
-    variant.deletedAt = new Date();
-    variant.deletedBy = reqUserId;
-
-    await this.lensVariantRepository.save(variant);
     return true;
   }
 }
