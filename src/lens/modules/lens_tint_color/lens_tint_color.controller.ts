@@ -8,8 +8,11 @@ import {
   Param,
   Query,
   Req,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiTags, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { LensTintColorService } from './lens_tint_color.service';
 import { LensTintColorModel } from './models/lens_tint_color.model';
 import {
@@ -19,6 +22,7 @@ import {
   GetLensTintColorsQueryDto,
   UpdateLensTintColorBodyDto,
   UpdateLensTintColorParamsDto,
+  UploadLensTintColorImageDto,
 } from './dtos/lens_tint_color.dto';
 import { RequestModel } from '../../../common/models/request.model';
 import { RoleType } from 'src/role/enum/role.enum';
@@ -53,23 +57,56 @@ export class LensTintColorController {
   }
 
   @Post('lens-tint-color')
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        lensVariantId: { type: 'number' },
+        name: { type: 'string' },
+        colorCode: { type: 'string' },
+        image: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
   async create(
     @Body() body: CreateLensTintColorBodyDto,
+    @UploadedFile() image: Express.Multer.File,
     @Req() req: RequestModel,
   ): Promise<LensTintColorModel> {
     return await this.lensTintColorService.createLensTintColor(
       body.lensVariantId,
       body.name,
-      body.imageUrl,
+      image,
       body.colorCode,
       req.user.userId,
     );
   }
 
   @Put('lens-tint-color/:lensTintColorId')
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+        colorCode: { type: 'string' },
+        image: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
   async update(
     @Param() params: UpdateLensTintColorParamsDto,
     @Body() body: UpdateLensTintColorBodyDto,
+    @UploadedFile() image: Express.Multer.File,
     @Req() req: RequestModel,
   ): Promise<LensTintColorModel> {
     const lensTintColor = await this.lensTintColorService.getLensTintColorById(
@@ -79,7 +116,7 @@ export class LensTintColorController {
     return await this.lensTintColorService.updateLensTintColor(
       lensTintColor,
       body.name,
-      body.imageUrl,
+      image,
       body.colorCode,
       req.user.userId,
     );
@@ -98,5 +135,32 @@ export class LensTintColorController {
       lensTintColor,
       req.user.userId,
     );
+  }
+
+  @Post('lens-tint-color/upload-image')
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        lensVariantId: { type: 'number' },
+        image: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  async uploadImage(
+    @Body() body: UploadLensTintColorImageDto,
+    @UploadedFile() image: Express.Multer.File,
+  ): Promise<{ imageUrl: string }> {
+    const imageUrl = await this.lensTintColorService.uploadLensTintColorImage(
+      body.lensVariantId,
+      image,
+    );
+
+    return { imageUrl };
   }
 }

@@ -5,12 +5,14 @@ import { LensTintColorEntity } from './entities/lens_tint_color.entity';
 import { LensTintColorModel } from './models/lens_tint_color.model';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
 import { PageList } from 'src/common/models/page-list.model';
+import { AwsS3Service } from 'src/common/services/aws-s3.service';
 
 @Injectable()
 export class LensTintColorService {
   constructor(
     @InjectRepository(LensTintColorEntity)
     private readonly lensTintColorRepository: Repository<LensTintColorEntity>,
+    private readonly awsS3Service: AwsS3Service,
   ) {}
 
   async getLensTintColors(
@@ -61,15 +63,43 @@ export class LensTintColorService {
   async createLensTintColor(
     lensVariantId: number,
     name: string,
-    imageUrl: string,
-    colorCode: string,
+    imageFile: Express.Multer.File | undefined,
+    colorCode: string | undefined,
     reqUserId: number,
   ): Promise<LensTintColorModel> {
+    let imageUrl: string | undefined;
+
+    // Upload image to S3 if provided
+    if (imageFile) {
+      try {
+        const folderPath = `lens_tint_color/${lensVariantId}`;
+        const fileName = `${Date.now()}_${imageFile.originalname}`;
+
+        imageUrl = await this.awsS3Service.uploadFile(
+          imageFile.buffer,
+          fileName,
+          imageFile.mimetype,
+          folderPath,
+          false,
+        );
+      } catch (error) {
+        console.error('Failed to upload image to S3:', error);
+        throw new HttpException(
+          'Failed to upload image',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+
     const entity = new LensTintColorEntity();
     entity.lensVariantId = lensVariantId;
     entity.name = name;
-    entity.imageUrl = imageUrl;
-    entity.colorCode = colorCode;
+    if (imageUrl) {
+      entity.imageUrl = imageUrl;
+    }
+    if (colorCode) {
+      entity.colorCode = colorCode;
+    }
     entity.createdAt = new Date();
     entity.createdBy = reqUserId;
 
@@ -80,19 +110,51 @@ export class LensTintColorService {
   async updateLensTintColor(
     lensTintColor: LensTintColorModel,
     name: string | undefined,
-    imageUrl: string | undefined,
+    imageFile: Express.Multer.File | undefined,
     colorCode: string | undefined,
     reqUserId: number,
   ): Promise<LensTintColorModel> {
+    let imageUrl: string | undefined;
+
+    // Upload new image to S3 if provided
+    if (imageFile) {
+      try {
+        // Delete old image if exists
+        if (lensTintColor.imageUrl) {
+          await this.awsS3Service.deleteFile(lensTintColor.imageUrl);
+        }
+
+        const folderPath = `lens_tint_color/${lensTintColor.lensVariantId}`;
+        const fileName = `${Date.now()}_${imageFile.originalname}`;
+
+        imageUrl = await this.awsS3Service.uploadFile(
+          imageFile.buffer,
+          fileName,
+          imageFile.mimetype,
+          folderPath,
+          false,
+        );
+      } catch (error) {
+        console.error('Failed to upload image to S3:', error);
+        throw new HttpException(
+          'Failed to upload image',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+
+    const updateData: any = {
+      updatedAt: new Date(),
+      updatedBy: reqUserId,
+    };
+
+    if (name !== undefined) updateData.name = name;
+    if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
+    if (colorCode !== undefined) updateData.colorCode = colorCode;
+
     await this.lensTintColorRepository.update(
       { id: lensTintColor.id, deletedAt: IsNull() },
-      {
-        name: name,
-        imageUrl: imageUrl,
-        colorCode: colorCode,
-        updatedAt: new Date(),
-        updatedBy: reqUserId,
-      },
+      updateData,
     );
 
     return await this.getLensTintColorById(lensTintColor.id);
@@ -102,6 +164,16 @@ export class LensTintColorService {
     lensTintColor: LensTintColorModel,
     reqUserId: number,
   ): Promise<boolean> {
+    // Delete image from S3 if exists
+    if (lensTintColor.imageUrl) {
+      try {
+        await this.awsS3Service.deleteFile(lensTintColor.imageUrl);
+      } catch (error) {
+        console.error('Failed to delete image from S3:', error);
+        // Continue with soft delete even if S3 deletion fails
+      }
+    }
+
     await this.lensTintColorRepository.update(
       { id: lensTintColor.id, deletedAt: IsNull() },
       {
@@ -111,5 +183,35 @@ export class LensTintColorService {
     );
 
     return true;
+  }
+
+  /**
+   * Upload image for lens tint color to S3
+   * @param lensVariantId - The lens variant ID for folder structure
+   * @param imageFile - The image file to upload
+   * @returns The S3 URL of uploaded image
+   */
+  async uploadLensTintColorImage(
+    lensVariantId: number,
+    imageFile: Express.Multer.File,
+  ): Promise<string> {
+    try {
+      const folderPath = `lens_tint_color/${lensVariantId}`;
+      const fileName = `${Date.now()}_${imageFile.originalname}`;
+
+      return await this.awsS3Service.uploadFile(
+        imageFile.buffer,
+        fileName,
+        imageFile.mimetype,
+        folderPath,
+        false,
+      );
+    } catch (error) {
+      console.error('Failed to upload image to S3:', error);
+      throw new HttpException(
+        'Failed to upload image',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }

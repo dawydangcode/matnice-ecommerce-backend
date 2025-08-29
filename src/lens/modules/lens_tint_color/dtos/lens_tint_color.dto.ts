@@ -74,7 +74,6 @@ export class GetLensTintColorParamsDto extends PickType(LensTintColorDto, [
 export class CreateLensTintColorBodyDto extends PickType(LensTintColorDto, [
   'lensVariantId',
   'name',
-  'imageUrl',
   'colorCode',
 ]) {}
 
@@ -83,9 +82,13 @@ export class UpdateLensTintColorParamsDto extends PickType(LensTintColorDto, [
 ]) {}
 
 export class UpdateLensTintColorBodyDto extends PartialType(
-  PickType(LensTintColorDto, ['name', 'imageUrl', 'colorCode']),
+  PickType(LensTintColorDto, ['name', 'colorCode']),
 ) {}
 
 export class DeleteLensTintColorParamsDto extends PickType(LensTintColorDto, [
   'lensTintColorId',
+]) {}
+
+export class UploadLensTintColorImageDto extends PickType(LensTintColorDto, [
+  'lensVariantId',
 ]) {}
