@@ -1,10 +1,11 @@
 import { LensMaterialsType } from '../enum/lens-materials.type';
+import { LensDesignType } from '../enum/lens_design.type';
 
 export class LensVariantModel {
   public readonly id: number;
   public readonly lensId: number;
   public readonly lensThicknessId: number;
-  public readonly design: string;
+  public readonly design: LensDesignType;
   public readonly material: LensMaterialsType;
   public readonly price: number;
   public readonly stock: number;
@@ -19,7 +20,7 @@ export class LensVariantModel {
     id: number,
     lensId: number,
     lensThicknessId: number,
-    design: string,
+    design: LensDesignType,
     material: LensMaterialsType,
     price: number,
     stock: number,

@@ -7,6 +7,7 @@ import {} from './dtos/lens_variant.dto';
 import { PageList } from 'src/common/models/page-list.model';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
 import { LensMaterialsType } from './enum/lens-materials.type';
+import { LensDesignType } from './enum/lens_design.type';
 
 export interface LensVariantResponse {
   data: LensVariantModel[];
@@ -73,7 +74,7 @@ export class LensVariantService {
   async createLensVariant(
     lensId: number,
     lensThicknessId: number,
-    design: string,
+    design: LensDesignType,
     material: LensMaterialsType,
     price: number,
     stock: number,
@@ -97,7 +98,7 @@ export class LensVariantService {
     lensVariant: LensVariantModel,
     lensId: number | undefined,
     lensThicknessId: number | undefined,
-    design: string | undefined,
+    design: LensDesignType | undefined,
     material: LensMaterialsType | undefined,
     price: number | undefined,
     stock: number | undefined,

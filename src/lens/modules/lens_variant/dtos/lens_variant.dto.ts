@@ -13,6 +13,7 @@ import {
   Min,
 } from 'class-validator';
 import { LensMaterialsType } from '../enum/lens-materials.type';
+import { LensDesignType } from '../enum/lens_design.type';
 
 export class LensVariantDto {
   @ApiProperty()
@@ -33,7 +34,7 @@ export class LensVariantDto {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  design!: string;
+  design!: LensDesignType;
 
   @ApiProperty()
   @IsString()
