@@ -23,6 +23,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/role/decorators/roles.decorator';
 import { RoleType } from 'src/role/enum/role.enum';
 import { RequestModel } from 'src/common/models/request.model';
+import { Public } from 'src/middlewares/guards/jwt-auth.guard';
 
 @Controller('api/v1')
 @ApiTags('Brand')
@@ -81,6 +82,7 @@ export class BrandController {
     return await this.brandService.deleteBrand(brand, req.user.userId);
   }
 
+  @Public()
   @Get('brand/getBrandsForFilter')
   async getBrandsForFilter() {
     return await this.brandService.getBrandsForFilter();
