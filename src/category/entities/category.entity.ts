@@ -5,7 +5,6 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { CategoryModel } from '../models/category.model';
-import { CategoryType } from '../enum/category.type';
 
 @Entity('category')
 export class CategoryEntity {
@@ -14,9 +13,6 @@ export class CategoryEntity {
 
   @Column({ name: 'name' })
   name!: string;
-
-  @Column({ name: 'type' })
-  type!: CategoryType;
 
   @Column({ name: 'description' })
   description!: string;
@@ -43,7 +39,6 @@ export class CategoryEntity {
     return new CategoryModel(
       this.id,
       this.name,
-      this.type,
       this.description,
       this.createdAt,
       this.createdBy,
