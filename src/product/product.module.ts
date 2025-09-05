@@ -8,6 +8,7 @@ import { ProductDetailModule } from './modules/product-detail/product-detail.mod
 import { ProductImageModule } from './modules/product-image/product-image.module';
 import { ProductCategoryModule } from './modules/product-category/product-category.module';
 import { ProductThicknessCompatibilityModule } from './modules/product-thickness-compatibility/product-thickness-compatibility.module';
+import { Product3dModelModule } from './modules/product-3d-model/product-3d-model.module';
 import { ProductSchedulerService } from './services/product-scheduler.service';
 
 @Module({
@@ -17,6 +18,7 @@ import { ProductSchedulerService } from './services/product-scheduler.service';
     ProductDetailModule,
     ProductCategoryModule,
     ProductThicknessCompatibilityModule,
+    Product3dModelModule,
     forwardRef(() => ProductImageModule),
   ],
   controllers: [ProductController],
@@ -28,6 +30,7 @@ import { ProductSchedulerService } from './services/product-scheduler.service';
     ProductImageModule,
     ProductCategoryModule,
     ProductThicknessCompatibilityModule,
+    Product3dModelModule,
   ],
 })
 export class ProductModule {}
