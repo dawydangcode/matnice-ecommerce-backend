@@ -1,3 +1,4 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsNotEmpty,
   IsString,
@@ -6,147 +7,109 @@ import {
   IsNumber,
   MaxLength,
 } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateProduct3dModelDto {
-  @ApiProperty({ description: 'Product ID' })
+  @ApiProperty()
   @IsNotEmpty()
   @IsNumber()
   productId!: number;
 
-  @ApiProperty({ description: 'Type of 3D model', example: 'glb' })
-  @IsNotEmpty()
-  @IsString()
-  @MaxLength(50)
-  modelType!: string;
-
-  @ApiProperty({ description: 'File extension', example: '.glb' })
-  @IsNotEmpty()
-  @IsString()
-  @MaxLength(10)
-  fileType!: string;
-
-  @ApiProperty({ description: 'URL to the 3D model file' })
-  @IsNotEmpty()
-  @IsString()
-  @MaxLength(500)
-  fileUrl!: string;
-
-  @ApiProperty({ description: 'Original filename' })
+  @ApiProperty()
   @IsNotEmpty()
   @IsString()
   @MaxLength(255)
-  fileName!: string;
+  modelName!: string;
 
-  @ApiPropertyOptional({ description: 'File size in bytes' })
-  @IsOptional()
-  @IsNumber()
-  fileSize!: number;
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(255)
+  modelFilePath!: string;
 
-  @ApiPropertyOptional({
-    description: 'Is this the primary 3D model for the product',
-    default: false,
-  })
-  @IsOptional()
-  @IsBoolean()
-  isPrimary!: boolean;
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(255)
+  modelType!: string;
 
-  @ApiPropertyOptional({ description: 'Thumbnail URL for preview' })
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  @MaxLength(500)
-  thumbnailUrl!: string;
+  @MaxLength(255)
+  mtlFilePath?: string;
 
-  @ApiPropertyOptional({
-    description: 'Additional metadata',
-    example: '{ "textures"!: ["texture1.jpg"], "animations"!: [] }',
-  })
+  @ApiPropertyOptional()
   @IsOptional()
-  metadata!: Record<string, any>;
+  @IsString()
+  @MaxLength(255)
+  textureBasePath?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  configJson?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
 }
 
 export class UpdateProduct3dModelDto {
-  @ApiPropertyOptional({ description: 'Type of 3D model', example: 'glb' })
-  @IsOptional()
-  @IsString()
-  @MaxLength(50)
-  modelType!: string;
-
-  @ApiPropertyOptional({ description: 'File extension', example: '.glb' })
-  @IsOptional()
-  @IsString()
-  @MaxLength(10)
-  fileType!: string;
-
-  @ApiPropertyOptional({ description: 'URL to the 3D model file' })
-  @IsOptional()
-  @IsString()
-  @MaxLength(500)
-  fileUrl!: string;
-
-  @ApiPropertyOptional({ description: 'Original filename' })
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   @MaxLength(255)
-  fileName!: string;
+  modelName?: string;
 
-  @ApiPropertyOptional({ description: 'File size in bytes' })
-  @IsOptional()
-  @IsNumber()
-  fileSize!: number;
-
-  @ApiPropertyOptional({
-    description: 'Is this the primary 3D model for the product',
-  })
-  @IsOptional()
-  @IsBoolean()
-  isPrimary!: boolean;
-
-  @ApiPropertyOptional({ description: 'Thumbnail URL for preview' })
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  @MaxLength(500)
-  thumbnailUrl!: string;
+  @MaxLength(255)
+  modelFilePath?: string;
 
-  @ApiPropertyOptional({ description: 'Additional metadata' })
+  @ApiPropertyOptional()
   @IsOptional()
-  metadata!: Record<string, any>;
+  @IsString()
+  @MaxLength(255)
+  modelType?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  mtlFilePath?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  textureBasePath?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  configJson?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
 }
 
-export class Product3dModelResponseDto {
-  @ApiProperty()
-  id!: number;
+export class Product3dModelQueryDto {
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  productId?: number;
 
-  @ApiProperty()
-  productId!: number;
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  modelType?: string;
 
-  @ApiProperty()
-  modelType!: string;
-
-  @ApiProperty()
-  fileType!: string;
-
-  @ApiProperty()
-  fileUrl!: string;
-
-  @ApiProperty()
-  fileName!: string;
-
-  @ApiPropertyOptional()
-  fileSize!: number;
-
-  @ApiProperty()
-  isPrimary!: boolean;
-
-  @ApiPropertyOptional()
-  thumbnailUrl!: string;
-
-  @ApiPropertyOptional()
-  metadata!: Record<string, any>;
-
-  @ApiProperty()
-  createdAt!: Date;
-
-  @ApiProperty()
-  updatedAt!: Date;
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
 }

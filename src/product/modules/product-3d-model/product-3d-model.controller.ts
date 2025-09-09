@@ -21,7 +21,7 @@ import { Product3dModelService } from './product-3d-model.service';
 import {
   CreateProduct3dModelDto,
   UpdateProduct3dModelDto,
-  Product3dModelResponseDto,
+  Product3dModelQueryDto,
 } from './dtos/product-3d-model.dto';
 import { JwtAuthGuard } from '../../../middlewares/guards/jwt-auth.guard';
 import { Request } from 'express';
@@ -38,14 +38,24 @@ export class Product3dModelController {
   @ApiResponse({
     status: HttpStatus.CREATED,
     description: '3D model created successfully',
-    type: Product3dModelResponseDto,
   })
   async create(
     @Body() createDto: CreateProduct3dModelDto,
     @Req() req: Request,
   ) {
     const userId = (req.user as any)?.id;
-    return await this.product3dModelService.create(createDto, userId);
+    const result = await this.product3dModelService.createProduct3dModel(
+      createDto.productId,
+      createDto.modelName,
+      createDto.modelFilePath,
+      createDto.modelType as any,
+      createDto.mtlFilePath || '',
+      createDto.textureBasePath || '',
+      createDto.configJson || '',
+      createDto.isActive ?? true,
+      userId,
+    );
+    return result.toModel();
   }
 
   @Get()
@@ -53,34 +63,33 @@ export class Product3dModelController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'List of all 3D models',
-    type: [Product3dModelResponseDto],
   })
   async findAll() {
-    return await this.product3dModelService.findAll();
+    return await this.product3dModelService.getProduct3dModels();
   }
 
   @Get('product/:productId')
-  @ApiOperation({ summary: 'Get all 3D models for a specific product' })
+  @ApiOperation({ summary: 'Get 3D model for a specific product' })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'List of 3D models for the product',
-    type: [Product3dModelResponseDto],
+    description: '3D model for the product',
   })
   async findByProductId(@Param('productId', ParseIntPipe) productId: number) {
-    return await this.product3dModelService.findByProductId(productId);
+    return await this.product3dModelService.getProduct3dModelByProductId(
+      productId,
+    );
   }
 
-  @Get('product/:productId/primary')
-  @ApiOperation({ summary: 'Get primary 3D model for a specific product' })
+  @Get('product/:productId/active')
+  @ApiOperation({ summary: 'Get active 3D models for a specific product' })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Primary 3D model for the product',
-    type: Product3dModelResponseDto,
+    description: 'Active 3D models for the product',
   })
-  async findPrimaryByProductId(
+  async findActiveByProductId(
     @Param('productId', ParseIntPipe) productId: number,
   ) {
-    return await this.product3dModelService.findPrimaryByProductId(productId);
+    return await this.product3dModelService.getActiveByProductId(productId);
   }
 
   @Get('type/:modelType')
@@ -88,10 +97,9 @@ export class Product3dModelController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'List of 3D models by type',
-    type: [Product3dModelResponseDto],
   })
   async findByModelType(@Param('modelType') modelType: string) {
-    return await this.product3dModelService.findByModelType(modelType);
+    return await this.product3dModelService.findByModelType(modelType as any);
   }
 
   @Get('stats/storage')
@@ -106,10 +114,10 @@ export class Product3dModelController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: '3D model details',
-    type: Product3dModelResponseDto,
   })
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    return await this.product3dModelService.findOne(id);
+    const result = await this.product3dModelService.getProduct3dModel(id);
+    return result.toModel();
   }
 
   @Patch(':id')
@@ -117,7 +125,6 @@ export class Product3dModelController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: '3D model updated successfully',
-    type: Product3dModelResponseDto,
   })
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -125,29 +132,58 @@ export class Product3dModelController {
     @Req() req: Request,
   ) {
     const userId = (req.user as any)?.id;
-    return await this.product3dModelService.update(id, updateDto, userId);
+    const model = await this.product3dModelService.getProduct3dModel(id);
+    const modelData = model.toModel();
+
+    return await this.product3dModelService.updateProduct3dModel(
+      modelData,
+      updateDto.modelName || modelData.modelName,
+      updateDto.modelFilePath || modelData.modelFilePath,
+      (updateDto.modelType as any) || modelData.modelType,
+      updateDto.mtlFilePath || modelData.mtlFilePath || '',
+      updateDto.textureBasePath || modelData.textureBasePath || '',
+      updateDto.configJson || modelData.configJson || '',
+      updateDto.isActive ?? modelData.isActive,
+      userId,
+    );
   }
 
-  @Patch(':id/set-primary')
-  @ApiOperation({ summary: 'Set a 3D model as primary for its product' })
+  @Patch(':id/set-active')
+  @ApiOperation({ summary: 'Set a 3D model as active/inactive' })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: '3D model set as primary',
-    type: Product3dModelResponseDto,
+    description: '3D model activity status updated',
   })
-  async setPrimary(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
+  async setActive(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { isActive: boolean },
+    @Req() req: Request,
+  ) {
     const userId = (req.user as any)?.id;
-    return await this.product3dModelService.setPrimary(id, userId);
+    const model = await this.product3dModelService.getProduct3dModel(id);
+    const modelData = model.toModel();
+
+    return await this.product3dModelService.setActive(
+      modelData,
+      body.isActive,
+      userId,
+    );
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a 3D model' })
   @ApiResponse({
-    status: HttpStatus.NO_CONTENT,
+    status: HttpStatus.OK,
     description: '3D model deleted successfully',
   })
   async remove(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
     const userId = (req.user as any)?.id;
-    await this.product3dModelService.remove(id, userId);
+    const model = await this.product3dModelService.getProduct3dModel(id);
+    const modelData = model.toModel();
+
+    return await this.product3dModelService.deleteProduct3dModel(
+      modelData,
+      userId,
+    );
   }
 }

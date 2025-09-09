@@ -3,12 +3,16 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
+  OneToOne,
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
 } from 'typeorm';
 import { ProductEntity } from '../../../entities/product.entity';
+import { Model3dConfigEntity } from '../../model-3d-config/entities/model-3d-config.entity';
+import { Product3dModel } from '../models/product-3d-model.model';
+import { ModelType } from '../enum/model.type';
 
 @Entity('product_3d_model')
 export class Product3dModelEntity {
@@ -18,55 +22,80 @@ export class Product3dModelEntity {
   @Column({ name: 'product_id', type: 'bigint' })
   productId!: number;
 
-  @Column({ name: 'model_type', type: 'varchar', length: 50 })
-  modelType!: string;
+  @Column({ name: 'model_name', type: 'varchar', length: 255 })
+  modelName!: string;
 
-  @Column({ name: 'file_type', type: 'varchar', length: 10 })
-  fileType!: string;
+  @Column({ name: 'model_file_path', type: 'varchar', length: 255 })
+  modelFilePath!: string;
 
-  @Column({ name: 'file_url', type: 'varchar', length: 500 })
-  fileUrl!: string;
-
-  @Column({ name: 'file_name', type: 'varchar', length: 255 })
-  fileName!: string;
-
-  @Column({ name: 'file_size', type: 'bigint', nullable: true })
-  fileSize?: number;
-
-  @Column({ name: 'is_primary', type: 'boolean', default: false })
-  isPrimary!: boolean;
+  @Column({ name: 'model_type', type: 'varchar', length: 255 })
+  modelType!: ModelType;
 
   @Column({
-    name: 'thumbnail_url',
+    name: 'mtl_file_path',
     type: 'varchar',
-    length: 500,
+    length: 255,
     nullable: true,
   })
-  thumbnailUrl?: string;
+  mtlFilePath!: string;
 
-  @Column({ name: 'metadata', type: 'json', nullable: true })
-  metadata?: Record<string, any>;
+  @Column({
+    name: 'texture_base_path',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
+  textureBasePath!: string;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @Column({ name: 'config_json', type: 'text', nullable: true })
+  configJson!: string;
+
+  @Column({ name: 'is_active', type: 'boolean', default: true })
+  isActive!: boolean;
+
+  @Column({ name: 'created_at' })
   createdAt!: Date;
 
   @Column({ name: 'created_by', type: 'bigint', nullable: true })
-  createdBy?: number;
+  createdBy!: number;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @Column({ name: 'updated_at' })
   updatedAt!: Date;
 
   @Column({ name: 'updated_by', type: 'bigint', nullable: true })
-  updatedBy?: number;
+  updatedBy!: number;
 
   @DeleteDateColumn({ name: 'deleted_at' })
-  deletedAt?: Date;
+  deletedAt!: Date;
 
   @Column({ name: 'deleted_by', type: 'bigint', nullable: true })
-  deletedBy?: number;
+  deletedBy!: number;
 
   // Relations
   @ManyToOne(() => ProductEntity)
   @JoinColumn({ name: 'product_id' })
-  product?: ProductEntity;
+  product!: ProductEntity;
+
+  @OneToOne(() => Model3dConfigEntity, (config) => config.model)
+  config!: Model3dConfigEntity;
+
+  toModel(): Product3dModel {
+    return new Product3dModel(
+      this.id,
+      this.productId,
+      this.modelName,
+      this.modelFilePath,
+      this.modelType,
+      this.mtlFilePath,
+      this.textureBasePath,
+      this.configJson,
+      this.isActive,
+      this.createdAt,
+      this.createdBy,
+      this.updatedAt,
+      this.updatedBy,
+      this.deletedAt,
+      this.deletedBy,
+    );
+  }
 }

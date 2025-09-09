@@ -1,15 +1,9 @@
-import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { Product3dModelEntity } from './entities/product-3d-model.entity';
-import {
-  CreateProduct3dModelDto,
-  UpdateProduct3dModelDto,
-} from './dtos/product-3d-model.dto';
+import { Product3dModel } from './models/product-3d-model.model';
+import { ModelType } from './enum/model.type';
 
 @Injectable()
 export class Product3dModelService {
@@ -18,128 +12,180 @@ export class Product3dModelService {
     private readonly product3dModelRepository: Repository<Product3dModelEntity>,
   ) {}
 
-  async create(
-    createDto: CreateProduct3dModelDto,
-    userId?: number,
-  ): Promise<Product3dModelEntity> {
-    // If setting as primary, ensure no other model for this product is primary
-    if (createDto.isPrimary) {
-      await this.unsetPrimaryForProduct(createDto.productId);
-    }
-
-    const product3dModel = this.product3dModelRepository.create({
-      ...createDto,
-      createdBy: userId,
-    });
-
-    return await this.product3dModelRepository.save(product3dModel);
-  }
-
-  async findAll(): Promise<Product3dModelEntity[]> {
-    return await this.product3dModelRepository.find({
+  async getProduct3dModels(): Promise<Product3dModel[]> {
+    const models = await this.product3dModelRepository.find({
+      where: { deletedAt: IsNull() },
       relations: ['product'],
-      order: { createdAt: 'DESC' },
     });
+    return models.map((model) => model.toModel());
   }
 
-  async findByProductId(productId: number): Promise<Product3dModelEntity[]> {
-    return await this.product3dModelRepository.find({
-      where: { productId },
-      order: { isPrimary: 'DESC', createdAt: 'ASC' },
-    });
-  }
-
-  async findPrimaryByProductId(
+  async getProduct3dModelByProductId(
     productId: number,
-  ): Promise<Product3dModelEntity | null> {
-    return await this.product3dModelRepository.findOne({
-      where: { productId, isPrimary: true },
-    });
-  }
-
-  async findOne(id: number): Promise<Product3dModelEntity> {
+  ): Promise<Product3dModel> {
     const product3dModel = await this.product3dModelRepository.findOne({
-      where: { id },
+      where: { productId, deletedAt: IsNull() },
       relations: ['product'],
     });
 
     if (!product3dModel) {
-      throw new NotFoundException(`3D Model with ID ${id} not found`);
+      throw new NotFoundException(
+        `3D Model for Product ID ${productId} not found`,
+      );
+    }
+
+    return product3dModel.toModel();
+  }
+
+  async getActiveByProductId(productId: number): Promise<Product3dModel[]> {
+    const product3dModels = await this.product3dModelRepository.find({
+      where: { productId, isActive: true, deletedAt: IsNull() },
+      relations: ['product'],
+    });
+
+    if (!product3dModels || product3dModels.length === 0) {
+      throw new NotFoundException(
+        `Active 3D Models for Product ID ${productId} not found`,
+      );
+    }
+
+    return product3dModels.map((model) => model.toModel());
+  }
+
+  async getProduct3dModel(
+    product3dModelId: number,
+  ): Promise<Product3dModelEntity> {
+    const product3dModel = await this.product3dModelRepository.findOne({
+      where: { id: product3dModelId, deletedAt: IsNull() },
+      relations: ['product'],
+    });
+
+    if (!product3dModel) {
+      throw new NotFoundException(
+        `3D Model with ID ${product3dModelId} not found`,
+      );
     }
 
     return product3dModel;
   }
 
-  async update(
-    id: number,
-    updateDto: UpdateProduct3dModelDto,
-    userId?: number,
+  async createProduct3dModel(
+    productId: number,
+    modelName: string,
+    modelFilePath: string,
+    modelType: ModelType,
+    mtlFilePath: string,
+    textureBasePath: string,
+    configJson: string,
+    isActive: boolean,
+    reqUserId: number,
   ): Promise<Product3dModelEntity> {
-    const product3dModel = await this.findOne(id);
+    const entity = new Product3dModelEntity();
+    entity.productId = productId;
+    entity.modelName = modelName;
+    entity.modelFilePath = modelFilePath;
+    entity.modelType = modelType;
+    entity.mtlFilePath = mtlFilePath;
+    entity.textureBasePath = textureBasePath;
+    entity.configJson = configJson;
+    entity.isActive = isActive;
+    entity.createdAt = new Date();
+    entity.createdBy = reqUserId;
 
-    // If setting as primary, ensure no other model for this product is primary
-    if (updateDto.isPrimary && !product3dModel.isPrimary) {
-      await this.unsetPrimaryForProduct(product3dModel.productId);
-    }
-
-    Object.assign(product3dModel, {
-      ...updateDto,
-      updatedBy: userId,
-    });
-
-    return await this.product3dModelRepository.save(product3dModel);
+    return await this.product3dModelRepository.save(entity);
   }
 
-  async remove(id: number, userId?: number): Promise<void> {
-    const product3dModel = await this.findOne(id);
-
-    // Soft delete
-    product3dModel.deletedBy = userId;
-    await this.product3dModelRepository.softRemove(product3dModel);
-  }
-
-  async setPrimary(id: number, userId?: number): Promise<Product3dModelEntity> {
-    const product3dModel = await this.findOne(id);
-
-    // Unset primary for all other models of this product
-    await this.unsetPrimaryForProduct(product3dModel.productId);
-
-    // Set this model as primary
-    product3dModel.isPrimary = true;
-    product3dModel.updatedBy = userId;
-
-    return await this.product3dModelRepository.save(product3dModel);
-  }
-
-  private async unsetPrimaryForProduct(productId: number): Promise<void> {
+  async updateProduct3dModel(
+    product3dModel: Product3dModel,
+    modelName: string,
+    modelFilePath: string,
+    modelType: ModelType,
+    mtlFilePath: string,
+    textureBasePath: string,
+    configJson: string,
+    isActive: boolean,
+    reqUserId: number,
+  ): Promise<Product3dModel> {
     await this.product3dModelRepository.update(
-      { productId, isPrimary: true },
-      { isPrimary: false },
+      { id: product3dModel.id, deletedAt: IsNull() },
+      {
+        modelName: modelName,
+        modelFilePath: modelFilePath,
+        modelType: modelType,
+        mtlFilePath: mtlFilePath,
+        textureBasePath: textureBasePath,
+        configJson: configJson,
+        isActive: isActive,
+        updatedAt: new Date(),
+        updatedBy: reqUserId,
+      },
+    );
+
+    return await this.getProduct3dModel(product3dModel.id).then((entity) =>
+      entity.toModel(),
     );
   }
 
-  async findByModelType(modelType: string): Promise<Product3dModelEntity[]> {
-    return await this.product3dModelRepository.find({
+  async deleteProduct3dModel(
+    product3dModel: Product3dModel,
+    reqUserId: number,
+  ): Promise<boolean> {
+    await this.product3dModelRepository.update(
+      { id: product3dModel.id, deletedAt: IsNull() },
+      {
+        deletedAt: new Date(),
+        deletedBy: reqUserId,
+      },
+    );
+    return true;
+  }
+
+  async setActive(
+    product3dModel: Product3dModel,
+    isActive: boolean,
+    reqUserId: number,
+  ): Promise<Product3dModel> {
+    await this.product3dModelRepository.update(
+      { id: product3dModel.id, deletedAt: IsNull() },
+      {
+        isActive: isActive,
+        updatedAt: new Date(),
+        updatedBy: reqUserId,
+      },
+    );
+
+    return await this.getProduct3dModel(product3dModel.id).then((entity) =>
+      entity.toModel(),
+    );
+  }
+
+  async findByModelType(modelType: ModelType): Promise<Product3dModel[]> {
+    const models = await this.product3dModelRepository.find({
       where: { modelType },
       relations: ['product'],
       order: { createdAt: 'DESC' },
     });
+
+    return models.map((model) => model.toModel());
   }
 
   async getStorageStats(): Promise<{
     totalFiles: number;
-    totalSize: number;
+    activeFiles: number;
     byType: Record<string, number>;
   }> {
-    const models = await this.product3dModelRepository.find();
+    const allModels = await this.product3dModelRepository.find();
+    const activeModels = await this.product3dModelRepository.find({
+      where: { isActive: true },
+    });
 
     const stats = {
-      totalFiles: models.length,
-      totalSize: models.reduce((sum, model) => sum + (model.fileSize || 0), 0),
+      totalFiles: allModels.length,
+      activeFiles: activeModels.length,
       byType: {} as Record<string, number>,
     };
 
-    models.forEach((model) => {
+    allModels.forEach((model) => {
       stats.byType[model.modelType] = (stats.byType[model.modelType] || 0) + 1;
     });
 
