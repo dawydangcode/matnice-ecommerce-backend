@@ -12,7 +12,7 @@ export class SessionEntity {
   @PrimaryGeneratedColumn({ name: 'id' })
   id!: number;
 
-  @Column({ name: 'account_id' })
+  @Column({ name: 'user_id' })
   userId!: number;
 
   @Column({ name: 'type' })

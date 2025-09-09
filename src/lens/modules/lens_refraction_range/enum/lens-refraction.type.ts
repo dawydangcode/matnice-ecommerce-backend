@@ -1,0 +1,6 @@
+export enum LensRefractionType {
+  SPHERICAL = 'SPHERICAL',
+  CYLINDRICAL = 'CYLINDRICAL',
+  AXIS = 'AXIS',
+  ADDITIONAL = 'ADDITIONAL',
+}

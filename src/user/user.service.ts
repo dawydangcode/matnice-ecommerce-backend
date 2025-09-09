@@ -1,7 +1,13 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
-import { In, IsNull, Like, Repository } from 'typeorm';
+import { In, IsNull, Like, Repository, DataSource } from 'typeorm';
 import { PageList } from 'src/common/models/page-list.model';
 import { UserModel } from './models/user.model';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
@@ -9,6 +15,8 @@ import * as bcrypt from 'bcrypt';
 import { SALT_OR_ROUNDS } from 'src/common/utils/constant';
 import { RoleService } from 'src/role/role.service';
 import { RoleType } from 'src/role/enum/role.enum';
+import { UserDetailEntity } from './modules/user-detail/entities/user-detail.entity';
+import { HttpErrorByCode } from '@nestjs/common/utils/http-error-by-code.util';
 
 @Injectable()
 export class UserService {
@@ -16,6 +24,7 @@ export class UserService {
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
     private readonly roleService: RoleService,
+    private readonly dataSource: DataSource,
   ) {}
 
   async getUsers(
@@ -56,7 +65,7 @@ export class UserService {
       },
     });
     if (!user) {
-      throw new Error('User not found');
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
     return user.toModel(isHiddenPassword);
@@ -67,7 +76,7 @@ export class UserService {
     password: string,
     email: string,
     roleId: number,
-    reqAccountId: number,
+    reqUserId: number,
   ): Promise<UserModel> {
     const existingUser = await this.getUsers(
       undefined,
@@ -104,10 +113,10 @@ export class UserService {
     entity.email = email;
     entity.roleId = roleId ?? defaultRole.id;
     entity.createdAt = new Date();
-    entity.createdBy = reqAccountId;
+    entity.createdBy = reqUserId;
 
     const newAccount = await this.userRepository.save(entity);
-    if (!reqAccountId) {
+    if (!reqUserId) {
       await this.userRepository.update(newAccount.id, {
         createdBy: newAccount.id,
       });
@@ -120,8 +129,9 @@ export class UserService {
     user: UserModel,
     username: string | undefined,
     password: string | undefined,
+    email: string | undefined,
     roleId: number | undefined,
-    reqAccountId: number,
+    reqUserId: number | undefined,
   ): Promise<UserModel> {
     let hashedPassword = password;
     if (password) {
@@ -136,16 +146,17 @@ export class UserService {
       {
         username: username,
         password: hashedPassword,
+        email: email,
         roleId: roleId,
         updatedAt: new Date(),
-        updatedBy: reqAccountId,
+        updatedBy: reqUserId,
       },
     );
 
     return await this.getUserById(user.id, true);
   }
 
-  async deleteUser(user: UserModel, reqAccountId: number): Promise<boolean> {
+  async deleteUser(user: UserModel, reqUserId: number): Promise<boolean> {
     await this.userRepository.update(
       {
         id: user.id,
@@ -153,9 +164,45 @@ export class UserService {
       },
       {
         deletedAt: new Date(),
-        deletedBy: reqAccountId,
+        deletedBy: reqUserId,
       },
     );
     return true;
+  }
+
+  async getUserByUsername(
+    username: string,
+    isHiddenPassword: boolean,
+  ): Promise<UserModel> {
+    const userEntity = await this.userRepository.findOne({
+      where: {
+        username: username,
+        deletedAt: IsNull(),
+      },
+    });
+
+    if (!userEntity) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    return userEntity.toModel(isHiddenPassword);
+  }
+
+  async getUserByEmail(
+    email: string,
+    isHiddenPassword: boolean,
+  ): Promise<UserModel> {
+    const userEntity = await this.userRepository.findOne({
+      where: {
+        email: email,
+        deletedAt: IsNull(),
+      },
+    });
+
+    if (!userEntity) {
+      throw new HttpException('Email not found', HttpStatus.NOT_FOUND);
+    }
+
+    return userEntity.toModel(isHiddenPassword);
   }
 }

@@ -13,10 +13,12 @@ import { RoleModel } from './models/role.model';
 import { ApiTags } from '@nestjs/swagger';
 import { RoleType } from './enum/role.enum';
 import { Roles } from './decorators/roles.decorator';
+import { Public } from 'src/middlewares/guards/jwt-auth.guard';
 
 @ApiTags('Role')
 @Controller('api/v1')
 @Roles(RoleType.Admin)
+// @Public()
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 

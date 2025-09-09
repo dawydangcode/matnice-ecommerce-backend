@@ -57,7 +57,7 @@ export class CreateAccountBodyDto extends PickType(UserDto, [
 export class UpdateUserParamsDto extends PickType(UserDto, ['userId']) {}
 
 export class UpdateUserBodyDto extends PartialType(
-  PickType(UserDto, ['userId', 'roleId', 'email', 'username', 'password']),
+  PickType(UserDto, ['roleId', 'email', 'username', 'password']),
 ) {}
 
 export class DeleteUserParamsDto extends PickType(UserDto, ['userId']) {}

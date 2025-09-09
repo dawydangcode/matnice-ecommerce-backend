@@ -71,6 +71,7 @@ export class UserController {
       user,
       body.username,
       body.password,
+      body.email,
       body.roleId,
       req.user.userId,
     );

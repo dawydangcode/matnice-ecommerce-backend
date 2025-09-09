@@ -18,7 +18,7 @@ export class SessionService {
     userAgent: string,
     ipAddress: string,
     type: SessionType | undefined,
-    reqAccountId: number,
+    reqUserId: number,
   ): Promise<SessionModel> {
     const entity = new SessionEntity();
 
@@ -27,7 +27,7 @@ export class SessionService {
     entity.ipAddress = ipAddress;
     entity.type = type;
     entity.createdAt = new Date();
-    entity.createdBy = reqAccountId;
+    entity.createdBy = reqUserId;
     entity.isActive = true;
 
     const newSession = await this.sessionRepository.save(entity);
@@ -56,7 +56,7 @@ export class SessionService {
     session: SessionModel,
     isActive: boolean,
     type: SessionType | undefined,
-    reqAccountId: number,
+    reqUserId: number,
   ): Promise<SessionModel> {
     await this.sessionRepository.update(
       {
@@ -67,7 +67,7 @@ export class SessionService {
         isActive: isActive,
         type: type,
         updatedAt: new Date(),
-        updatedBy: reqAccountId,
+        updatedBy: reqUserId,
       },
     );
 
