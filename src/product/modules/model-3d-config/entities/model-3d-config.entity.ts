@@ -13,110 +13,56 @@ import { Model3dConfigModel } from '../models/model-3d-config.model';
 
 @Entity('model_3d_config')
 export class Model3dConfigEntity {
-  @PrimaryGeneratedColumn('increment', { type: 'bigint' })
+  @PrimaryGeneratedColumn({ name: 'id' })
   id!: number;
 
-  @Column({ name: 'model_id', type: 'bigint' })
+  @Column({ name: 'model_id' })
   modelId!: number;
 
-  @Column({
-    name: 'offset_x',
-    type: 'decimal',
-    precision: 5,
-    scale: 3,
-    default: 0.5,
-  })
+  @Column({ name: 'offset_x' })
   offsetX!: number;
 
-  @Column({
-    name: 'offset_y',
-    type: 'decimal',
-    precision: 5,
-    scale: 3,
-    default: 0.5,
-  })
+  @Column({ name: 'offset_y' })
   offsetY!: number;
 
-  @Column({
-    name: 'position_offset_x',
-    type: 'decimal',
-    precision: 5,
-    scale: 3,
-    default: 0.4,
-  })
+  @Column({ name: 'position_offset_x' })
   positionOffsetX!: number;
 
-  @Column({
-    name: 'position_offset_y',
-    type: 'decimal',
-    precision: 5,
-    scale: 3,
-    default: 0.097,
-  })
+  @Column({ name: 'position_offset_y' })
   positionOffsetY!: number;
 
-  @Column({
-    name: 'position_offset_z',
-    type: 'decimal',
-    precision: 5,
-    scale: 3,
-    default: -0.4,
-  })
+  @Column({ name: 'position_offset_z' })
   positionOffsetZ!: number;
 
-  @Column({
-    name: 'initial_scale',
-    type: 'decimal',
-    precision: 5,
-    scale: 3,
-    default: 0.16,
-  })
+  @Column({ name: 'initial_scale' })
   initialScale!: number;
 
-  @Column({
-    name: 'rotation_sensitivity',
-    type: 'decimal',
-    precision: 3,
-    scale: 2,
-    default: 1.0,
-  })
+  @Column({ name: 'rotation_sensitivity' })
   rotationSensitivity!: number;
 
-  @Column({
-    name: 'yaw_limit',
-    type: 'decimal',
-    precision: 3,
-    scale: 2,
-    default: 0.5,
-  })
+  @Column({ name: 'yaw_limit' })
   yawLimit!: number;
 
-  @Column({
-    name: 'pitch_limit',
-    type: 'decimal',
-    precision: 3,
-    scale: 2,
-    default: 0.3,
-  })
+  @Column({ name: 'pitch_limit' })
   pitchLimit!: number;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
-  @Column({ name: 'created_by', type: 'bigint', nullable: true })
-  createdBy?: number;
+  @Column({ name: 'created_by' })
+  createdBy!: number;
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt!: Date;
 
-  @Column({ name: 'updated_by', type: 'bigint', nullable: true })
-  updatedBy?: number;
+  @Column({ name: 'updated_by' })
+  updatedBy!: number;
 
   @DeleteDateColumn({ name: 'deleted_at' })
-  deletedAt?: Date;
+  deletedAt!: Date;
 
-  @Column({ name: 'deleted_by', type: 'bigint', nullable: true })
-  deletedBy?: number;
+  @Column({ name: 'deleted_by' })
+  deletedBy!: number;
 
   // Relations
   @OneToOne(() => Product3dModelEntity)
