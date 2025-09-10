@@ -39,7 +39,7 @@ export class Product3dModelService {
 
   async getActiveByProductId(productId: number): Promise<Product3dModel[]> {
     const product3dModels = await this.product3dModelRepository.find({
-      where: { productId, isActive: true, deletedAt: IsNull() },
+      where: { id: productId, isActive: true, deletedAt: IsNull() },
       relations: ['product'],
     });
 

@@ -9,6 +9,7 @@ import {
   DeleteDateColumn,
 } from 'typeorm';
 import { Product3dModelEntity } from '../../product-3d-model/entities/product-3d-model.entity';
+import { Model3dConfigModel } from '../models/model-3d-config.model';
 
 @Entity('model_3d_config')
 export class Model3dConfigEntity {
@@ -121,4 +122,26 @@ export class Model3dConfigEntity {
   @OneToOne(() => Product3dModelEntity)
   @JoinColumn({ name: 'model_id' })
   model?: Product3dModelEntity;
+
+  toModel(): Model3dConfigModel {
+    return new Model3dConfigModel(
+      this.id,
+      this.modelId,
+      this.offsetX,
+      this.offsetY,
+      this.positionOffsetX,
+      this.positionOffsetY,
+      this.positionOffsetZ,
+      this.initialScale,
+      this.rotationSensitivity,
+      this.yawLimit,
+      this.pitchLimit,
+      this.createdAt,
+      this.createdBy,
+      this.updatedAt,
+      this.updatedBy,
+      this.deletedAt,
+      this.deletedBy,
+    );
+  }
 }

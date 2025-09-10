@@ -1,54 +1,59 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class Model3dConfigModel {
-  @ApiProperty({ description: 'Config ID' })
-  id!: number;
+  public readonly id: number;
+  public readonly modelId: number;
+  public readonly offsetX: number;
+  public readonly offsetY: number;
+  public readonly positionOffsetX: number;
+  public readonly positionOffsetY: number;
+  public readonly positionOffsetZ: number;
+  public readonly initialScale: number;
+  public readonly rotationSensitivity: number;
+  public readonly yawLimit: number;
+  public readonly pitchLimit: number;
+  public readonly createdAt: Date | undefined;
+  public readonly createdBy: number | undefined;
+  public readonly updatedAt: Date | undefined;
+  public readonly updatedBy: number | undefined;
+  public readonly deletedAt: Date | undefined;
+  public readonly deletedBy: number | undefined;
 
-  @ApiProperty({ description: '3D model ID' })
-  modelId!: number;
-
-  @ApiProperty({ description: 'Offset X coordinate' })
-  offsetX!: number;
-
-  @ApiProperty({ description: 'Offset Y coordinate' })
-  offsetY!: number;
-
-  @ApiProperty({ description: 'Position offset X' })
-  positionOffsetX!: number;
-
-  @ApiProperty({ description: 'Position offset Y' })
-  positionOffsetY!: number;
-
-  @ApiProperty({ description: 'Position offset Z' })
-  positionOffsetZ!: number;
-
-  @ApiProperty({ description: 'Initial scale' })
-  initialScale!: number;
-
-  @ApiProperty({ description: 'Rotation sensitivity' })
-  rotationSensitivity!: number;
-
-  @ApiProperty({ description: 'Yaw rotation limit' })
-  yawLimit!: number;
-
-  @ApiProperty({ description: 'Pitch rotation limit' })
-  pitchLimit!: number;
-
-  @ApiProperty({ description: 'Creation timestamp' })
-  createdAt!: Date;
-
-  @ApiProperty({ description: 'Created by user ID', nullable: true })
-  createdBy?: number;
-
-  @ApiProperty({ description: 'Last update timestamp' })
-  updatedAt!: Date;
-
-  @ApiProperty({ description: 'Updated by user ID', nullable: true })
-  updatedBy?: number;
-
-  @ApiProperty({ description: 'Deletion timestamp', nullable: true })
-  deletedAt?: Date;
-
-  @ApiProperty({ description: 'Deleted by user ID', nullable: true })
-  deletedBy?: number;
+  constructor(
+    id: number,
+    modelId: number,
+    offsetX: number,
+    offsetY: number,
+    positionOffsetX: number,
+    positionOffsetY: number,
+    positionOffsetZ: number,
+    initialScale: number,
+    rotationSensitivity: number,
+    yawLimit: number,
+    pitchLimit: number,
+    createdAt: Date | undefined,
+    createdBy: number | undefined,
+    updatedAt: Date | undefined,
+    updatedBy: number | undefined,
+    deletedAt: Date | undefined,
+    deletedBy: number | undefined,
+  ) {
+    this.id = id;
+    this.modelId = modelId;
+    this.offsetX = offsetX;
+    this.offsetY = offsetY;
+    this.positionOffsetX = positionOffsetX;
+    this.positionOffsetY = positionOffsetY;
+    this.positionOffsetZ = positionOffsetZ;
+    this.initialScale = initialScale;
+    this.rotationSensitivity = rotationSensitivity;
+    this.yawLimit = yawLimit;
+    this.pitchLimit = pitchLimit;
+    this.createdAt = createdAt;
+    this.createdBy = createdBy;
+    this.updatedAt = updatedAt;
+    this.updatedBy = updatedBy;
+    this.deletedAt = deletedAt;
+    this.deletedBy = deletedBy;
+  }
 }

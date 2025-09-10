@@ -1,132 +1,106 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, Min, Max } from 'class-validator';
+import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { IsNumber, Min, Max } from 'class-validator';
 
-export class CreateModel3dConfigDto {
+export class Model3dConfigDto {
   @ApiProperty()
-  @IsNotEmpty()
+  @IsNumber()
+  @Type(() => Number)
+  model3dConfigId!: number;
+
+  @ApiProperty()
   @IsNumber()
   modelId!: number;
 
-  @ApiPropertyOptional()
-  @IsOptional()
+  @ApiProperty()
   @IsNumber()
   @Min(0)
   @Max(1)
-  offsetX?: number;
+  offsetX!: number;
 
-  @ApiPropertyOptional()
-  @IsOptional()
+  @ApiProperty()
   @IsNumber()
   @Min(0)
   @Max(1)
-  offsetY?: number;
+  offsetY!: number;
 
-  @ApiPropertyOptional()
-  @IsOptional()
+  @ApiProperty()
   @IsNumber()
-  positionOffsetX?: number;
+  positionOffsetX!: number;
 
-  @ApiPropertyOptional()
-  @IsOptional()
+  @ApiProperty()
   @IsNumber()
-  positionOffsetY?: number;
+  positionOffsetY!: number;
 
-  @ApiPropertyOptional()
-  @IsOptional()
+  @ApiProperty()
   @IsNumber()
-  positionOffsetZ?: number;
+  positionOffsetZ!: number;
 
-  @ApiPropertyOptional()
-  @IsOptional()
+  @ApiProperty()
   @IsNumber()
   @Min(0.01)
   @Max(10)
-  initialScale?: number;
+  initialScale!: number;
 
-  @ApiPropertyOptional()
-  @IsOptional()
+  @ApiProperty()
   @IsNumber()
   @Min(0.1)
   @Max(10)
-  rotationSensitivity?: number;
+  rotationSensitivity!: number;
 
-  @ApiPropertyOptional()
-  @IsOptional()
+  @ApiProperty()
   @IsNumber()
   @Min(0.1)
   @Max(2)
-  yawLimit?: number;
+  yawLimit!: number;
 
-  @ApiPropertyOptional()
-  @IsOptional()
+  @ApiProperty()
   @IsNumber()
   @Min(0.1)
   @Max(2)
-  pitchLimit?: number;
+  pitchLimit!: number;
 }
 
-export class UpdateModel3dConfigDto {
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  @Max(1)
-  offsetX?: number;
+export class GetModel3dConfigParamsDto extends PickType(Model3dConfigDto, [
+  'model3dConfigId',
+]) {}
 
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  @Max(1)
-  offsetY?: number;
+export class GetModel3dConfigByIdParamsDto extends PickType(Model3dConfigDto, [
+  'model3dConfigId',
+]) {}
 
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  positionOffsetX?: number;
+export class CreateModel3dConfigBodyDto extends PickType(Model3dConfigDto, [
+  'modelId',
+  'offsetX',
+  'offsetY',
+  'positionOffsetX',
+  'positionOffsetY',
+  'positionOffsetZ',
+  'initialScale',
+  'rotationSensitivity',
+  'yawLimit',
+  'pitchLimit',
+]) {}
 
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  positionOffsetY?: number;
+export class UpdateModel3dConfigParamsDto extends PickType(Model3dConfigDto, [
+  'model3dConfigId',
+]) {}
 
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  positionOffsetZ?: number;
+export class UpdateModel3dConfigBodyDto extends PartialType(
+  PickType(Model3dConfigDto, [
+    'modelId',
+    'offsetX',
+    'offsetY',
+    'positionOffsetX',
+    'positionOffsetY',
+    'positionOffsetZ',
+    'initialScale',
+    'rotationSensitivity',
+    'yawLimit',
+    'pitchLimit',
+  ]),
+) {}
 
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  @Min(0.01)
-  @Max(10)
-  initialScale?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  @Min(0.1)
-  @Max(10)
-  rotationSensitivity?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  @Min(0.1)
-  @Max(2)
-  yawLimit?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  @Min(0.1)
-  @Max(2)
-  pitchLimit?: number;
-}
-
-export class Model3dConfigQueryDto {
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsNumber()
-  modelId?: number;
-}
+export class DeleteModel3dConfigParamsDto extends PickType(Model3dConfigDto, [
+  'model3dConfigId',
+]) {}

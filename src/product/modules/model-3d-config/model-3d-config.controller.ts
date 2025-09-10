@@ -2,114 +2,99 @@ import {
   Controller,
   Get,
   Post,
-  Patch,
   Delete,
   Param,
   Body,
   ParseIntPipe,
-  HttpStatus,
-  UseGuards,
   Req,
+  Put,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { Model3dConfigService } from './model-3d-config.service';
-import {
-  CreateModel3dConfigDto,
-  UpdateModel3dConfigDto,
-  Model3dConfigQueryDto,
-} from './dtos/model-3d-config.dto';
-import { JwtAuthGuard } from '../../../middlewares/guards/jwt-auth.guard';
 import { Request } from 'express';
+import { RequestModel } from 'src/common/models/request.model';
+import {
+  CreateModel3dConfigBodyDto,
+  DeleteModel3dConfigParamsDto,
+  GetModel3dConfigByIdParamsDto,
+  UpdateModel3dConfigBodyDto,
+  UpdateModel3dConfigParamsDto,
+} from './dtos/model-3d-config.dto';
 
 @ApiTags('Model 3D Configurations')
-@Controller('model-3d-config')
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@Controller('api/v1')
 export class Model3dConfigController {
   constructor(private readonly model3dConfigService: Model3dConfigService) {}
 
-  @Post()
-  @ApiOperation({ summary: 'Create a new 3D model configuration' })
-  @ApiResponse({
-    status: HttpStatus.CREATED,
-    description: 'Configuration created successfully',
-  })
-  async create(@Body() createDto: CreateModel3dConfigDto, @Req() req: Request) {
-    const userId = (req.user as any)?.id;
-    return await this.model3dConfigService.create(
-      createDto.modelId,
-      createDto.offsetX,
-      createDto.offsetY,
-      createDto.positionOffsetX,
-      createDto.positionOffsetY,
-      createDto.positionOffsetZ,
-      createDto.initialScale,
-      createDto.rotationSensitivity,
-      createDto.yawLimit,
-      createDto.pitchLimit,
-      userId,
+  @Get('model-3d-config/list')
+  async getModel3dConfigs() {
+    return await this.model3dConfigService.getModel3dConfigs();
+  }
+
+  @Get('model-3d-config/:modelId')
+  async getByModel3dConfigId(@Param() params: GetModel3dConfigByIdParamsDto) {
+    return await this.model3dConfigService.getModel3dConfigById(
+      params.model3dConfigId,
     );
   }
 
-  @Get('model/:modelId')
-  @ApiOperation({ summary: 'Get configuration by model ID' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Configuration details',
-  })
-  async findByModelId(@Param('modelId', ParseIntPipe) modelId: number) {
-    return await this.model3dConfigService.findByModelId(modelId);
-  }
-
-  @Get(':id')
-  @ApiOperation({ summary: 'Get configuration by ID' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Configuration details',
-  })
-  async findOne(@Param('id', ParseIntPipe) id: number) {
-    return await this.model3dConfigService.findById(id);
-  }
-
-  @Patch(':id')
-  @ApiOperation({ summary: 'Update 3D model configuration' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Configuration updated successfully',
-  })
-  async update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateDto: UpdateModel3dConfigDto,
-    @Req() req: Request,
+  @Post('/model-3d-config')
+  async createModel3dConfig(
+    @Body() body: CreateModel3dConfigBodyDto,
+    @Req() req: RequestModel,
   ) {
-    const userId = (req.user as any)?.id;
-    return await this.model3dConfigService.update(
-      id,
-      updateDto.offsetX,
-      updateDto.offsetY,
-      updateDto.positionOffsetX,
-      updateDto.positionOffsetY,
-      updateDto.positionOffsetZ,
-      updateDto.initialScale,
-      updateDto.rotationSensitivity,
-      updateDto.yawLimit,
-      updateDto.pitchLimit,
-      userId,
+    return await this.model3dConfigService.createModel3dConfig(
+      body.modelId,
+      body.offsetX,
+      body.offsetY,
+      body.positionOffsetX,
+      body.positionOffsetY,
+      body.positionOffsetZ,
+      body.initialScale,
+      body.rotationSensitivity,
+      body.yawLimit,
+      body.pitchLimit,
+      req.user.userId,
     );
   }
 
-  @Delete(':id')
-  @ApiOperation({ summary: 'Delete 3D model configuration' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Configuration deleted successfully',
-  })
-  async remove(@Param('id', ParseIntPipe) id: number) {
-    return await this.model3dConfigService.delete(id);
+  @Put('model-3d-config/:model3dConfigId/update')
+  async updateModel3dConfig(
+    @Param() params: UpdateModel3dConfigParamsDto,
+    @Body() body: UpdateModel3dConfigBodyDto,
+    @Req() req: RequestModel,
+  ) {
+    const model3dConfig = await this.model3dConfigService.getModel3dConfigById(
+      params.model3dConfigId,
+    );
+    await this.model3dConfigService.updateModel3dConfig(
+      model3dConfig,
+      body.modelId,
+      body.offsetX,
+      body.offsetY,
+      body.positionOffsetX,
+      body.positionOffsetY,
+      body.positionOffsetZ,
+      body.initialScale,
+      body.rotationSensitivity,
+      body.yawLimit,
+      body.pitchLimit,
+      req.user.userId,
+    );
+  }
+
+  @Delete('model-3d-config/:model3dConfigId/delete')
+  async remove(
+    @Param() params: DeleteModel3dConfigParamsDto,
+    @Req() req: RequestModel,
+  ) {
+    const model3dConfig = await this.model3dConfigService.getModel3dConfigById(
+      params.model3dConfigId,
+    );
+
+    return await this.model3dConfigService.deleteModel3dConfig(
+      model3dConfig,
+      req.user.userId,
+    );
   }
 }
