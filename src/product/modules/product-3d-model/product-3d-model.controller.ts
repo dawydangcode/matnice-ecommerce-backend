@@ -10,12 +10,17 @@ import {
   HttpStatus,
   UseGuards,
   Req,
+  UseInterceptors,
+  UploadedFile,
+  UploadedFiles,
 } from '@nestjs/common';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiConsumes,
 } from '@nestjs/swagger';
 import { Product3dModelService } from './product-3d-model.service';
 import {
@@ -24,6 +29,7 @@ import {
   Product3dModelQueryDto,
 } from './dtos/product-3d-model.dto';
 import { JwtAuthGuard } from '../../../middlewares/guards/jwt-auth.guard';
+import { AwsS3Service } from '../../../common/services/aws-s3.service';
 import { Request } from 'express';
 
 @ApiTags('Product 3D Models')
@@ -31,7 +37,91 @@ import { Request } from 'express';
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 export class Product3dModelController {
-  constructor(private readonly product3dModelService: Product3dModelService) {}
+  constructor(
+    private readonly product3dModelService: Product3dModelService,
+    private readonly awsS3Service: AwsS3Service,
+  ) {}
+
+  @Post('upload')
+  @ApiOperation({ summary: 'Upload 3D model files to S3' })
+  @ApiConsumes('multipart/form-data')
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Files uploaded successfully',
+  })
+  @UseInterceptors(FilesInterceptor('files', 10)) // Allow up to 10 files
+  async uploadFiles(
+    @UploadedFiles() files: Express.Multer.File[],
+    @Body() body: { productId: string; folderName?: string },
+  ) {
+    const productId = parseInt(body.productId);
+    const folderName = body.folderName || `product-${productId}-3d-models`;
+
+    const uploadResults: any[] = [];
+
+    for (const file of files) {
+      const allowedTypes = [
+        'model/gltf-binary', // .glb
+        'model/gltf+json', // .gltf
+        'application/octet-stream', // .obj, .mtl (generic)
+        'text/plain', // .mtl files
+        'image/jpeg', // textures
+        'image/png', // textures
+        'image/webp', // textures
+      ];
+
+      // Validate file type based on extension
+      const fileExt = file.originalname.toLowerCase().split('.').pop();
+      const validExts = [
+        'glb',
+        'gltf',
+        'obj',
+        'mtl',
+        'jpg',
+        'jpeg',
+        'png',
+        'webp',
+      ];
+
+      if (!validExts.includes(fileExt || '')) {
+        throw new Error(`Unsupported file type: ${fileExt}`);
+      }
+
+      const fileName = `${Date.now()}-${file.originalname}`;
+      const mimeType = file.mimetype || 'application/octet-stream';
+
+      try {
+        const fileUrl = await this.awsS3Service.uploadFile(
+          file.buffer,
+          fileName,
+          mimeType,
+          folderName,
+          false, // Don't overwrite
+        );
+
+        uploadResults.push({
+          originalName: file.originalname,
+          fileName,
+          url: fileUrl,
+          size: file.size,
+          mimeType,
+          fileType: fileExt,
+        });
+      } catch (error: any) {
+        console.error(`Failed to upload ${file.originalname}:`, error);
+        throw new Error(
+          `Failed to upload ${file.originalname}: ${error.message}`,
+        );
+      }
+    }
+
+    return {
+      message: 'Files uploaded successfully',
+      files: uploadResults,
+      folderName,
+      productId,
+    };
+  }
 
   @Post()
   @ApiOperation({ summary: 'Create a new 3D model for a product' })
