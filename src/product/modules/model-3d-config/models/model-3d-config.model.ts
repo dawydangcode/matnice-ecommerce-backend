@@ -1,5 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger';
-
 export class Model3dConfigModel {
   public readonly id: number;
   public readonly modelId: number;

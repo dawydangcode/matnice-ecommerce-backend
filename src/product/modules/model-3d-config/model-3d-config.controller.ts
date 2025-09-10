@@ -31,14 +31,21 @@ export class Model3dConfigController {
     return await this.model3dConfigService.getModel3dConfigs();
   }
 
-  @Get('model-3d-config/:modelId')
+  @Get('model-3d-config/:model3dConfigId/detail')
   async getByModel3dConfigId(@Param() params: GetModel3dConfigByIdParamsDto) {
     return await this.model3dConfigService.getModel3dConfigById(
       params.model3dConfigId,
     );
   }
 
-  @Post('/model-3d-config')
+  // @Get('model-3d-config/:modelId/model/')
+  // async getByModelId(@Param() params: GetModel3dConfigByIdParamsDto) {
+  //   return await this.model3dConfigService.getModel3dConfigByModelId(
+  //     params.model3dConfigId,
+  //   );
+  // }
+
+  @Post('/model-3d-config/create')
   async createModel3dConfig(
     @Body() body: CreateModel3dConfigBodyDto,
     @Req() req: RequestModel,

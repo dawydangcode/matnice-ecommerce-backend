@@ -21,23 +21,6 @@ export class Model3dConfigService {
     return configs.map((config) => config.toModel());
   }
 
-  async getModel3dConfigByModelId(
-    modelId: number,
-  ): Promise<Model3dConfigModel> {
-    const config = await this.model3dConfigRepository.findOne({
-      where: { id: modelId, deletedAt: IsNull() },
-      relations: ['model'],
-    });
-
-    if (!config) {
-      throw new NotFoundException(
-        `3D model configuration for model ID ${modelId} not found`,
-      );
-    }
-
-    return config.toModel();
-  }
-
   async getModel3dConfigById(
     model3dConfigId: number,
   ): Promise<Model3dConfigModel> {
@@ -48,6 +31,23 @@ export class Model3dConfigService {
     if (!config) {
       throw new NotFoundException(
         `3D model configuration with ID ${model3dConfigId} not found`,
+      );
+    }
+
+    return config.toModel();
+  }
+
+  async getModel3dConfigByModelId(
+    modelId: number,
+  ): Promise<Model3dConfigModel> {
+    const config = await this.model3dConfigRepository.findOne({
+      where: { modelId: modelId, deletedAt: IsNull() },
+      relations: ['model'],
+    });
+
+    if (!config) {
+      throw new NotFoundException(
+        `3D model configuration for model ID ${modelId} not found`,
       );
     }
 
