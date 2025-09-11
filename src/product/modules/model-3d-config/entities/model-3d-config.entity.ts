@@ -19,31 +19,31 @@ export class Model3dConfigEntity {
   @Column({ name: 'model_id' })
   modelId!: number;
 
-  @Column({ name: 'offset_x' })
+  @Column({ name: 'offset_x', type: 'double' })
   offsetX!: number;
 
-  @Column({ name: 'offset_y' })
+  @Column({ name: 'offset_y', type: 'double' })
   offsetY!: number;
 
-  @Column({ name: 'position_offset_x' })
+  @Column({ name: 'position_offset_x', type: 'double' })
   positionOffsetX!: number;
 
-  @Column({ name: 'position_offset_y' })
+  @Column({ name: 'position_offset_y', type: 'double' })
   positionOffsetY!: number;
 
-  @Column({ name: 'position_offset_z' })
+  @Column({ name: 'position_offset_z', type: 'double' })
   positionOffsetZ!: number;
 
-  @Column({ name: 'initial_scale' })
+  @Column({ name: 'initial_scale', type: 'double' })
   initialScale!: number;
 
-  @Column({ name: 'rotation_sensitivity' })
+  @Column({ name: 'rotation_sensitivity', type: 'double' })
   rotationSensitivity!: number;
 
-  @Column({ name: 'yaw_limit' })
+  @Column({ name: 'yaw_limit', type: 'double' })
   yawLimit!: number;
 
-  @Column({ name: 'pitch_limit' })
+  @Column({ name: 'pitch_limit', type: 'double' })
   pitchLimit!: number;
 
   @CreateDateColumn({ name: 'created_at' })

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Repository } from 'typeorm';
 import { Model3dConfigEntity } from './entities/model-3d-config.entity';
@@ -67,6 +71,17 @@ export class Model3dConfigService {
     pitchLimit: number,
     userId: number,
   ): Promise<Model3dConfigModel> {
+    // Kiểm tra xem config cho modelId này đã tồn tại hay chưa
+    const existingConfig = await this.model3dConfigRepository.findOne({
+      where: { modelId: modelId, deletedAt: IsNull() },
+    });
+
+    if (existingConfig) {
+      throw new ConflictException(
+        `Configuration for model ID ${modelId} already exists`,
+      );
+    }
+
     const entity = new Model3dConfigEntity();
 
     entity.modelId = modelId;
@@ -87,8 +102,7 @@ export class Model3dConfigService {
   }
 
   async updateModel3dConfig(
-    model3dConfigId: Model3dConfigModel,
-    modelId: number | undefined,
+    model3dConfig: Model3dConfigModel,
     offsetX: number | undefined,
     offsetY: number | undefined,
     positionOffsetX: number | undefined,
@@ -100,33 +114,40 @@ export class Model3dConfigService {
     pitchLimit: number | undefined,
     reqUserId: number,
   ): Promise<Model3dConfigModel> {
+    // Chỉ update những field có giá trị (không undefined)
+    const updateData: any = {
+      updatedAt: new Date(),
+      updatedBy: reqUserId,
+    };
+
+    if (offsetX !== undefined) updateData.offsetX = offsetX;
+    if (offsetY !== undefined) updateData.offsetY = offsetY;
+    if (positionOffsetX !== undefined)
+      updateData.positionOffsetX = positionOffsetX;
+    if (positionOffsetY !== undefined)
+      updateData.positionOffsetY = positionOffsetY;
+    if (positionOffsetZ !== undefined)
+      updateData.positionOffsetZ = positionOffsetZ;
+    if (initialScale !== undefined) updateData.initialScale = initialScale;
+    if (rotationSensitivity !== undefined)
+      updateData.rotationSensitivity = rotationSensitivity;
+    if (yawLimit !== undefined) updateData.yawLimit = yawLimit;
+    if (pitchLimit !== undefined) updateData.pitchLimit = pitchLimit;
+
     await this.model3dConfigRepository.update(
-      { id: model3dConfigId.id, deletedAt: IsNull() },
-      {
-        modelId: modelId,
-        offsetX: offsetX,
-        offsetY: offsetY,
-        positionOffsetX: positionOffsetX,
-        positionOffsetY: positionOffsetY,
-        positionOffsetZ: positionOffsetZ,
-        initialScale: initialScale,
-        rotationSensitivity: rotationSensitivity,
-        yawLimit: yawLimit,
-        pitchLimit: pitchLimit,
-        updatedAt: new Date(),
-        updatedBy: reqUserId,
-      },
+      { id: model3dConfig.id, deletedAt: IsNull() },
+      updateData,
     );
 
-    return await this.getModel3dConfigById(model3dConfigId.id);
+    return await this.getModel3dConfigById(model3dConfig.id);
   }
 
   async deleteModel3dConfig(
-    model3dConfigId: Model3dConfigModel,
+    model3dConfig: Model3dConfigModel,
     reqUserId: number,
   ): Promise<boolean> {
     await this.model3dConfigRepository.update(
-      { id: model3dConfigId.id, deletedAt: IsNull() },
+      { id: model3dConfig.id, deletedAt: IsNull() },
       {
         deletedAt: new Date(),
         deletedBy: reqUserId,

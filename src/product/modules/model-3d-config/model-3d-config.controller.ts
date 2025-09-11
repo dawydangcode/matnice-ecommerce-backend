@@ -17,6 +17,7 @@ import {
   CreateModel3dConfigBodyDto,
   DeleteModel3dConfigParamsDto,
   GetModel3dConfigByIdParamsDto,
+  GetModel3dConfigByModelIdParamsDto,
   UpdateModel3dConfigBodyDto,
   UpdateModel3dConfigParamsDto,
 } from './dtos/model-3d-config.dto';
@@ -38,12 +39,12 @@ export class Model3dConfigController {
     );
   }
 
-  // @Get('model-3d-config/:modelId/model/')
-  // async getByModelId(@Param() params: GetModel3dConfigByIdParamsDto) {
-  //   return await this.model3dConfigService.getModel3dConfigByModelId(
-  //     params.model3dConfigId,
-  //   );
-  // }
+  @Get('model-3d-config/:modelId/model/')
+  async getByModelId(@Param() params: GetModel3dConfigByModelIdParamsDto) {
+    return await this.model3dConfigService.getModel3dConfigByModelId(
+      params.modelId,
+    );
+  }
 
   @Post('/model-3d-config/create')
   async createModel3dConfig(
@@ -74,9 +75,8 @@ export class Model3dConfigController {
     const model3dConfig = await this.model3dConfigService.getModel3dConfigById(
       params.model3dConfigId,
     );
-    await this.model3dConfigService.updateModel3dConfig(
+    return await this.model3dConfigService.updateModel3dConfig(
       model3dConfig,
-      body.modelId,
       body.offsetX,
       body.offsetY,
       body.positionOffsetX,
