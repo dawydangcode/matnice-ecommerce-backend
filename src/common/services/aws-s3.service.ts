@@ -183,6 +183,45 @@ export class AwsS3Service {
     }
   }
 
+  async getFile(key: string): Promise<Buffer> {
+    try {
+      const command = new GetObjectCommand({
+        Bucket: this.bucketName,
+        Key: key,
+      });
+
+      const response = await this.s3Client.send(command);
+
+      if (!response.Body) {
+        throw new Error('No file content received from S3');
+      }
+
+      // Convert stream to buffer
+      const chunks: Uint8Array[] = [];
+      const stream = response.Body as any;
+
+      return new Promise((resolve, reject) => {
+        stream.on('data', (chunk: Uint8Array) => chunks.push(chunk));
+        stream.on('error', reject);
+        stream.on('end', () => resolve(Buffer.concat(chunks)));
+      });
+    } catch (error) {
+      console.error('Error getting file from S3:', error);
+      throw error;
+    }
+  }
+
+  async getFileByUrl(fileUrl: string): Promise<Buffer> {
+    try {
+      const url = new URL(fileUrl);
+      const key = url.pathname.substring(1); // Remove leading '/'
+      return await this.getFile(key);
+    } catch (error) {
+      console.error('Error parsing file URL for download:', error);
+      throw error;
+    }
+  }
+
   generateFileName(originalName: string, prefix?: string): string {
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(2, 15);

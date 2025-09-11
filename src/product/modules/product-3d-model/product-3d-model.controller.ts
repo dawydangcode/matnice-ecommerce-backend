@@ -10,6 +10,7 @@ import {
   HttpStatus,
   UseGuards,
   Req,
+  Res,
   UseInterceptors,
   UploadedFile,
   UploadedFiles,
@@ -28,14 +29,15 @@ import {
   UpdateProduct3dModelDto,
   Product3dModelQueryDto,
 } from './dtos/product-3d-model.dto';
-import { JwtAuthGuard } from '../../../middlewares/guards/jwt-auth.guard';
+import {
+  JwtAuthGuard,
+  Public,
+} from '../../../middlewares/guards/jwt-auth.guard';
 import { AwsS3Service } from '../../../common/services/aws-s3.service';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 
 @ApiTags('Product 3D Models')
-@Controller('product-3d-model')
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@Controller('api/v1/product-3d-model')
 export class Product3dModelController {
   constructor(
     private readonly product3dModelService: Product3dModelService,
@@ -43,6 +45,7 @@ export class Product3dModelController {
   ) {}
 
   @Post('upload')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Upload 3D model files to S3' })
   @ApiConsumes('multipart/form-data')
   @ApiResponse({
@@ -124,6 +127,7 @@ export class Product3dModelController {
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Create a new 3D model for a product' })
   @ApiResponse({
     status: HttpStatus.CREATED,
@@ -158,6 +162,82 @@ export class Product3dModelController {
     return await this.product3dModelService.getProduct3dModels();
   }
 
+  @Get(':productId/active')
+  @ApiOperation({ summary: 'Get active 3D model for product' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Active 3D model retrieved successfully',
+  })
+  async getActiveByProductId(
+    @Param('productId', ParseIntPipe) productId: number,
+  ) {
+    const models =
+      await this.product3dModelService.getActiveByProductId(productId);
+    return models && models.length > 0 ? models[0] : null;
+  }
+
+  @Get('serve/:productId')
+  @Public()
+  @ApiOperation({
+    summary: 'Serve 3D model file for product (proxy to avoid CORS)',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '3D model file served successfully',
+  })
+  async serveModel(
+    @Param('productId', ParseIntPipe) productId: number,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    try {
+      const models =
+        await this.product3dModelService.getActiveByProductId(productId);
+
+      if (!models || models.length === 0) {
+        return res.status(404).json({ message: '3D model not found' });
+      }
+
+      const model = models[0]; // Get first active model
+
+      if (!model.modelFilePath) {
+        return res.status(404).json({ message: 'Model file path not found' });
+      }
+
+      // Get file from S3 using URL
+      const fileBuffer = await this.awsS3Service.getFileByUrl(
+        model.modelFilePath,
+      );
+
+      // Set appropriate headers
+      const fileExt = model.modelFilePath.toLowerCase().split('.').pop();
+      let mimeType = 'application/octet-stream';
+
+      if (fileExt === 'glb') {
+        mimeType = 'model/gltf-binary';
+      } else if (fileExt === 'gltf') {
+        mimeType = 'model/gltf+json';
+      } else if (fileExt === 'obj') {
+        mimeType = 'application/octet-stream';
+      }
+
+      res.set({
+        'Content-Type': mimeType,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      });
+
+      return res.send(fileBuffer);
+    } catch (error: any) {
+      console.error('Error serving 3D model:', error);
+      return res.status(500).json({
+        message: 'Error serving 3D model',
+        error: error.message,
+      });
+    }
+  }
+
   @Get('product/:productId')
   @ApiOperation({ summary: 'Get 3D model for a specific product' })
   @ApiResponse({
@@ -168,18 +248,6 @@ export class Product3dModelController {
     return await this.product3dModelService.getProduct3dModelByProductId(
       productId,
     );
-  }
-
-  @Get('product/:productId/active')
-  @ApiOperation({ summary: 'Get active 3D models for a specific product' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Active 3D models for the product',
-  })
-  async findActiveByProductId(
-    @Param('productId', ParseIntPipe) productId: number,
-  ) {
-    return await this.product3dModelService.getActiveByProductId(productId);
   }
 
   @Get('type/:modelType')
