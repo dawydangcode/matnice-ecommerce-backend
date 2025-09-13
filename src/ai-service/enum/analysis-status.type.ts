@@ -1,4 +1,4 @@
-export enum AnalysisStatus {
+export enum AnalysisStatusType {
   PENDING = 'pending',
   PROCESSING = 'processing',
   COMPLETED = 'completed',

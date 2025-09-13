@@ -79,7 +79,7 @@ export class AIServiceController {
 
       return {
         success: true,
-        sessionId: result.sessionId,
+        sessionId: result.sessionId.toString(),
         message: 'Face analysis started successfully',
         data: result.analysis,
       };

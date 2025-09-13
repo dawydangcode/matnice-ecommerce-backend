@@ -1,6 +1,6 @@
-import { AnalysisStatus } from '../enum/analysis-status.type';
-import { SkinColorDetected } from '../enum/detect-skin-color.type';
-import { GenderDetected } from '../enum/detected-gender.type';
+import { AnalysisStatusType } from '../enum/analysis-status.type';
+import { SkinColorDetectedType } from '../enum/detect-skin-color.type';
+import { GenderDetectedType } from '../enum/detected-gender.type';
 
 export class FaceAnalysisModel {
   public readonly id: number;
@@ -10,17 +10,17 @@ export class FaceAnalysisModel {
   public readonly imageS3Key: string;
 
   // Gender Analysis Results
-  public readonly detectedGender: GenderDetected;
+  public readonly detectedGender: GenderDetectedType;
   public readonly genderConfidence: number;
 
   // Skin Tone Analysis Results
-  public readonly detectedSkinTone: SkinColorDetected;
-  public readonly skinToneConfidence: number;
+  public readonly detectedSkinColor: SkinColorDetectedType;
+  public readonly SkinColorConfidence: number;
 
   // Processing Status
-  public readonly analysisStatus: AnalysisStatus;
-  public readonly errorMessage?: string;
-  public readonly processingTimeMs?: number;
+  public readonly analysisStatus: AnalysisStatusType;
+  public readonly errorMessage: string | undefined;
+  public readonly processingTimeMs: number | undefined;
 
   public readonly createdAt: Date | undefined;
   public readonly createdBy: number | undefined;
@@ -35,13 +35,13 @@ export class FaceAnalysisModel {
     userId: number | undefined,
     imageUrl: string,
     imageS3Key: string,
-    detectedGender: GenderDetected,
+    detectedGender: GenderDetectedType,
     genderConfidence: number,
-    detectedSkinTone: SkinColorDetected,
-    skinToneConfidence: number,
-    analysisStatus: AnalysisStatus,
-    errorMessage: string,
-    processingTimeMs: number,
+    detectedSkinColor: SkinColorDetectedType,
+    SkinColorConfidence: number,
+    analysisStatus: AnalysisStatusType,
+    errorMessage: string | undefined,
+    processingTimeMs: number | undefined,
     createdAt: Date | undefined,
     createdBy: number | undefined,
     updatedAt: Date | undefined,
@@ -56,8 +56,8 @@ export class FaceAnalysisModel {
     this.imageS3Key = imageS3Key;
     this.detectedGender = detectedGender;
     this.genderConfidence = genderConfidence;
-    this.detectedSkinTone = detectedSkinTone;
-    this.skinToneConfidence = skinToneConfidence;
+    this.detectedSkinColor = detectedSkinColor;
+    this.SkinColorConfidence = SkinColorConfidence;
     this.analysisStatus = analysisStatus;
     this.errorMessage = errorMessage;
     this.processingTimeMs = processingTimeMs;
@@ -70,19 +70,39 @@ export class FaceAnalysisModel {
   }
 
   // Metadata
-  analysisMetadata?: {
+  public readonly analysisMetadata?: {
     imageWidth?: number;
     imageHeight?: number;
     faceDetected?: boolean;
     faceCount?: number;
     modelVersions?: {
       genderModel?: string;
-      skinToneModel?: string;
+      SkinColorModel?: string;
     };
   };
 
-  constructor(data: Partial<FaceAnalysisModel>) {
-    Object.assign(this, data);
+  // Static factory method để tạo từ Entity
+  static fromEntity(entity: any): FaceAnalysisModel {
+    return new FaceAnalysisModel(
+      entity.id,
+      entity.sessionId?.toString() || '', // Convert number to string for compatibility
+      entity.userId,
+      entity.imageUrl,
+      entity.imageS3Key,
+      entity.detectedGender,
+      entity.genderConfidence,
+      entity.detectedSkinColor,
+      entity.SkinColorConfidence,
+      entity.analysisStatus,
+      entity.errorMessage,
+      entity.processingTimeMs,
+      entity.createdAt,
+      entity.createdBy,
+      entity.updatedAt,
+      entity.updatedBy,
+      entity.deletedAt,
+      entity.deletedBy,
+    );
   }
 
   // Helper methods
@@ -94,19 +114,28 @@ export class FaceAnalysisModel {
     return this.analysisStatus === 'failed';
   }
 
+  isPending(): boolean {
+    return this.analysisStatus === 'pending';
+  }
+
+  isProcessing(): boolean {
+    return this.analysisStatus === 'processing';
+  }
+
   hasValidResults(): boolean {
     return (
       this.isProcessingComplete() &&
-      this.detectedGender !== 'unknown' &&
-      this.detectedSkinTone !== 'unknown'
+      this.detectedGender !== GenderDetectedType.UNKNOWN &&
+      this.detectedSkinColor !== SkinColorDetectedType.UNKNOWN
     );
   }
 
   getOverallConfidence(): number {
     if (!this.hasValidResults()) return 0;
-    return (this.genderConfidence + this.skinToneConfidence) / 2;
+    return (this.genderConfidence + this.SkinColorConfidence) / 2;
   }
 
+  // Format cho API response (public facing) - match với DTO structure
   toPublicResult() {
     return {
       sessionId: this.sessionId,
@@ -115,9 +144,9 @@ export class FaceAnalysisModel {
           detected: this.detectedGender,
           confidence: this.genderConfidence,
         },
-        skinTone: {
-          detected: this.detectedSkinTone,
-          confidence: this.skinToneConfidence,
+        SkinColor: {
+          detected: this.detectedSkinColor,
+          confidence: this.SkinColorConfidence,
         },
         overall: {
           confidence: this.getOverallConfidence(),
@@ -125,7 +154,60 @@ export class FaceAnalysisModel {
         },
       },
       status: this.analysisStatus,
-      analyzedAt: this.updatedAt,
+      analyzedAt: this.updatedAt || this.createdAt || new Date(),
+    };
+  }
+
+  // Format chi tiết cho admin/internal use
+  toDetailedResult() {
+    return {
+      id: this.id,
+      sessionId: this.sessionId,
+      userId: this.userId,
+      imageUrl: this.imageUrl,
+      imageS3Key: this.imageS3Key,
+      analysis: {
+        gender: {
+          detected: this.detectedGender,
+          confidence: this.genderConfidence,
+        },
+        SkinColor: {
+          detected: this.detectedSkinColor,
+          confidence: this.SkinColorConfidence,
+        },
+        overall: {
+          confidence: this.getOverallConfidence(),
+          status: this.analysisStatus,
+          processingTime: this.processingTimeMs,
+          errorMessage: this.errorMessage,
+        },
+      },
+      timestamps: {
+        createdAt: this.createdAt,
+        createdBy: this.createdBy,
+        updatedAt: this.updatedAt,
+        updatedBy: this.updatedBy,
+        deletedAt: this.deletedAt,
+        deletedBy: this.deletedBy,
+      },
+      metadata: this.analysisMetadata,
+    };
+  }
+
+  // Format cho analytics/reporting
+  toAnalyticsData() {
+    return {
+      sessionId: this.sessionId,
+      userId: this.userId,
+      detectedGender: this.detectedGender,
+      genderConfidence: this.genderConfidence,
+      detectedSkinColor: this.detectedSkinColor,
+      SkinColorConfidence: this.SkinColorConfidence,
+      analysisStatus: this.analysisStatus,
+      processingTimeMs: this.processingTimeMs,
+      createdAt: this.createdAt,
+      hasValidResults: this.hasValidResults(),
+      overallConfidence: this.getOverallConfidence(),
     };
   }
 }

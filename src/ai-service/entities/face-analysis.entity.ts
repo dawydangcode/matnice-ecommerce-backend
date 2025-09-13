@@ -2,82 +2,58 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  CreateDateColumn,
-  UpdateDateColumn,
   Index,
+  DeleteDateColumn,
 } from 'typeorm';
+import { AnalysisStatusType } from '../enum/analysis-status.type';
+import { GenderDetectedType } from '../enum/detected-gender.type';
+import { SkinColorDetectedType } from '../enum/detect-skin-color.type';
+import { FaceAnalysisModel } from '../models/face-analysis.model';
 
 @Entity('face_analysis')
 @Index(['sessionId'])
 @Index(['userId'])
 @Index(['createdAt'])
 export class FaceAnalysisEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: 'id' })
   id!: number;
 
-  @Column({ type: 'bigint', name: 'session_id' })
+  @Column({ name: 'session_id' })
   sessionId!: number;
 
-  @Column({ type: 'bigint', name: 'user_id', nullable: true })
+  @Column({ name: 'user_id' })
   userId?: number;
 
-  @Column({ type: 'varchar', length: 255, name: 'image_url' })
+  @Column({ name: 'image_url' })
   imageUrl!: string;
 
-  @Column({ type: 'varchar', length: 50, name: 'image_s3_key' })
+  @Column({ name: 'image_s3_key' })
   imageS3Key!: string;
 
   // Gender Analysis Results
-  @Column({
-    type: 'enum',
-    enum: ['male', 'female', 'unknown'],
-    name: 'detected_gender',
-    default: 'unknown',
-  })
-  detectedGender!: 'male' | 'female' | 'unknown';
+  @Column({ name: 'detected_gender' })
+  detectedGender!: GenderDetectedType;
 
-  @Column({
-    type: 'decimal',
-    precision: 5,
-    scale: 4,
-    name: 'gender_confidence',
-    default: 0,
-  })
+  @Column({ name: 'gender_confidence' })
   genderConfidence!: number;
 
   // Skin Tone Analysis Results
-  @Column({
-    type: 'enum',
-    enum: ['light', 'medium', 'dark', 'unknown'],
-    name: 'detected_skin_tone',
-    default: 'unknown',
-  })
-  detectedSkinTone!: 'light' | 'medium' | 'dark' | 'unknown';
+  @Column({ name: 'detected_skin_tone' })
+  detectedSkinColor!: SkinColorDetectedType;
 
-  @Column({
-    type: 'decimal',
-    precision: 5,
-    scale: 4,
-    name: 'skin_tone_confidence',
-    default: 0,
-  })
-  skinToneConfidence!: number;
+  @Column({ name: 'skin_color_confidence' })
+  SkinColorConfidence!: number;
 
   // Processing Status
-  @Column({
-    type: 'enum',
-    enum: ['pending', 'processing', 'completed', 'failed'],
-    name: 'analysis_status',
-    default: 'pending',
-  })
-  analysisStatus!: 'pending' | 'processing' | 'completed' | 'failed';
+  @Column({ name: 'analysis_status' })
+  AnalysisStatusType!: AnalysisStatusType;
 
   @Column({ type: 'text', name: 'error_message', nullable: true })
-  errorMessage?: string;
+  errorMessage!: string;
 
   // Processing Times
-  @Column({ type: 'int', name: 'processing_time_ms', nullable: true })
-  processingTimeMs?: number;
+  @Column({ name: 'processing_time_ms' })
+  processingTimeMs!: number;
 
   // Metadata
   @Column({ type: 'json', name: 'analysis_metadata', nullable: true })
@@ -88,25 +64,48 @@ export class FaceAnalysisEntity {
     faceCount?: number;
     modelVersions?: {
       genderModel?: string;
-      skinToneModel?: string;
+      SkinColorModel?: string;
     };
   };
 
-  @CreateDateColumn({ name: 'created_at' })
+  @Column({ name: 'created_at' })
   createdAt!: Date;
 
-  @Column({ type: 'bigint', name: 'created_by', nullable: true })
-  createdBy?: number;
+  @Column({ name: 'created_by' })
+  createdBy!: number;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @Column({ name: 'updated_at' })
   updatedAt!: Date;
 
-  @Column({ type: 'bigint', name: 'updated_by', nullable: true })
-  updatedBy?: number;
+  @Column({ name: 'updated_by' })
+  updatedBy!: number;
 
-  @Column({ type: 'timestamp', name: 'deleted_at', nullable: true })
-  deletedAt?: Date;
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deletedAt!: Date;
 
-  @Column({ type: 'bigint', name: 'deleted_by', nullable: true })
-  deletedBy?: number;
+  @Column({ name: 'deleted_by' })
+  deletedBy!: number;
+
+  toModel(): FaceAnalysisModel {
+    return new FaceAnalysisModel(
+      this.id,
+      this.sessionId.toString(),
+      this.userId,
+      this.imageUrl,
+      this.imageS3Key,
+      this.detectedGender,
+      this.genderConfidence,
+      this.detectedSkinColor,
+      this.SkinColorConfidence,
+      this.AnalysisStatusType,
+      this.errorMessage,
+      this.processingTimeMs,
+      this.createdAt,
+      this.createdBy,
+      this.updatedAt,
+      this.updatedBy,
+      this.deletedAt,
+      this.deletedBy,
+    );
+  }
 }

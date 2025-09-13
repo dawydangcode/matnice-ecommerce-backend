@@ -20,6 +20,7 @@ import {
   GetAnalysisHistoryRequestDto,
   FaceAnalysisResultDto,
 } from './dtos/ai-analysis.dto';
+import { AnalysisStatusType } from './enum/analysis-status.type';
 
 @Injectable()
 export class AIServiceService {
@@ -96,10 +97,7 @@ export class AIServiceService {
         // Return analysis immediately if processing is fast (for demo purposes)
       };
     } catch (error) {
-      this.logger.error(
-        `Failed to start face analysis for session ${session.id}:`,
-        error,
-      );
+      this.logger.error(`Failed to start face analysis:`, error);
       throw new InternalServerErrorException('Failed to start face analysis');
     }
   }
@@ -116,7 +114,7 @@ export class AIServiceService {
       throw new BadRequestException('Analysis session not found');
     }
 
-    const model = new FaceAnalysisModel(analysis);
+    const model = analysis.toModel();
     return model.toPublicResult();
   }
 
@@ -142,12 +140,13 @@ export class AIServiceService {
       .getManyAndCount();
 
     const data = analyses.map((analysis) => {
-      const model = new FaceAnalysisModel(analysis);
+      const model = analysis.toModel();
+      const publicResult = model.toPublicResult();
       return {
         id: model.id,
         sessionId: model.sessionId,
-        analysis: model.toPublicResult().analysis,
-        createdAt: model.createdAt,
+        analysis: publicResult.analysis,
+        createdAt: model.createdAt || new Date(),
       };
     });
 
@@ -172,7 +171,10 @@ export class AIServiceService {
   ): Promise<void> {
     try {
       // Update status to processing
-      await this.updateAnalysisStatus(analysisId, 'processing');
+      await this.updateAnalysisStatus(
+        analysisId,
+        AnalysisStatusType.PROCESSING,
+      );
 
       // Run AI analysis
       const [genderResult, skinToneResult] = await Promise.all([
@@ -353,7 +355,7 @@ export class AIServiceService {
     s3Key: string,
   ): Promise<string> {
     try {
-      await this.s3Service.uploadFile(s3Key, imageBuffer as any, 'image/jpeg');
+      await this.s3Service.uploadFile(imageBuffer, s3Key, 'image/jpeg');
       return await this.s3Service.getSignedUrl(s3Key);
     } catch (error) {
       this.logger.error('Failed to upload image to S3:', error);
@@ -365,7 +367,7 @@ export class AIServiceService {
    * Create initial analysis record
    */
   private async createAnalysisRecord(
-    sessionId: string,
+    sessionId: number,
     userId?: number,
     imageUrl?: string,
     s3Key?: string,
@@ -376,7 +378,7 @@ export class AIServiceService {
       userId,
       imageUrl,
       imageS3Key: s3Key,
-      analysisStatus: 'pending',
+      AnalysisStatusType: AnalysisStatusType.PENDING,
       analysisMetadata: imageInfo,
     });
 
@@ -388,10 +390,10 @@ export class AIServiceService {
    */
   private async updateAnalysisStatus(
     analysisId: number,
-    status: 'pending' | 'processing' | 'completed' | 'failed',
+    status: AnalysisStatusType,
   ): Promise<void> {
     await this.faceAnalysisRepository.update(analysisId, {
-      analysisStatus: status,
+      AnalysisStatusType: status,
     });
   }
 

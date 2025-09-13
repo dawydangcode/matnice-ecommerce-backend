@@ -12,16 +12,20 @@ import {
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
+import { GenderDetectedType } from '../enum/detected-gender.type';
+import { SkinColorDetectedType } from '../enum/detect-skin-color.type';
+import { AnalysisStatusType } from '../enum/analysis-status.type';
 
 // Request DTOs
 export class AnalyzeFaceRequestDto {
   @ApiPropertyOptional({
     description: 'Session ID for tracking user session',
-    example: 'sess_1234567890',
+    example: 123,
   })
   @IsOptional()
-  @IsString()
-  sessionId!: string;
+  @IsNumber()
+  @Min(1)
+  sessionId?: number;
 
   @ApiPropertyOptional({
     description: 'User ID if user is logged in',
@@ -36,11 +40,12 @@ export class AnalyzeFaceRequestDto {
 export class GetAnalysisRequestDto {
   @ApiProperty({
     description: 'Session ID to get analysis results',
-    example: 'sess_1234567890',
+    example: 123,
   })
   @IsNotEmpty()
-  @IsString()
-  sessionId!: string;
+  @IsNumber()
+  @Min(1)
+  sessionId!: number;
 }
 
 export class GetAnalysisHistoryRequestDto {
@@ -82,28 +87,28 @@ export class GenderAnalysisDto {
     description: 'Detected gender',
     example: 'female',
   })
-  detected: 'male' | 'female' | 'unknown';
+  detected!: GenderDetectedType;
 
   @ApiProperty({
     description: 'Confidence score for gender detection (0-1)',
     example: 0.8542,
   })
-  confidence: number;
+  confidence!: number;
 }
 
-export class SkinToneAnalysisDto {
+export class SkinColorAnalysisDto {
   @ApiProperty({
     enum: ['light', 'medium', 'dark', 'unknown'],
     description: 'Detected skin tone',
     example: 'medium',
   })
-  detected: 'light' | 'medium' | 'dark' | 'unknown';
+  detected!: SkinColorDetectedType;
 
   @ApiProperty({
     description: 'Confidence score for skin tone detection (0-1)',
     example: 0.7231,
   })
-  confidence: number;
+  confidence!: number;
 }
 
 export class OverallAnalysisDto {
@@ -111,7 +116,7 @@ export class OverallAnalysisDto {
     description: 'Overall confidence score (average of all analyses)',
     example: 0.7887,
   })
-  confidence: number;
+  confidence!: number;
 
   @ApiProperty({
     description: 'Processing time in milliseconds',
@@ -125,19 +130,19 @@ export class FaceAnalysisResultDto {
     description: 'Session ID',
     example: 'sess_1234567890',
   })
-  sessionId: string;
+  sessionId!: string;
 
   @ApiProperty({
     type: () => ({
       gender: GenderAnalysisDto,
-      skinTone: SkinToneAnalysisDto,
+      SkinColor: SkinColorAnalysisDto,
       overall: OverallAnalysisDto,
     }),
     description: 'Analysis results',
   })
-  analysis: {
+  analysis!: {
     gender: GenderAnalysisDto;
-    skinTone: SkinToneAnalysisDto;
+    SkinColor: SkinColorAnalysisDto;
     overall: OverallAnalysisDto;
   };
 
@@ -146,13 +151,13 @@ export class FaceAnalysisResultDto {
     description: 'Analysis processing status',
     example: 'completed',
   })
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status!: AnalysisStatusType;
 
   @ApiProperty({
     description: 'When the analysis was completed',
     example: '2024-01-15T10:30:00.000Z',
   })
-  analyzedAt: Date;
+  analyzedAt!: Date;
 }
 
 export class AnalyzeFaceResponseDto {
@@ -160,19 +165,19 @@ export class AnalyzeFaceResponseDto {
     description: 'Whether the request was successful',
     example: true,
   })
-  success: boolean;
+  success!: boolean;
 
   @ApiProperty({
     description: 'Session ID for tracking analysis',
     example: 'sess_1234567890',
   })
-  sessionId: string;
+  sessionId!: string;
 
   @ApiProperty({
     description: 'Response message',
     example: 'Face analysis started successfully',
   })
-  message: string;
+  message!: string;
 
   @ApiPropertyOptional({
     type: FaceAnalysisResultDto,
@@ -186,19 +191,19 @@ export class GetAnalysisResponseDto {
     description: 'Whether the request was successful',
     example: true,
   })
-  success: boolean;
+  success!: boolean;
 
   @ApiProperty({
     type: FaceAnalysisResultDto,
     description: 'Analysis results',
   })
-  data: FaceAnalysisResultDto;
+  data!: FaceAnalysisResultDto;
 
   @ApiProperty({
     description: 'Response message',
     example: 'Analysis retrieved successfully',
   })
-  message: string;
+  message!: string;
 }
 
 export class AnalysisHistoryItemDto {
@@ -206,25 +211,25 @@ export class AnalysisHistoryItemDto {
     description: 'Analysis ID',
     example: 123,
   })
-  id: number;
+  id!: number;
 
   @ApiProperty({
     description: 'Session ID',
     example: 'sess_1234567890',
   })
-  sessionId: string;
+  sessionId!: string;
 
   @ApiProperty({
     type: () => ({
       gender: GenderAnalysisDto,
-      skinTone: SkinToneAnalysisDto,
+      SkinColor: SkinColorAnalysisDto,
       overall: OverallAnalysisDto,
     }),
     description: 'Analysis results',
   })
-  analysis: {
+  analysis!: {
     gender: GenderAnalysisDto;
-    skinTone: SkinToneAnalysisDto;
+    SkinColor: SkinColorAnalysisDto;
     overall: OverallAnalysisDto;
   };
 
@@ -232,7 +237,7 @@ export class AnalysisHistoryItemDto {
     description: 'When the analysis was created',
     example: '2024-01-15T10:30:00.000Z',
   })
-  createdAt: Date;
+  createdAt!: Date;
 }
 
 export class GetAnalysisHistoryResponseDto {
@@ -240,18 +245,18 @@ export class GetAnalysisHistoryResponseDto {
     description: 'Whether the request was successful',
     example: true,
   })
-  success: boolean;
+  success!: boolean;
 
   @ApiProperty({
     type: [AnalysisHistoryItemDto],
     description: 'List of analysis history',
   })
-  data: AnalysisHistoryItemDto[];
+  data!: AnalysisHistoryItemDto[];
 
   @ApiProperty({
     description: 'Pagination metadata',
   })
-  pagination: {
+  pagination!: {
     page: number;
     limit: number;
     total: number;
@@ -262,7 +267,7 @@ export class GetAnalysisHistoryResponseDto {
     description: 'Response message',
     example: 'Analysis history retrieved successfully',
   })
-  message: string;
+  message!: string;
 }
 
 // Error Response DTOs
@@ -271,13 +276,13 @@ export class ErrorResponseDto {
     description: 'Whether the request was successful',
     example: false,
   })
-  success: boolean;
+  success!: boolean;
 
   @ApiProperty({
     description: 'Error message',
     example: 'Invalid image format',
   })
-  message: string;
+  message!: string;
 
   @ApiPropertyOptional({
     description: 'Error code for client handling',
