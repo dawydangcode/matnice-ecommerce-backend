@@ -18,11 +18,20 @@ import { AnalysisStatusType } from '../enum/analysis-status.type';
 
 // Request DTOs
 export class AnalyzeFaceRequestDto {
+  @ApiProperty({
+    type: 'string',
+    format: 'binary',
+    description: 'Image file to analyze (JPEG, JPG, PNG)',
+    required: true,
+  })
+  image!: Express.Multer.File;
+
   @ApiPropertyOptional({
     description: 'Session ID for tracking user session',
     example: 123,
   })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   @Min(1)
   sessionId?: number;
@@ -34,7 +43,7 @@ export class AnalyzeFaceRequestDto {
   @IsOptional()
   @IsInt()
   @Min(1)
-  userId!: number;
+  userId?: number;
 }
 
 export class GetAnalysisRequestDto {
@@ -43,6 +52,7 @@ export class GetAnalysisRequestDto {
     example: 123,
   })
   @IsNotEmpty()
+  @Type(() => Number)
   @IsNumber()
   @Min(1)
   sessionId!: number;
@@ -54,6 +64,7 @@ export class GetAnalysisHistoryRequestDto {
     example: 123,
   })
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   userId!: number;

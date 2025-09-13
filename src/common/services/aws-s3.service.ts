@@ -133,12 +133,21 @@ export class AwsS3Service {
   }
 
   async getSignedUrl(
-    fileUrl: string,
+    fileUrlOrKey: string,
     expiresIn: number = 3600,
   ): Promise<string> {
     try {
-      const url = new URL(fileUrl);
-      const key = url.pathname.substring(1);
+      let key: string;
+
+      // Check if input is a full URL or just a key
+      if (fileUrlOrKey.startsWith('http')) {
+        // It's a full URL, extract the key
+        const url = new URL(fileUrlOrKey);
+        key = url.pathname.substring(1);
+      } else {
+        // It's just a key
+        key = fileUrlOrKey;
+      }
 
       const command = new GetObjectCommand({
         Bucket: this.bucketName,

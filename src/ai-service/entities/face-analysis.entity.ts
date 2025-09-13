@@ -31,25 +31,25 @@ export class FaceAnalysisEntity {
   imageS3Key!: string;
 
   // Gender Analysis Results
-  @Column({ name: 'detected_gender' })
+  @Column({ name: 'detected_gender_type' })
   detectedGender!: GenderDetectedType;
 
-  @Column({ name: 'gender_confidence' })
+  @Column({ name: 'gender_confidence', type: 'double' })
   genderConfidence!: number;
 
   // Skin Tone Analysis Results
-  @Column({ name: 'detected_skin_tone' })
+  @Column({ name: 'detected_skin_color_type' })
   detectedSkinColor!: SkinColorDetectedType;
 
-  @Column({ name: 'skin_color_confidence' })
+  @Column({ name: 'skin_color_confidence', type: 'double' })
   SkinColorConfidence!: number;
 
   // Processing Status
   @Column({ name: 'analysis_status' })
   AnalysisStatusType!: AnalysisStatusType;
 
-  @Column({ type: 'text', name: 'error_message', nullable: true })
-  errorMessage!: string;
+  // @Column({ type: 'text', name: 'error_message', nullable: true })
+  // errorMessage!: string;
 
   // Processing Times
   @Column({ name: 'processing_time_ms' })
@@ -98,7 +98,7 @@ export class FaceAnalysisEntity {
       this.detectedSkinColor,
       this.SkinColorConfidence,
       this.AnalysisStatusType,
-      this.errorMessage,
+      undefined, // errorMessage - temporarily disabled
       this.processingTimeMs,
       this.createdAt,
       this.createdBy,

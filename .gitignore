@@ -46,6 +46,18 @@ lerna-debug.log*
 .temp
 .tmp
 
+# Python virtual environments
+.venv/
+ai-env/
+venv/
+env/
+
+# AI model test outputs
+face_skin_analysis/
+gender_results/
+__pycache__/
+*.pyc
+
 # Runtime data
 pids
 *.pid

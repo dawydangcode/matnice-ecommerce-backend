@@ -93,7 +93,7 @@ export class FaceAnalysisModel {
       entity.genderConfidence,
       entity.detectedSkinColor,
       entity.SkinColorConfidence,
-      entity.analysisStatus,
+      entity.AnalysisStatusType,
       entity.errorMessage,
       entity.processingTimeMs,
       entity.createdAt,
@@ -138,6 +138,7 @@ export class FaceAnalysisModel {
   // Format cho API response (public facing) - match với DTO structure
   toPublicResult() {
     return {
+      analysisId: this.id,
       sessionId: this.sessionId,
       analysis: {
         gender: {
@@ -154,6 +155,7 @@ export class FaceAnalysisModel {
         },
       },
       status: this.analysisStatus,
+      s3Url: undefined as string | undefined, // Will be set by service
       analyzedAt: this.updatedAt || this.createdAt || new Date(),
     };
   }

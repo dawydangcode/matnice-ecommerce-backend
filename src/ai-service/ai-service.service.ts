@@ -21,11 +21,15 @@ import {
   FaceAnalysisResultDto,
 } from './dtos/ai-analysis.dto';
 import { AnalysisStatusType } from './enum/analysis-status.type';
+import { GenderDetectedType } from './enum/detected-gender.type';
+import { SkinColorDetectedType } from './enum/detect-skin-color.type';
 
 @Injectable()
 export class AIServiceService {
   private readonly logger = new Logger(AIServiceService.name);
-  private readonly pythonPath = process.env.PYTHON_PATH || 'python3';
+  private readonly pythonPath =
+    process.env.PYTHON_PATH ||
+    '/home/dawy/KLTN/matnice-ecommerce-backend/.venv/bin/python';
   private readonly aiModelsPath = path.join(__dirname, '../../ai-models');
 
   constructor(
@@ -115,7 +119,18 @@ export class AIServiceService {
     }
 
     const model = analysis.toModel();
-    return model.toPublicResult();
+    const result = model.toPublicResult();
+
+    // Add signed URL for accessing the image
+    if (analysis.imageS3Key) {
+      try {
+        result.s3Url = await this.s3Service.getSignedUrl(analysis.imageS3Key);
+      } catch (error) {
+        this.logger.warn('Failed to generate signed URL:', error);
+      }
+    }
+
+    return result;
   }
 
   /**
@@ -127,7 +142,9 @@ export class AIServiceService {
     const queryBuilder = this.faceAnalysisRepository
       .createQueryBuilder('analysis')
       .where('analysis.deletedAt IS NULL')
-      .andWhere('analysis.analysisStatus = :status', { status: 'completed' });
+      .andWhere('analysis.AnalysisStatusType = :status', {
+        status: 'completed',
+      });
 
     if (userId) {
       queryBuilder.andWhere('analysis.userId = :userId', { userId });
@@ -184,12 +201,16 @@ export class AIServiceService {
 
       const processingTime = Date.now() - startTime;
 
+      // Debug logging
+      this.logger.debug(`Gender result: ${JSON.stringify(genderResult)}`);
+      this.logger.debug(`Skin tone result: ${JSON.stringify(skinToneResult)}`);
+
       // Update with results
       await this.updateAnalysisResults(analysisId, {
         genderResult,
         skinToneResult,
         processingTime,
-        status: 'completed',
+        status: AnalysisStatusType.COMPLETED,
       });
 
       this.logger.log(
@@ -198,8 +219,8 @@ export class AIServiceService {
     } catch (error) {
       this.logger.error(`Face analysis failed for ID ${analysisId}:`, error);
       await this.updateAnalysisResults(analysisId, {
-        status: 'failed',
-        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        status: AnalysisStatusType.FAILED,
+        // errorMessage: error instanceof Error ? error.message : 'Unknown error',
         processingTime: Date.now() - startTime,
       });
     }
@@ -209,7 +230,7 @@ export class AIServiceService {
    * Analyze gender using AI model
    */
   private async analyzeGender(imageUrl: string): Promise<{
-    gender: 'male' | 'female' | 'unknown';
+    gender: GenderDetectedType;
     confidence: number;
   }> {
     return new Promise((resolve, reject) => {
@@ -217,7 +238,17 @@ export class AIServiceService {
         this.aiModelsPath,
         'gender-ai-package/gender_classifier.py',
       );
-      const process = spawn(this.pythonPath, [scriptPath, imageUrl]);
+
+      // Debug log để kiểm tra đường dẫn
+      this.logger.debug(`Gender AI script path: ${scriptPath}`);
+      this.logger.debug(`File exists: ${fs.existsSync(scriptPath)}`);
+
+      const modelPath = path.join(
+        this.aiModelsPath,
+        'gender-ai-package/gender_best.pt',
+      );
+      const command = `${this.pythonPath} "${scriptPath}" --source "${imageUrl}" --model "${modelPath}" --json 2>/dev/null`;
+      const process = spawn('bash', ['-c', command]);
 
       let output = '';
       let error = '';
@@ -233,7 +264,10 @@ export class AIServiceService {
       process.on('close', (code) => {
         if (code === 0) {
           try {
-            const result = JSON.parse(output.trim());
+            // Parse only the last line as JSON (ignore log messages)
+            const lines = output.trim().split('\n');
+            const jsonLine = lines[lines.length - 1];
+            const result = JSON.parse(jsonLine);
             if (result.error) {
               reject(new Error(`Gender analysis error: ${result.error}`));
               return;
@@ -264,7 +298,7 @@ export class AIServiceService {
    * Analyze skin tone using AI model
    */
   private async analyzeSkinTone(imageUrl: string): Promise<{
-    skinTone: 'light' | 'medium' | 'dark' | 'unknown';
+    skinTone: SkinColorDetectedType;
     confidence: number;
   }> {
     return new Promise((resolve, reject) => {
@@ -272,7 +306,12 @@ export class AIServiceService {
         this.aiModelsPath,
         'skincolor-ai-model/face_skin_analyzer.py',
       );
-      const process = spawn(this.pythonPath, [scriptPath, imageUrl]);
+      const modelPath = path.join(
+        this.aiModelsPath,
+        'skincolor-ai-model/runs/train20/weights/best.pt',
+      );
+      const command = `${this.pythonPath} "${scriptPath}" --source "${imageUrl}" --model "${modelPath}" --json 2>/dev/null`;
+      const process = spawn('bash', ['-c', command]);
 
       let output = '';
       let error = '';
@@ -288,13 +327,16 @@ export class AIServiceService {
       process.on('close', (code) => {
         if (code === 0) {
           try {
-            const result = JSON.parse(output.trim());
+            // Parse only the last line as JSON (ignore log messages)
+            const lines = output.trim().split('\n');
+            const jsonLine = lines[lines.length - 1];
+            const result = JSON.parse(jsonLine);
             if (result.error) {
               reject(new Error(`Skin tone analysis error: ${result.error}`));
               return;
             }
             resolve({
-              skinTone: result.skin_tone || 'unknown',
+              skinTone: result.skin_type || 'unknown',
               confidence: result.confidence || 0,
             });
           } catch (e) {
@@ -356,7 +398,10 @@ export class AIServiceService {
   ): Promise<string> {
     try {
       await this.s3Service.uploadFile(imageBuffer, s3Key, 'image/jpeg');
-      return await this.s3Service.getSignedUrl(s3Key);
+      // Return simple S3 URL instead of signed URL to avoid DB column length issues
+      const bucketName = process.env.AWS_S3_BUCKET_NAME || 'testbucket21045081';
+      const region = process.env.AWS_REGION || 'ap-southeast-2';
+      return `https://${bucketName}.s3.${region}.amazonaws.com/${s3Key}`;
     } catch (error) {
       this.logger.error('Failed to upload image to S3:', error);
       throw new InternalServerErrorException('Failed to upload image');
@@ -407,7 +452,7 @@ export class AIServiceService {
       skinToneResult?: { skinTone: string; confidence: number };
       processingTime?: number;
       status?: string;
-      errorMessage?: string;
+      // errorMessage?: string;
     },
   ): Promise<void> {
     const updateData: any = {};
@@ -418,8 +463,8 @@ export class AIServiceService {
     }
 
     if (data.skinToneResult) {
-      updateData.detectedSkinTone = data.skinToneResult.skinTone;
-      updateData.skinToneConfidence = data.skinToneResult.confidence;
+      updateData.detectedSkinColor = data.skinToneResult.skinTone;
+      updateData.SkinColorConfidence = data.skinToneResult.confidence;
     }
 
     if (data.processingTime) {
@@ -427,12 +472,12 @@ export class AIServiceService {
     }
 
     if (data.status) {
-      updateData.analysisStatus = data.status;
+      updateData.AnalysisStatusType = data.status;
     }
 
-    if (data.errorMessage) {
-      updateData.errorMessage = data.errorMessage;
-    }
+    // if (data.errorMessage) {
+    //   updateData.errorMessage = data.errorMessage;
+    // }
 
     await this.faceAnalysisRepository.update(analysisId, updateData);
   }

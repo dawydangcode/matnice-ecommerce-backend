@@ -10,18 +10,49 @@ import os
 import argparse
 import numpy as np
 from pathlib import Path
+import requests
+import tempfile
+from urllib.parse import urlparse
+
+def download_image_from_url(url, silent=False):
+    """Download image from URL to temporary file"""
+    try:
+        response = requests.get(url, timeout=30)
+        response.raise_for_status()
+        
+        # Create temporary file
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg')
+        temp_file.write(response.content)
+        temp_file.close()
+        
+        return temp_file.name
+    except Exception as e:
+        if not silent:
+            print(f"❌ Error downloading image from URL: {e}")
+        return None
+
+def is_url(string):
+    """Check if string is a valid URL"""
+    try:
+        result = urlparse(string)
+        return all([result.scheme, result.netloc])
+    except:
+        return False
 
 class GenderClassifier:
-    def __init__(self, model_path="weights/gender_best.pt"):
+    def __init__(self, model_path="weights/gender_best.pt", silent=False):
         """
         Initialize Gender Classifier
         Args:
             model_path: Path to trained gender classification model
+            silent: If True, suppress all output messages
         """
+        self.silent = silent
         try:
-            self.model = YOLO(model_path)
-            print(f"✅ Gender model loaded: {model_path}")
-            print(f"✅ Model classes: {self.model.names}")
+            self.model = YOLO(model_path, verbose=False)
+            if not self.silent:
+                print(f"✅ Gender model loaded: {model_path}")
+                print(f"✅ Model classes: {self.model.names}")
         except Exception as e:
             raise Exception(f"Failed to load model: {e}")
     
@@ -31,7 +62,7 @@ class GenderClassifier:
         Returns: dict with prediction results
         """
         try:
-            results = self.model(image_path)
+            results = self.model(image_path, verbose=False)
             
             for result in results:
                 probs = result.probs
@@ -173,37 +204,87 @@ def main():
                        help='Path to gender classification model')
     parser.add_argument('--output', type=str, default='gender_results',
                        help='Output directory')
+    parser.add_argument('--json', action='store_true',
+                       help='Output JSON format for API integration')
     
     args = parser.parse_args()
     
     # Initialize classifier
-    print("🚀 Initializing Gender Classifier...")
+    if not args.json:
+        print("🚀 Initializing Gender Classifier...")
     try:
-        classifier = GenderClassifier(model_path=args.model)
+        classifier = GenderClassifier(model_path=args.model, silent=args.json)
     except Exception as e:
-        print(f"❌ Error: {e}")
+        if not args.json:
+            print(f"❌ Error: {e}")
         return
     
     # Process input
-    if os.path.isfile(args.source):
+    temp_file = None
+    source_path = args.source
+    
+    # Check if source is URL
+    if is_url(args.source):
+        if not args.json:
+            print(f"\n🌐 Downloading image from URL: {args.source}")
+        temp_file = download_image_from_url(args.source, silent=args.json)
+        if not temp_file:
+            if not args.json:
+                print("❌ Failed to download image")
+            return
+        source_path = temp_file
+    
+    if os.path.isfile(source_path):
         # Single image
-        print(f"\n📷 Processing single image: {args.source}")
-        result = classifier.process_image_with_visualization(args.source, args.output)
+        if not args.json:
+            print(f"\n📷 Processing single image: {source_path}")
+        result = classifier.process_image_with_visualization(source_path, args.output)
         if result:
             prediction = result["prediction"]
-            print(f"\n✅ Result:")
-            print(f"   Gender: {prediction['predicted_gender']}")
-            print(f"   Confidence: {prediction['confidence']:.3f}")
-            print(f"   Output: {result['output_path']}")
+            if args.json:
+                # Output JSON format for API integration
+                import json
+                api_result = {
+                    "success": True,
+                    "gender": prediction['predicted_gender'],
+                    "confidence": float(prediction['confidence'])  # Ensure float type
+                }
+                print(json.dumps(api_result))
+            else:
+                print(f"\n✅ Result:")
+                print(f"   Gender: {prediction['predicted_gender']}")
+                print(f"   Confidence: {prediction['confidence']:.3f}")
+                print(f"   Output: {result['output_path']}")
+        else:
+            if args.json:
+                import json
+                api_result = {
+                    "success": False,
+                    "error": "No faces detected or processing failed",
+                    "gender": "unknown",
+                    "confidence": 0.0
+                }
+                print(json.dumps(api_result))
+            else:
+                print("❌ No faces detected or processing failed")
         
     elif os.path.isdir(args.source):
         # Directory
-        print(f"\n📁 Processing directory: {args.source}")
+        if not args.json:
+            print(f"\n📁 Processing directory: {args.source}")
         results = classifier.process_directory(args.source, args.output)
-        print(f"\n🎉 Completed processing {len(results)} images!")
+        if not args.json:
+            print(f"\n🎉 Completed processing {len(results)} images!")
         
     else:
-        print(f"❌ Error: {args.source} is not a valid file or directory")
+        if not args.json:
+            print(f"❌ Error: {args.source} is not a valid file or directory")
+    
+    # Cleanup temporary file
+    if temp_file and os.path.exists(temp_file):
+        os.unlink(temp_file)
+        if not args.json:
+            print(f"🧹 Cleaned up temporary file: {temp_file}")
 
 if __name__ == "__main__":
     main()
