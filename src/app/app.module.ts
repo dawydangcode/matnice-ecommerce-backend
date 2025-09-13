@@ -17,6 +17,7 @@ import { BrandModule } from 'src/brand/brand.module';
 import { CartModule } from 'src/cart/cart.module';
 import { LensModule } from 'src/lens/lens.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { AIServiceModule } from 'src/ai-service/ai-service.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     BrandModule,
     CartModule,
     LensModule,
+    AIServiceModule,
   ],
   controllers: [AppController],
   providers: [

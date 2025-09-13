@@ -133,12 +133,34 @@ export class FaceAnalysisResultDto {
   sessionId!: string;
 
   @ApiProperty({
-    type: () => ({
-      gender: GenderAnalysisDto,
-      SkinColor: SkinColorAnalysisDto,
-      overall: OverallAnalysisDto,
-    }),
     description: 'Analysis results',
+    type: 'object',
+    properties: {
+      gender: {
+        type: 'object',
+        properties: {
+          detected: { type: 'string', enum: ['male', 'female', 'unknown'] },
+          confidence: { type: 'number' },
+        },
+      },
+      SkinColor: {
+        type: 'object',
+        properties: {
+          detected: {
+            type: 'string',
+            enum: ['light', 'medium', 'dark', 'unknown'],
+          },
+          confidence: { type: 'number' },
+        },
+      },
+      overall: {
+        type: 'object',
+        properties: {
+          confidence: { type: 'number' },
+          processingTime: { type: 'number' },
+        },
+      },
+    },
   })
   analysis!: {
     gender: GenderAnalysisDto;
@@ -220,12 +242,34 @@ export class AnalysisHistoryItemDto {
   sessionId!: string;
 
   @ApiProperty({
-    type: () => ({
-      gender: GenderAnalysisDto,
-      SkinColor: SkinColorAnalysisDto,
-      overall: OverallAnalysisDto,
-    }),
     description: 'Analysis results',
+    type: 'object',
+    properties: {
+      gender: {
+        type: 'object',
+        properties: {
+          detected: { type: 'string', enum: ['male', 'female', 'unknown'] },
+          confidence: { type: 'number' },
+        },
+      },
+      SkinColor: {
+        type: 'object',
+        properties: {
+          detected: {
+            type: 'string',
+            enum: ['light', 'medium', 'dark', 'unknown'],
+          },
+          confidence: { type: 'number' },
+        },
+      },
+      overall: {
+        type: 'object',
+        properties: {
+          confidence: { type: 'number' },
+          processingTime: { type: 'number' },
+        },
+      },
+    },
   })
   analysis!: {
     gender: GenderAnalysisDto;
