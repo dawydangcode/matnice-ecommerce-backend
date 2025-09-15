@@ -16,7 +16,6 @@ import { AwsS3Service } from '../common/services/aws-s3.service';
 import { SessionService } from '../common/services/session.service';
 import {
   AnalyzeFaceRequestDto,
-  GetAnalysisRequestDto,
   GetAnalysisHistoryRequestDto,
   FaceAnalysisResultDto,
 } from './dtos/ai-analysis.dto';

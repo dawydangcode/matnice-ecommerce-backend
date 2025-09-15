@@ -6,9 +6,11 @@ import {
   UseInterceptors,
   Body,
   Query,
+  Param,
   BadRequestException,
   UseGuards,
   Req,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -90,9 +92,20 @@ export class AIServiceController {
     }
   }
 
-  @Get('analysis/result')
+  @Get('analysis/:sessionId/result/')
   @Public() // Allow anonymous access to get results by session
-  @ApiOperation({ summary: 'Get face analysis results by session ID' })
+  @ApiOperation({
+    summary: 'Get face analysis results by session ID',
+    parameters: [
+      {
+        name: 'sessionId',
+        in: 'path',
+        description: 'Session ID to get analysis results',
+        required: true,
+        schema: { type: 'integer', minimum: 1 },
+      },
+    ],
+  })
   @ApiResponse({
     status: 200,
     description: 'Analysis results retrieved successfully',
@@ -104,10 +117,10 @@ export class AIServiceController {
     type: ErrorResponseDto,
   })
   async getAnalysisResult(
-    @Query() query: GetAnalysisRequestDto,
+    @Param('sessionId', ParseIntPipe) sessionId: number,
   ): Promise<GetAnalysisResponseDto> {
     try {
-      const result = await this.aiService.getAnalysisResult(query.sessionId);
+      const result = await this.aiService.getAnalysisResult(sessionId);
 
       return {
         success: true,
