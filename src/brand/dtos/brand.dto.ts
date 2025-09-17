@@ -1,12 +1,17 @@
 import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsNumber, IsPositive, IsString } from 'class-validator';
+import { BrandType } from '../enum/brand.type';
 
 export class BrandDto {
   @ApiProperty()
   @IsNumber()
   @Type(() => Number)
   brandId!: number;
+
+  @ApiProperty()
+  @IsString()
+  type!: BrandType;
 
   @ApiProperty()
   @IsString()
@@ -40,6 +45,7 @@ export class GetBrandsQueryDto extends PartialType(
 export class GetBrandByIdParamsDto extends PickType(BrandDto, ['brandId']) {}
 
 export class CreateBrandBodyDto extends PickType(BrandDto, [
+  'type',
   'name',
   'description',
 ]) {}
@@ -47,7 +53,7 @@ export class CreateBrandBodyDto extends PickType(BrandDto, [
 export class UpdateBrandParamsDto extends PickType(BrandDto, ['brandId']) {}
 
 export class UpdateBrandBodyDto extends PartialType(
-  PickType(BrandDto, ['name', 'description']),
+  PickType(BrandDto, ['type', 'name', 'description']),
 ) {}
 
 export class DeleteBrandParamsDto extends PickType(BrandDto, ['brandId']) {}

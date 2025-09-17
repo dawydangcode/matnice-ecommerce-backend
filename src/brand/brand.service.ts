@@ -5,6 +5,7 @@ import { In, IsNull, Like, Repository } from 'typeorm';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
 import { PageList } from 'src/common/models/page-list.model';
 import { BrandModel } from './models/brand.model';
+import { BrandType } from './enum/brand.type';
 
 @Injectable()
 export class BrandService {
@@ -15,6 +16,7 @@ export class BrandService {
 
   async getBrands(
     brandIds: number[] | undefined,
+    type: BrandType | undefined,
     pagination: PaginationParamsModel | undefined,
     search: string | undefined,
     relations: string[] | undefined,
@@ -22,6 +24,7 @@ export class BrandService {
     const [brands, total] = await this.brandRepository.findAndCount({
       where: {
         id: brandIds ? In(brandIds) : undefined,
+        type: type ? type : undefined,
         name: search ? Like(`%${search}%`) : undefined,
         deletedAt: IsNull(),
       },
@@ -46,6 +49,18 @@ export class BrandService {
     return brands.map((brand: BrandEntity) => brand.toModel());
   }
 
+  async getBrandByType(type: BrandType): Promise<BrandModel[]> {
+    const brands = await this.brandRepository.find({
+      where: {
+        type: type,
+        deletedAt: IsNull(),
+      },
+      order: { name: 'ASC' },
+    });
+
+    return brands.map((brand: BrandEntity) => brand.toModel());
+  }
+
   async getBrandById(brandId: number): Promise<BrandModel> {
     const brand = await this.brandRepository.findOne({
       where: {
@@ -62,11 +77,13 @@ export class BrandService {
   }
 
   async createBrand(
+    type: BrandType,
     name: string,
     description: string,
     reqUserId: number,
   ): Promise<BrandModel> {
     const entity = new BrandEntity();
+    entity.type = type;
     entity.name = name;
     entity.description = description;
     entity.createdAt = new Date();
@@ -77,6 +94,7 @@ export class BrandService {
 
   async updateBrand(
     brand: BrandModel,
+    type: BrandType | undefined,
     name: string | undefined,
     description: string | undefined,
     reqUserId: number,
@@ -84,6 +102,7 @@ export class BrandService {
     await this.brandRepository.update(
       { id: brand.id },
       {
+        type: type,
         name: name,
         description: description,
         updatedAt: new Date(),
