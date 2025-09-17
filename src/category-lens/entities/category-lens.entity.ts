@@ -6,11 +6,10 @@ import {
 } from 'typeorm';
 import { CategoryLensModel } from '../models/category-lens.model';
 
-@Entity('category')
+@Entity('category_lens')
 export class CategoryLensEntity {
   @PrimaryGeneratedColumn({ name: 'id' })
   id!: number;
-  z;
   @Column({ name: 'name' })
   name!: string;
 

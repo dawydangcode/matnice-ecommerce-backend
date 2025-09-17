@@ -18,7 +18,7 @@ export class LensEntity {
   @Column({ name: 'name', type: 'varchar', length: 255 })
   name!: string;
 
-  @Column({ name: 'brand_id' })
+  @Column({ name: 'brand_lens_id' })
   brandId!: number;
 
   origin!: string;

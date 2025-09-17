@@ -6,7 +6,7 @@ import {
 } from 'typeorm';
 import { BrandLensModel } from '../models/brand-lens.model';
 
-@Entity('brand-lens')
+@Entity('brand_lens')
 export class BrandLensEntity {
   @PrimaryGeneratedColumn({ name: 'id' })
   id!: number;

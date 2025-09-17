@@ -18,6 +18,8 @@ import { CartModule } from 'src/cart/cart.module';
 import { LensModule } from 'src/lens/lens.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AIServiceModule } from 'src/ai-service/ai-service.module';
+import { CategoryLensModule } from 'src/category-lens/category-lens.module';
+import { BrandLensModule } from 'src/brand-lens/brand-lens.module';
 
 @Module({
   imports: [
@@ -38,7 +40,9 @@ import { AIServiceModule } from 'src/ai-service/ai-service.module';
     MailerModule,
     ProductModule,
     CategoryModule,
+    CategoryLensModule,
     BrandModule,
+    BrandLensModule,
     CartModule,
     LensModule,
     AIServiceModule,

@@ -17,7 +17,7 @@ export class LensCategoryService {
   async getLensCategories(
     lensCategoryIds: number[] | undefined,
     lensIds: number[] | undefined,
-    categoryIds: number[] | undefined,
+    categoryLensIds: number[] | undefined,
     pagination: PaginationParamsModel | undefined,
     relations: string[] | undefined,
   ): Promise<PageList<LensCategoryModel>> {
@@ -26,7 +26,7 @@ export class LensCategoryService {
         where: {
           id: lensCategoryIds ? In(lensCategoryIds) : undefined,
           lensId: lensIds ? In(lensIds) : undefined,
-          categoryId: categoryIds ? In(categoryIds) : undefined,
+          categoryLensId: categoryLensIds ? In(categoryLensIds) : undefined,
           deletedAt: IsNull(),
         },
         relations: relations,
@@ -67,12 +67,12 @@ export class LensCategoryService {
 
   async createLensCategory(
     lensId: number,
-    categoryId: number,
+    categoryLensId: number,
     reqUserId: number,
   ): Promise<LensCategoryModel> {
     const entity = this.lensCategoryRepository.create({
       lensId: lensId,
-      categoryId: categoryId,
+      categoryLensId: categoryLensId,
       createdAt: new Date(),
       createdBy: reqUserId,
     });

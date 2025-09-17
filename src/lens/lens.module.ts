@@ -11,7 +11,6 @@ import { LensRefractionRangeModule } from './modules/lens_refraction_range/lens_
 import { LensTintColorModule } from './modules/lens_tint_color/lens_tint_color.module';
 import { LensThicknessModule } from './modules/lens_thickness/lens_thickness.module';
 import { LensImageModule } from './modules/lens_image/lens-image.module';
-import { LensBrandModule } from './modules/lens_brand/lens_brand.module';
 
 @Module({
   imports: [
@@ -25,7 +24,6 @@ import { LensBrandModule } from './modules/lens_brand/lens_brand.module';
     LensTintColorModule,
     LensThicknessModule,
     LensImageModule,
-    LensBrandModule,
   ],
   controllers: [LensController],
   providers: [LensService],
@@ -40,7 +38,6 @@ import { LensBrandModule } from './modules/lens_brand/lens_brand.module';
     LensTintColorModule,
     LensThicknessModule,
     LensImageModule,
-    LensBrandModule,
   ],
 })
 export class LensModule {}

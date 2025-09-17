@@ -19,8 +19,8 @@ export class LensCategoryEntity {
   @Column({ name: 'lens_id', type: 'bigint' })
   lensId!: number;
 
-  @Column({ name: 'category_id', type: 'bigint' })
-  categoryId!: number;
+  @Column({ name: 'category_lens_id', type: 'bigint' })
+  categoryLensId!: number;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt!: Date;
@@ -53,7 +53,7 @@ export class LensCategoryEntity {
     return new LensCategoryModel(
       this.id,
       this.lensId,
-      this.categoryId,
+      this.categoryLensId,
       this.createdAt,
       this.createdBy,
       this.updatedAt,

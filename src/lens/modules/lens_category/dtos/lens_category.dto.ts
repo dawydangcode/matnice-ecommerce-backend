@@ -22,7 +22,7 @@ export class LensCategoryDto {
   @ApiProperty()
   @IsNumber()
   @Type(() => Number)
-  categoryId!: number;
+  categoryLensId!: number;
 
   @ApiProperty()
   @IsPositive()
@@ -43,11 +43,11 @@ export class GetLensCategoriesQueryDto extends PartialType(
 
 export class CreateLensCategoryBodyDto extends PickType(LensCategoryDto, [
   'lensId',
-  'categoryId',
+  'categoryLensId',
 ]) {}
 
 export class UpdateLensCategoryDto extends PartialType(
-  PickType(LensCategoryDto, ['lensId', 'categoryId']),
+  PickType(LensCategoryDto, ['lensId', 'categoryLensId']),
 ) {}
 
 export class GetLensCategoryByLensIdParamsDto extends PickType(

@@ -44,7 +44,7 @@ export class LensCategoryController {
     );
   }
 
-  @Get('lens-category/:lensCategoryId')
+  @Get('lens-category/:lenscategoryLensId')
   async getLensCategoryById(@Param('id', ParseIntPipe) id: number) {
     return this.lensCategoryService.findOne(id);
   }
@@ -63,12 +63,12 @@ export class LensCategoryController {
   ) {
     return this.lensCategoryService.createLensCategory(
       body.lensId,
-      body.categoryId,
+      body.categoryLensId,
       req.user.userId,
     );
   }
 
-  @Delete('lens-category/:lensCategoryId/delete')
+  @Delete('lens-category/:lenscategoryLensId/delete')
   async deleteLensCategory(
     @Param('id', ParseIntPipe) id: number,
     @Req() req: RequestModel,

@@ -1,7 +1,7 @@
 export class LensCategoryModel {
   public readonly id: number;
   public readonly lensId: number;
-  public readonly categoryId: number;
+  public readonly categoryLensId: number;
   public readonly createdAt: Date | undefined;
   public readonly createdBy: number | undefined;
   public readonly updatedAt: Date | undefined;
@@ -12,7 +12,7 @@ export class LensCategoryModel {
   constructor(
     id: number,
     lensId: number,
-    categoryId: number,
+    categoryLensId: number,
     createdAt: Date | undefined,
     createdBy: number | undefined,
     updatedAt: Date | undefined,
@@ -22,7 +22,7 @@ export class LensCategoryModel {
   ) {
     this.id = id;
     this.lensId = lensId;
-    this.categoryId = categoryId;
+    this.categoryLensId = categoryLensId;
     this.createdAt = createdAt;
     this.createdBy = createdBy;
     this.updatedAt = updatedAt;
