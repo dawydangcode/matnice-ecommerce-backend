@@ -17,7 +17,6 @@ import {
   CategoryCreateBodyDto,
   GetCategoriesQueryDto,
   GetCategoryByIdParamsDto,
-  getCategoryByTypeParamsDto,
 } from './dtos/category.dto';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
 import { RequestModel } from 'src/common/models/request.model';
@@ -34,7 +33,6 @@ export class CategoryController {
       undefined,
       undefined,
       undefined,
-      undefined,
       new PaginationParamsModel(query.page, query.limit),
       undefined,
     );
@@ -45,18 +43,12 @@ export class CategoryController {
     return await this.categoryService.getCategoryById(params.categoryId);
   }
 
-  @Get('category/type/:type/list')
-  async getCategoryByType(@Param('type') params: getCategoryByTypeParamsDto) {
-    return await this.categoryService.getCategoryByType(params.type);
-  }
-
   @Post('category/create')
   async createCategory(
     @Req() req: RequestModel,
     @Body() body: CategoryCreateBodyDto,
   ) {
     return await this.categoryService.createCategory(
-      body.type,
       body.name,
       body.description,
       req.user.userId,
@@ -75,7 +67,6 @@ export class CategoryController {
 
     return await this.categoryService.updateCategory(
       category,
-      body.type,
       body.name,
       body.description,
       req.user.userId,

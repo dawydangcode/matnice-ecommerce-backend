@@ -35,7 +35,6 @@ export class BrandController {
   async getBrands(@Query() query: GetBrandsQueryDto) {
     return await this.brandService.getBrands(
       undefined,
-      undefined,
       new PaginationParamsModel(query.page, query.limit),
       undefined,
       undefined,
@@ -55,7 +54,6 @@ export class BrandController {
     @Body() body: CreateBrandBodyDto,
   ) {
     return await this.brandService.createBrand(
-      body.type,
       body.name,
       body.description,
       req.user.userId,
@@ -72,7 +70,6 @@ export class BrandController {
     const brand = await this.brandService.getBrandById(params.brandId);
     return await this.brandService.updateBrand(
       brand,
-      body.type,
       body.name,
       body.description,
       req.user.userId,
