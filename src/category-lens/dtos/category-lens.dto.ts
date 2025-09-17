@@ -2,12 +2,12 @@ import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsNumber, IsPositive, IsString } from 'class-validator';
 
-export class CategoryDto {
+export class CategoryLensDto {
   @ApiProperty()
   @IsNumber()
   @Type(() => Number)
-  categoryId!: number;
-  z;
+  categoryLensId!: number;
+
   @ApiProperty()
   @IsString()
   name!: string;
@@ -38,27 +38,27 @@ export class CategoryDto {
   q!: string;
 }
 
-export class GetCategoriesQueryDto extends PartialType(
-  PickType(CategoryDto, ['page', 'limit', 'q']),
+export class GetCategoriesLensQueryDto extends PartialType(
+  PickType(CategoryLensDto, ['page', 'limit', 'q']),
 ) {}
 
-export class GetCategoryByIdParamsDto extends PickType(CategoryDto, [
-  'categoryId',
+export class GetCategoryLensByIdParamsDto extends PickType(CategoryLensDto, [
+  'categoryLensId',
 ]) {}
 
-export class CategoryCreateBodyDto extends PickType(CategoryDto, [
+export class CreateCategoryLensBodyDto extends PickType(CategoryLensDto, [
   'name',
   'description',
 ]) {}
 
-export class CategoryUpdateParamsDto extends PickType(CategoryDto, [
-  'categoryId',
+export class UpdateCategoryLensParamsDto extends PickType(CategoryLensDto, [
+  'categoryLensId',
 ]) {}
 
-export class CategoryUpdateBodyDto extends PartialType(
-  PickType(CategoryDto, ['name', 'description']),
+export class UpdateCategoryLensBodyDto extends PartialType(
+  PickType(CategoryLensDto, ['name', 'description']),
 ) {}
 
-export class CategoryDeleteParamsDto extends PickType(CategoryDto, [
-  'categoryId',
+export class DeleteCategoryLensParamsDto extends PickType(CategoryLensDto, [
+  'categoryLensId',
 ]) {}

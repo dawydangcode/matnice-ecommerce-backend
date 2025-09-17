@@ -4,10 +4,10 @@ import {
   Entity,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { CategoryModel } from '../models/category.model';
+import { CategoryLensModel } from '../models/category-lens.model';
 
 @Entity('category')
-export class CategoryEntity {
+export class CategoryLensEntity {
   @PrimaryGeneratedColumn({ name: 'id' })
   id!: number;
   z;
@@ -35,8 +35,8 @@ export class CategoryEntity {
   @Column({ name: 'deleted_by' })
   deletedBy!: number;
 
-  toModel(): CategoryModel {
-    return new CategoryModel(
+  toModel(): CategoryLensModel {
+    return new CategoryLensModel(
       this.id,
       this.name,
       this.description,
