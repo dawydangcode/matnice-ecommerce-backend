@@ -8,5 +8,6 @@ import { LensBrandEntity } from './entities/lens-brand.entity';
   imports: [TypeOrmModule.forFeature([LensBrandEntity])],
   controllers: [LensBrandController],
   providers: [LensBrandService],
+  exports: [LensBrandService],
 })
 export class LensBrandModule {}

@@ -5,6 +5,7 @@ import { In, IsNull, Like, Repository } from 'typeorm';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
 import { CategoryModel } from './models/category.model';
 import { PageList } from 'src/common/models/page-list.model';
+import { CategoryType } from './enum/category.type';
 
 @Injectable()
 export class CategoryService {
@@ -15,6 +16,7 @@ export class CategoryService {
 
   async getCategories(
     categoryIds: number[] | undefined,
+    type: CategoryType | undefined,
     name: string | undefined,
     description: string | undefined,
     pagination: PaginationParamsModel | undefined,
@@ -23,6 +25,7 @@ export class CategoryService {
     const [categories, total] = await this.categoryRepository.findAndCount({
       where: {
         id: categoryIds ? In(categoryIds) : undefined,
+        type: type ? type : undefined,
         name: name ? Like(`%${name}%`) : undefined,
         description: description ? Like(`%${description}%`) : undefined,
         deletedAt: IsNull(),
@@ -52,12 +55,28 @@ export class CategoryService {
     return category.toModel();
   }
 
+  async getCategoryByType(type: CategoryType): Promise<CategoryModel[]> {
+    const categories = await this.categoryRepository.find({
+      where: {
+        type: type,
+        deletedAt: IsNull(),
+      },
+    });
+
+    if (!categories || categories.length === 0) {
+      throw new Error(`Category with type ${type} not found`);
+    }
+    return categories.map((category: CategoryEntity) => category.toModel());
+  }
+
   async createCategory(
+    type: CategoryType,
     name: string,
     description: string,
     reqUserId: number,
   ): Promise<CategoryModel> {
     const entity = new CategoryEntity();
+    entity.type = type;
     entity.name = name;
     entity.description = description;
     entity.createdAt = new Date();
@@ -68,6 +87,7 @@ export class CategoryService {
 
   async updateCategory(
     category: CategoryModel,
+    type: CategoryType | undefined,
     name: string | undefined,
     description: string | undefined,
     reqUserId: number,
@@ -75,6 +95,7 @@ export class CategoryService {
     await this.categoryRepository.update(
       { id: category.id, deletedAt: IsNull() },
       {
+        type: type,
         name: name,
         description: description,
         updatedAt: new Date(),
