@@ -27,9 +27,13 @@ import {
 import { RequestModel } from 'src/common/models/request.model';
 import { GetCategoriesQueryDto } from 'src/category/dtos/category.dto';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
+import { Public } from 'src/middlewares/guards/jwt-auth.guard';
+import { Roles } from 'src/role/decorators/roles.decorator';
+import { RoleType } from 'src/role/enum/role.enum';
 
 @ApiTags('Lens Category')
 @Controller('api/v1/')
+@Roles(RoleType.Admin)
 export class LensCategoryController {
   constructor(private readonly lensCategoryService: LensCategoryService) {}
 
@@ -44,7 +48,8 @@ export class LensCategoryController {
     );
   }
 
-  @Get('lens-category/:lenscategoryLensId')
+  @Public()
+  @Get('lens-category/:lensCategoryLensId')
   async getLensCategoryById(@Param('id', ParseIntPipe) id: number) {
     return this.lensCategoryService.findOne(id);
   }
@@ -74,5 +79,19 @@ export class LensCategoryController {
     @Req() req: RequestModel,
   ) {
     return this.lensCategoryService.remove(id, req.user.userId);
+  }
+
+  // New endpoint for frontend navigation dropdown - matches what frontend expects
+  @Get('lens-categories')
+  @Public()
+  async getLensCategoriesForNavigation() {
+    const result = await this.lensCategoryService.getLensCategories(
+      undefined,
+      undefined,
+      undefined,
+      new PaginationParamsModel(1, 100), // Get first 100 categories
+      undefined,
+    );
+    return result.data;
   }
 }

@@ -80,13 +80,14 @@ export class BrandLensController {
 
   @Delete('brand-lens/:brandLensId/delete')
   @Roles(RoleType.Admin)
-  async deleteBrandLens(
+  async deleteBrand(
     @Req() req: RequestModel,
     @Param() params: DeleteBrandParamsDto,
   ) {
     const brandLens = await this.brandLensService.getBrandLensById(
       params.brandLensId,
     );
+
     return await this.brandLensService.deleteBrand(brandLens, req.user.userId);
   }
 
@@ -94,5 +95,18 @@ export class BrandLensController {
   @Get('brand-lens/getBrandsForFilter')
   async getBrandsForFilter() {
     return await this.brandLensService.getBrandsLensForFilter();
+  }
+
+  // New endpoint for frontend navigation dropdown
+  @Get('brand-lens')
+  @Public()
+  async getBrandLens() {
+    const result = await this.brandLensService.getBrandsLens(
+      undefined,
+      new PaginationParamsModel(1, 100), // Get first 100 brands
+      undefined,
+      undefined,
+    );
+    return result.data;
   }
 }

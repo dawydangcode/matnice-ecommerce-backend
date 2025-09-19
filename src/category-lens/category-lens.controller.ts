@@ -14,6 +14,7 @@ import { Roles } from 'src/role/decorators/roles.decorator';
 import { RoleType } from 'src/role/enum/role.enum';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
 import { RequestModel } from 'src/common/models/request.model';
+import { Public } from 'src/middlewares/guards/jwt-auth.guard';
 import { CategoryLensService } from './category-lens.service';
 import {
   CreateCategoryLensBodyDto,
@@ -89,5 +90,19 @@ export class CategoryLensController {
       categoryLens,
       req.user.userId,
     );
+  }
+
+  // New endpoint for frontend navigation dropdown
+  @Get('lens-categories')
+  @Public()
+  async getLensCategories() {
+    const result = await this.categoryLensService.getCategoriesLens(
+      undefined,
+      undefined,
+      undefined,
+      new PaginationParamsModel(1, 100), // Get first 100 categories
+      undefined,
+    );
+    return result.data;
   }
 }
