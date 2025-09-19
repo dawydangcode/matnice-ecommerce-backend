@@ -25,11 +25,11 @@ import {
 
 @Controller('api/v1/')
 @ApiTags('Category Lens')
-@Roles(RoleType.Admin)
 export class CategoryLensController {
   constructor(private readonly categoryLensService: CategoryLensService) {}
 
   @Get('category-lens/list')
+  @Roles(RoleType.Admin)
   async getCategoryLensList(@Query() query: GetCategoriesLensQueryDto) {
     return await this.categoryLensService.getCategoriesLens(
       undefined,
@@ -41,6 +41,7 @@ export class CategoryLensController {
   }
 
   @Get('category-lens/:categoryLensId/details')
+  @Roles(RoleType.Admin)
   async getCategoryLensById(@Param() params: GetCategoryLensByIdParamsDto) {
     return await this.categoryLensService.getCategoryLensById(
       params.categoryLensId,
@@ -48,6 +49,7 @@ export class CategoryLensController {
   }
 
   @Post('category-lens/create')
+  @Roles(RoleType.Admin)
   async createCategoryLens(
     @Req() req: RequestModel,
     @Body() body: CreateCategoryLensBodyDto,
@@ -60,6 +62,7 @@ export class CategoryLensController {
   }
 
   @Put('category-lens/:categoryLensId/update')
+  @Roles(RoleType.Admin)
   async updateCategory(
     @Param() params: GetCategoryLensByIdParamsDto,
     @Body() body: CreateCategoryLensBodyDto,
@@ -78,6 +81,7 @@ export class CategoryLensController {
   }
 
   @Delete('category-lens/:categoryLensId/delete')
+  @Roles(RoleType.Admin)
   async deleteCategory(
     @Param() params: DeleteCategoryLensParamsDto,
     @Req() req: RequestModel,

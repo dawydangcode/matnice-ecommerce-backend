@@ -33,11 +33,11 @@ import { RoleType } from 'src/role/enum/role.enum';
 
 @ApiTags('Lens Category')
 @Controller('api/v1/')
-@Roles(RoleType.Admin)
 export class LensCategoryController {
   constructor(private readonly lensCategoryService: LensCategoryService) {}
 
   @Get('lens-category/list')
+  @Roles(RoleType.Admin)
   async getLensCategories(@Query() query: GetCategoriesQueryDto) {
     return this.lensCategoryService.getLensCategories(
       undefined,
@@ -55,6 +55,7 @@ export class LensCategoryController {
   }
 
   @Get('lens/:lensId')
+  @Roles(RoleType.Admin)
   async getLenCategoryByLensId(
     @Param() params: GetLensCategoryByLensIdParamsDto,
   ) {
@@ -62,6 +63,7 @@ export class LensCategoryController {
   }
 
   @Post('lens-category/create')
+  @Roles(RoleType.Admin)
   async createLensCategory(
     @Body() body: CreateLensCategoryBodyDto,
     @Req() req: RequestModel,
@@ -74,6 +76,7 @@ export class LensCategoryController {
   }
 
   @Delete('lens-category/:lenscategoryLensId/delete')
+  @Roles(RoleType.Admin)
   async deleteLensCategory(
     @Param('id', ParseIntPipe) id: number,
     @Req() req: RequestModel,
@@ -81,7 +84,7 @@ export class LensCategoryController {
     return this.lensCategoryService.remove(id, req.user.userId);
   }
 
-  // New endpoint for frontend navigation dropdown - matches what frontend expects
+  // New endpoint for frontend navigation dropdown - PUBLIC ACCESS
   @Get('lens-categories')
   @Public()
   async getLensCategoriesForNavigation() {
@@ -89,7 +92,7 @@ export class LensCategoryController {
       undefined,
       undefined,
       undefined,
-      new PaginationParamsModel(1, 100), // Get first 100 categories
+      new PaginationParamsModel(1, 100),
       undefined,
     );
     return result.data;
