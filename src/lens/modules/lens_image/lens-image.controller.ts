@@ -269,8 +269,6 @@ export class LensImageController {
       }
 
       const userId = req.user?.id;
-
-      // First upload the file to S3
       const imageUrl = await this.lensImageService.uploadLensImage(
         file,
         Number(lensId),
@@ -278,25 +276,11 @@ export class LensImageController {
         userId,
       );
 
-      // Then create a record in the database
-      const createLensImageDto: CreateLensImageDto = {
-        lensId: Number(lensId),
-        imageUrl: imageUrl,
-        imageOrder: imageOrder as 'a' | 'b' | 'c' | 'd' | 'e',
-        isThumbnail: imageOrder === 'a', // Make first image (a) the thumbnail
-      };
-
-      const lensImageRecord = await this.lensImageService.createLensImage(
-        createLensImageDto,
-        userId,
-      );
-
       return res!.status(HttpStatus.OK).json({
         statusCode: HttpStatus.OK,
-        message: 'Lens image uploaded and saved successfully',
+        message: 'Lens image uploaded successfully',
         data: {
           imageUrl,
-          lensImageRecord,
         },
       });
     } catch (error) {

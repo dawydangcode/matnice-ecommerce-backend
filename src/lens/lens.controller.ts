@@ -17,10 +17,15 @@ import {
   GetLensesQueryDto,
   UpdateLensParamsDto,
   UpdateLensBodyDto,
+  GetLensByIdParamsDto,
 } from './dtos/lens.dto';
+import {
+  GetLensFullDetailsQueryDto,
+  LensFullDetailsResponseDto,
+} from './dtos/lens-full-details.dto';
 import { RequestModel } from '../common/models/request.model';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @Controller('api/v1')
 @ApiTags('Lens')
@@ -38,9 +43,34 @@ export class LensController {
     );
   }
 
-  @Get('lens/:lenId/detail')
-  async getLensById(@Param('id') id: number) {
-    return this.lensService.getLensById(Number(id));
+  @Get('lens/:lensId/detail')
+  async getLensById(@Param() params: GetLensByIdParamsDto) {
+    return this.lensService.getLensById(Number(params.lensId));
+  }
+
+  @Get('lens/:lensId/full-details')
+  @ApiOperation({
+    summary: 'Get full lens details with all related data',
+    description:
+      'Retrieve comprehensive lens information including variants, coatings, images, categories, and summary statistics',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lens full details retrieved successfully',
+    type: LensFullDetailsResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Lens not found',
+  })
+  async getLensFullDetails(
+    @Param() params: GetLensByIdParamsDto,
+    @Query() query: GetLensFullDetailsQueryDto,
+  ): Promise<LensFullDetailsResponseDto> {
+    return this.lensService.getLensFullDetails(
+      Number(params.lensId),
+      query.include,
+    );
   }
 
   @Post('lens/create')

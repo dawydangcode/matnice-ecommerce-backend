@@ -55,6 +55,8 @@ export class GetLensesQueryDto extends PartialType(
   PickType(LensDto, ['page', 'limit', 'q']),
 ) {}
 
+export class GetLensByIdParamsDto extends PickType(LensDto, ['lensId']) {}
+
 export class CreateLensBodyDto extends PickType(LensDto, [
   'name',
   'origin',
