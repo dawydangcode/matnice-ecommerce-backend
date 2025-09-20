@@ -43,6 +43,33 @@ export class LensController {
     );
   }
 
+  @Get('lens/cards')
+  @ApiOperation({
+    summary: 'Get lens cards for frontend display',
+    description:
+      'Get lenses with images, brand, category info for product listing',
+  })
+  async getLensCards(@Query() query: any) {
+    return this.lensService.getLensCards(
+      new PaginationParamsModel(
+        parseInt(query.page) || 1,
+        parseInt(query.limit) || 12,
+      ),
+      query.search,
+      query.brandLensIds
+        ? query.brandLensIds.split(',').map(Number)
+        : undefined,
+      query.categoryLensIds
+        ? query.categoryLensIds.split(',').map(Number)
+        : undefined,
+      query.lensTypes ? query.lensTypes.split(',') : undefined,
+      query.minPrice ? Number(query.minPrice) : undefined,
+      query.maxPrice ? Number(query.maxPrice) : undefined,
+      query.sortBy || 'newest',
+      query.sortOrder || 'DESC',
+    );
+  }
+
   @Get('lens/:lensId/detail')
   async getLensById(@Param() params: GetLensByIdParamsDto) {
     return this.lensService.getLensById(Number(params.lensId));

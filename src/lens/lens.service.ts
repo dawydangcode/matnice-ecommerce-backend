@@ -15,6 +15,182 @@ export class LensService {
     @InjectRepository(LensEntity)
     private readonly lensRepository: Repository<LensEntity>,
   ) {}
+
+  // New method for getting lens cards with full info for frontend
+  async getLensCards(
+    pagination?: PaginationParamsModel,
+    search?: string,
+    brandLensIds?: number[],
+    categoryLensIds?: number[],
+    lensTypes?: LensType[],
+    minPrice?: number,
+    maxPrice?: number,
+    sortBy: 'price' | 'name' | 'newest' = 'newest',
+    sortOrder: 'ASC' | 'DESC' = 'DESC',
+  ) {
+    const offset = pagination ? (pagination.page - 1) * pagination.limit : 0;
+    const limit = pagination?.limit || 20;
+
+    // Ensure limit and offset are numbers
+    const numericLimit = Number(limit);
+    const numericOffset = Number(offset);
+
+    let query = `
+      SELECT 
+        l.id,
+        l.name,
+        l.description,
+        l.lens_type as lensType,
+        l.origin,
+        bl.id as brandLensId,
+        bl.name as brandLensName,
+        bl.description as brandLensDescription,
+        cl.id as categoryLensId,
+        cl.name as categoryLensName,
+        cl.description as categoryLensDescription,
+        MIN(lv.price) as basePrice
+      FROM lens l
+      LEFT JOIN brand_lens bl ON l.brand_lens_id = bl.id AND bl.deleted_at IS NULL
+      LEFT JOIN lens_category lcat ON l.id = lcat.lens_id AND lcat.deleted_at IS NULL
+      LEFT JOIN category_lens cl ON lcat.category_lens_id = cl.id AND cl.deleted_at IS NULL
+      LEFT JOIN lens_variant lv ON l.id = lv.lens_id AND lv.deleted_at IS NULL
+      WHERE l.deleted_at IS NULL
+    `;
+
+    const params: any[] = [];
+    let paramIndex = 1;
+
+    if (search) {
+      query += ` AND l.name LIKE ?`;
+      params.push(`%${search}%`);
+    }
+
+    if (brandLensIds && brandLensIds.length > 0) {
+      query += ` AND bl.id IN (${brandLensIds.map(() => '?').join(',')})`;
+      params.push(...brandLensIds);
+    }
+
+    if (categoryLensIds && categoryLensIds.length > 0) {
+      query += ` AND cl.id IN (${categoryLensIds.map(() => '?').join(',')})`;
+      params.push(...categoryLensIds);
+    }
+
+    if (lensTypes && lensTypes.length > 0) {
+      query += ` AND l.lens_type IN (${lensTypes.map(() => '?').join(',')})`;
+      params.push(...lensTypes);
+    }
+
+    query += ` GROUP BY l.id, l.name, l.description, l.lens_type, l.origin, bl.id, bl.name, bl.description, cl.id, cl.name, cl.description`;
+
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      query += ` HAVING 1=1`;
+      if (minPrice !== undefined) {
+        query += ` AND basePrice >= ?`;
+        params.push(minPrice);
+      }
+      if (maxPrice !== undefined) {
+        query += ` AND basePrice <= ?`;
+        params.push(maxPrice);
+      }
+    }
+
+    // Sorting
+    if (sortBy === 'price') {
+      query += ` ORDER BY basePrice ${sortOrder}`;
+    } else if (sortBy === 'name') {
+      query += ` ORDER BY l.name ${sortOrder}`;
+    } else {
+      query += ` ORDER BY l.created_at ${sortOrder}`;
+    }
+
+    // Pagination
+    query += ` LIMIT ? OFFSET ?`;
+    params.push(numericLimit, numericOffset);
+
+    const lenses = await this.lensRepository.query(query, params);
+
+    // Count total
+    let countQuery = `
+      SELECT COUNT(DISTINCT l.id) as total
+      FROM lens l
+      LEFT JOIN brand_lens bl ON l.brand_lens_id = bl.id AND bl.deleted_at IS NULL
+      LEFT JOIN lens_category lcat ON l.id = lcat.lens_id AND lcat.deleted_at IS NULL
+      LEFT JOIN category_lens cl ON lcat.category_lens_id = cl.id AND cl.deleted_at IS NULL
+      LEFT JOIN lens_variant lv ON l.id = lv.lens_id AND lv.deleted_at IS NULL
+      WHERE l.deleted_at IS NULL
+    `;
+
+    const countParams: any[] = [];
+
+    if (search) {
+      countQuery += ` AND l.name LIKE ?`;
+      countParams.push(`%${search}%`);
+    }
+
+    if (brandLensIds && brandLensIds.length > 0) {
+      countQuery += ` AND bl.id IN (${brandLensIds.map(() => '?').join(',')})`;
+      countParams.push(...brandLensIds);
+    }
+
+    if (categoryLensIds && categoryLensIds.length > 0) {
+      countQuery += ` AND cl.id IN (${categoryLensIds.map(() => '?').join(',')})`;
+      countParams.push(...categoryLensIds);
+    }
+
+    if (lensTypes && lensTypes.length > 0) {
+      countQuery += ` AND l.lens_type IN (${lensTypes.map(() => '?').join(',')})`;
+      countParams.push(...lensTypes);
+    }
+
+    const countResult = await this.lensRepository.query(
+      countQuery,
+      countParams,
+    );
+    const total = countResult[0]?.total || 0;
+
+    // Get images for each lens
+    for (const lens of lenses) {
+      const images = await this.lensRepository.query(
+        `SELECT id, image_url as imageUrl, image_order as imageOrder, is_thumbnail as isThumbnail 
+         FROM lens_image 
+         WHERE lens_id = ? AND deleted_at IS NULL 
+         ORDER BY image_order, id`,
+        [lens.id],
+      );
+      lens.images = images;
+    }
+
+    // Transform data
+    const lensCards = lenses.map((lens) => ({
+      id: lens.id,
+      name: lens.name,
+      description: lens.description,
+      type: lens.lensType,
+      basePrice: lens.basePrice || 0,
+      images: lens.images || [],
+      brandLens: lens.brandLensId
+        ? {
+            id: lens.brandLensId,
+            name: lens.brandLensName,
+          }
+        : undefined,
+      categoryLens: lens.categoryLensId
+        ? {
+            id: lens.categoryLensId,
+            name: lens.categoryLensName,
+          }
+        : undefined,
+    }));
+
+    return {
+      data: lensCards,
+      total: parseInt(total),
+      page: pagination?.page || 1,
+      limit: numericLimit,
+      totalPages: Math.ceil(total / numericLimit),
+    };
+  }
+
   async getLenses(
     lensIds: number[] | undefined,
     name: string | undefined,
