@@ -450,118 +450,8 @@ export class LensService {
     const offset = pagination ? (pagination.page - 1) * pagination.limit : 0;
     const limit = pagination?.limit || 20;
 
-    // Collect all prescription values that need to be checked
-    const prescriptionValues: Array<{ type: string; value: number }> = [];
-
-    if (prescriptionData.sphereLeft !== undefined) {
-      prescriptionValues.push({
-        type: 'SPHERICAL',
-        value: prescriptionData.sphereLeft,
-      });
-    }
-    if (prescriptionData.sphereRight !== undefined) {
-      prescriptionValues.push({
-        type: 'SPHERICAL',
-        value: prescriptionData.sphereRight,
-      });
-    }
-    if (prescriptionData.cylinderLeft !== undefined) {
-      prescriptionValues.push({
-        type: 'CYLINDRICAL',
-        value: prescriptionData.cylinderLeft,
-      });
-    }
-    if (prescriptionData.cylinderRight !== undefined) {
-      prescriptionValues.push({
-        type: 'CYLINDRICAL',
-        value: prescriptionData.cylinderRight,
-      });
-    }
-    if (prescriptionData.addLeft !== undefined) {
-      prescriptionValues.push({
-        type: 'ADDITIONAL',
-        value: prescriptionData.addLeft,
-      });
-    }
-    if (prescriptionData.addRight !== undefined) {
-      prescriptionValues.push({
-        type: 'ADDITIONAL',
-        value: prescriptionData.addRight,
-      });
-    }
-
-    // If no prescription values provided, return all lenses
-    if (prescriptionValues.length === 0) {
-      const query = `
-        SELECT DISTINCT
-          l.id,
-          l.name,
-          l.description,
-          l.lens_type as lensType,
-          l.origin,
-          l.status,
-          bl.id as brandLensId,
-          bl.name as brandLensName,
-          bl.description as brandLensDescription,
-          MIN(lv.price) as basePrice,
-          li.image_url as imageUrl,
-          li.image_order as imageOrder,
-          li.is_thumbnail as isThumbnail
-        FROM lens l
-        LEFT JOIN brand_lens bl ON l.brand_lens_id = bl.id AND bl.deleted_at IS NULL
-        LEFT JOIN lens_variant lv ON l.id = lv.lens_id AND lv.deleted_at IS NULL
-        LEFT JOIN lens_image li ON l.id = li.lens_id AND li.deleted_at IS NULL AND li.is_thumbnail = 1
-        WHERE l.deleted_at IS NULL 
-          AND l.status = 'IN_STOCK'
-        GROUP BY l.id, l.name, l.description, l.lens_type, l.origin, l.status, 
-                 bl.id, bl.name, bl.description, li.image_url, li.image_order, li.is_thumbnail
-        ORDER BY l.created_at DESC
-        LIMIT ${Number(limit)} OFFSET ${Number(offset)}
-      `;
-
-      const lenses = await this.lensRepository.query(query);
-      const countQuery = `
-        SELECT COUNT(DISTINCT l.id) as total
-        FROM lens l
-        WHERE l.deleted_at IS NULL AND l.status = 'IN_STOCK'
-      `;
-      const totalResult = await this.lensRepository.query(countQuery);
-      const total = totalResult[0]?.total || 0;
-
-      const formattedLenses = lenses.map((lens: any) => ({
-        id: lens.id,
-        name: lens.name,
-        description: lens.description,
-        lensType: lens.lensType,
-        origin: lens.origin,
-        status: lens.status,
-        basePrice: Number(lens.basePrice) || 0,
-        brandLens: lens.brandLensId
-          ? {
-              id: lens.brandLensId,
-              name: lens.brandLensName,
-              description: lens.brandLensDescription,
-            }
-          : null,
-        imageUrl: lens.imageUrl,
-        imageOrder: lens.imageOrder,
-        isThumbnail: Boolean(lens.isThumbnail),
-      }));
-
-      return {
-        data: formattedLenses,
-        meta: {
-          total: Number(total),
-          page: pagination?.page || 1,
-          limit: pagination?.limit || 20,
-          totalPages: Math.ceil(Number(total) / (pagination?.limit || 20)),
-        },
-      };
-    }
-
-    // Build query to find lenses that can accommodate ALL prescription values
-    // We need to ensure that for each prescription value, there exists a corresponding refraction range
-    let query = `
+    // Build the complex query to find lenses with compatible variants
+    let baseQuery = `
       SELECT DISTINCT
         l.id,
         l.name,
@@ -579,58 +469,102 @@ export class LensService {
       FROM lens l
       LEFT JOIN brand_lens bl ON l.brand_lens_id = bl.id AND bl.deleted_at IS NULL
       LEFT JOIN lens_variant lv ON l.id = lv.lens_id AND lv.deleted_at IS NULL
+      LEFT JOIN lens_refraction_range lrr ON lv.id = lrr.lens_variant_id AND lrr.deleted_at IS NULL
       LEFT JOIN lens_image li ON l.id = li.lens_id AND li.deleted_at IS NULL AND li.is_thumbnail = 1
       WHERE l.deleted_at IS NULL 
         AND l.status = 'IN_STOCK'
     `;
 
-    // For each prescription value, we need to ensure there's a compatible range
-    const subqueryConditions: string[] = [];
+    const conditions: string[] = [];
     const params: any[] = [];
 
-    prescriptionValues.forEach((prescription, index) => {
-      const subquery = `
-        EXISTS (
-          SELECT 1 
-          FROM lens_variant lv${index}
-          JOIN lens_refraction_range lrr${index} ON lv${index}.id = lrr${index}.lens_variant_id
-          WHERE lv${index}.lens_id = l.id 
-            AND lv${index}.deleted_at IS NULL
-            AND lrr${index}.deleted_at IS NULL
-            AND lrr${index}.refraction_type = ?
-            AND ? BETWEEN lrr${index}.min_value AND lrr${index}.max_value
-        )
-      `;
-      subqueryConditions.push(subquery);
-      params.push(prescription.type, prescription.value);
-    });
+    // Check SPHERICAL values
+    if (
+      prescriptionData.sphereLeft !== undefined ||
+      prescriptionData.sphereRight !== undefined
+    ) {
+      const sphereValues = [
+        prescriptionData.sphereLeft,
+        prescriptionData.sphereRight,
+      ].filter((val) => val !== undefined);
+      if (sphereValues.length > 0) {
+        const sphereConditions = sphereValues.map((val) => {
+          params.push(val, val);
+          return `(lrr.refraction_type = 'SPHERICAL' AND ? BETWEEN lrr.min_value AND lrr.max_value)`;
+        });
+        conditions.push(`(${sphereConditions.join(' OR ')})`);
+      }
+    }
 
-    if (subqueryConditions.length > 0) {
-      query += ` AND ${subqueryConditions.join(' AND ')}`;
+    // Check CYLINDRICAL values
+    if (
+      prescriptionData.cylinderLeft !== undefined ||
+      prescriptionData.cylinderRight !== undefined
+    ) {
+      const cylinderValues = [
+        prescriptionData.cylinderLeft,
+        prescriptionData.cylinderRight,
+      ].filter((val) => val !== undefined);
+      if (cylinderValues.length > 0) {
+        const cylinderConditions = cylinderValues.map((val) => {
+          params.push(val, val);
+          return `(lrr.refraction_type = 'CYLINDRICAL' AND ? BETWEEN lrr.min_value AND lrr.max_value)`;
+        });
+        conditions.push(`(${cylinderConditions.join(' OR ')})`);
+      }
+    }
+
+    // Check ADD values
+    if (
+      prescriptionData.addLeft !== undefined ||
+      prescriptionData.addRight !== undefined
+    ) {
+      const addValues = [
+        prescriptionData.addLeft,
+        prescriptionData.addRight,
+      ].filter((val) => val !== undefined);
+      if (addValues.length > 0) {
+        const addConditions = addValues.map((val) => {
+          params.push(val, val);
+          return `(lrr.refraction_type = 'ADDITIONAL' AND ? BETWEEN lrr.min_value AND lrr.max_value)`;
+        });
+        conditions.push(`(${addConditions.join(' OR ')})`);
+      }
+    }
+
+    // Build final query with conditions
+    let query = baseQuery;
+    if (conditions.length > 0) {
+      query += ` AND (${conditions.join(' OR ')})`;
     }
 
     query += ` 
       GROUP BY l.id, l.name, l.description, l.lens_type, l.origin, l.status, 
                bl.id, bl.name, bl.description, li.image_url, li.image_order, li.is_thumbnail
       ORDER BY l.created_at DESC
-      LIMIT ${Number(limit)} OFFSET ${Number(offset)}
     `;
 
-    // Execute the query
+    // Add pagination with direct values instead of parameters
+    query += ` LIMIT ${Number(limit)} OFFSET ${Number(offset)}`;
+
+    // Execute the query with only WHERE condition parameters
     const lenses = await this.lensRepository.query(query, params);
 
     // Count total for pagination
     let countQuery = `
       SELECT COUNT(DISTINCT l.id) as total
       FROM lens l
+      LEFT JOIN lens_variant lv ON l.id = lv.lens_id AND lv.deleted_at IS NULL
+      LEFT JOIN lens_refraction_range lrr ON lv.id = lrr.lens_variant_id AND lrr.deleted_at IS NULL
       WHERE l.deleted_at IS NULL 
         AND l.status = 'IN_STOCK'
     `;
 
-    if (subqueryConditions.length > 0) {
-      countQuery += ` AND ${subqueryConditions.join(' AND ')}`;
+    if (conditions.length > 0) {
+      countQuery += ` AND (${conditions.join(' OR ')})`;
     }
 
+    // Use the same parameters for count query
     const totalResult = await this.lensRepository.query(countQuery, params);
     const total = totalResult[0]?.total || 0;
 
