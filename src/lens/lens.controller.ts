@@ -23,9 +23,14 @@ import {
   GetLensFullDetailsQueryDto,
   LensFullDetailsResponseDto,
 } from './dtos/lens-full-details.dto';
+import {
+  LensPrescriptionFilterQueryDto,
+  LensPrescriptionFilterResponseDto,
+} from './dtos/lens-prescription-filter.dto';
 import { RequestModel } from '../common/models/request.model';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Public } from 'src/middlewares/guards/jwt-auth.guard';
 
 @Controller('api/v1')
 @ApiTags('Lens')
@@ -44,6 +49,7 @@ export class LensController {
   }
 
   @Get('lens/cards')
+  @Public()
   @ApiOperation({
     summary: 'Get lens cards for frontend display',
     description:
@@ -70,12 +76,44 @@ export class LensController {
     );
   }
 
+  @Get('lens/filter-by-prescription')
+  @Public()
+  @ApiOperation({
+    summary: 'Filter lenses by prescription values',
+    description:
+      'Filter lenses based on prescription values (sphere, cylinder, add). Returns lenses that have variants compatible with the provided prescription values.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Filtered lenses retrieved successfully',
+    type: LensPrescriptionFilterResponseDto,
+  })
+  async filterLensesByPrescription(
+    @Query() query: LensPrescriptionFilterQueryDto,
+  ): Promise<LensPrescriptionFilterResponseDto> {
+    const prescriptionData = {
+      sphereLeft: query.sphereLeft,
+      sphereRight: query.sphereRight,
+      cylinderLeft: query.cylinderLeft,
+      cylinderRight: query.cylinderRight,
+      addLeft: query.addLeft,
+      addRight: query.addRight,
+    };
+
+    return this.lensService.filterLensesByPrescription(
+      prescriptionData,
+      new PaginationParamsModel(query.page || 1, query.limit || 12),
+    );
+  }
+
   @Get('lens/:lensId/detail')
+  @Public()
   async getLensById(@Param() params: GetLensByIdParamsDto) {
     return this.lensService.getLensById(Number(params.lensId));
   }
 
   @Get('lens/:lensId/full-details')
+  @Public()
   @ApiOperation({
     summary: 'Get full lens details with all related data',
     description:
