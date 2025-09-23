@@ -446,6 +446,7 @@ export class LensService {
       addRight?: number;
     },
     pagination?: PaginationParamsModel,
+    lensType?: LensType,
   ) {
     const offset = pagination ? (pagination.page - 1) * pagination.limit : 0;
     const limit = pagination?.limit || 20;
@@ -477,6 +478,12 @@ export class LensService {
 
     const conditions: string[] = [];
     const params: any[] = [];
+
+    // Add lens type filter if provided
+    if (lensType) {
+      baseQuery += ` AND l.lens_type = ?`;
+      params.push(lensType);
+    }
 
     // Check SPHERICAL values
     if (

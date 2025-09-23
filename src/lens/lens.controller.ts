@@ -103,6 +103,7 @@ export class LensController {
     return this.lensService.filterLensesByPrescription(
       prescriptionData,
       new PaginationParamsModel(query.page || 1, query.limit || 12),
+      query.lensType,
     );
   }
 

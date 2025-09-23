@@ -1,8 +1,17 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsNumber, Min, Max } from 'class-validator';
+import { IsOptional, IsNumber, Min, Max, IsEnum } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
+import { LensType } from '../enum/lens.type';
 
 export class LensPrescriptionFilterQueryDto {
+  @ApiPropertyOptional({
+    description: 'Lens type filter',
+    enum: LensType,
+    example: LensType.SINGLE_VISION,
+  })
+  @IsOptional()
+  @IsEnum(LensType)
+  lensType?: LensType;
   @ApiPropertyOptional({
     description: 'Sphere value for left eye',
     example: 0.25,
