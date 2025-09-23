@@ -155,28 +155,44 @@ export class CartLensDetailEntity {
       this.id,
       this.cartFrameId,
       undefined, // lensId removed
-      this.rightEyeSphere,
-      this.rightEyeCylinder,
+      typeof this.rightEyeSphere === 'string'
+        ? parseFloat(this.rightEyeSphere)
+        : this.rightEyeSphere,
+      typeof this.rightEyeCylinder === 'string'
+        ? parseFloat(this.rightEyeCylinder)
+        : this.rightEyeCylinder,
       this.rightEyeAxis,
-      this.leftEyeSphere,
-      this.leftEyeCylinder,
+      typeof this.leftEyeSphere === 'string'
+        ? parseFloat(this.leftEyeSphere)
+        : this.leftEyeSphere,
+      typeof this.leftEyeCylinder === 'string'
+        ? parseFloat(this.leftEyeCylinder)
+        : this.leftEyeCylinder,
       this.leftEyeAxis,
-      this.pdLeft,
-      this.pdRight,
+      typeof this.pdLeft === 'string' ? parseFloat(this.pdLeft) : this.pdLeft,
+      typeof this.pdRight === 'string'
+        ? parseFloat(this.pdRight)
+        : this.pdRight,
       undefined, // lensType removed
       'Standard', // lensQuality default
       undefined, // lensThicknessId removed
       undefined, // lensUpgradeDetailId removed
       0, // totalUpgradesPrice default
-      this.lensPrice,
+      typeof this.lensPrice === 'string'
+        ? parseFloat(this.lensPrice)
+        : this.lensPrice,
       undefined, // lensMaterial removed
       undefined, // tintId removed
       this.prescriptionNotes,
       this.lensNotes,
       this.manufacturingNotes,
       undefined, // fieldOfVision removed
-      this.addLeft,
-      this.addRight,
+      typeof this.addLeft === 'string'
+        ? parseFloat(this.addLeft)
+        : this.addLeft,
+      typeof this.addRight === 'string'
+        ? parseFloat(this.addRight)
+        : this.addRight,
       this.selectedCoatingIds,
       this.selectedTintColorId,
       this.lensVariantId,

@@ -88,9 +88,15 @@ export class CartFrameEntity {
       this.cartId,
       this.productId,
       this.quantity,
-      this.framePrice,
-      this.totalPrice,
-      this.discount,
+      typeof this.framePrice === 'string'
+        ? parseFloat(this.framePrice)
+        : this.framePrice,
+      typeof this.totalPrice === 'string'
+        ? parseFloat(this.totalPrice)
+        : this.totalPrice,
+      typeof this.discount === 'string'
+        ? parseFloat(this.discount)
+        : this.discount,
       this.addedAt,
       this.createdAt,
       this.createdBy,
