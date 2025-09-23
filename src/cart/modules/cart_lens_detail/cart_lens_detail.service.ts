@@ -32,11 +32,10 @@ export class CartLensDetailService {
     const lensDetail = await this.cartLensDetailRepository.findOne({
       where: { cartFrameId, deletedAt: IsNull() },
     });
+
+    // Return undefined if not found - this is expected for cart frames without lens details
     if (!lensDetail) {
-      throw new HttpException(
-        'Cart lens detail not found for the given cart frame ID',
-        HttpStatus.NOT_FOUND,
-      );
+      return undefined;
     }
 
     return lensDetail.toModel();
