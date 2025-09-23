@@ -119,9 +119,14 @@ export class LensProductLensDto {
 
 // New DTO for lens products from LensSelectionPage
 export class AddLensProductToCartDto {
-  @ApiProperty({ description: 'Cart ID where to add the item' })
+  @ApiProperty({
+    description:
+      'Cart ID where to add the item (optional, will create if not provided)',
+    required: false,
+  })
+  @IsOptional()
   @IsNumber()
-  cartId!: number;
+  cartId?: number;
 
   @ApiProperty({ description: 'Frame/product information' })
   @ValidateNested()

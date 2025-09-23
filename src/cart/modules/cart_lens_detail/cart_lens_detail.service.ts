@@ -85,7 +85,6 @@ export class CartLensDetailService {
   ): Promise<CartLensDetailModel> {
     const entity = new CartLensDetailEntity();
     entity.cartFrameId = cartFrameId;
-    entity.lensId = lensId;
     entity.rightEyeSphere = rightEyeSphere;
     entity.rightEyeCylinder = rightEyeCylinder;
     entity.rightEyeAxis = rightEyeAxis;
@@ -94,17 +93,10 @@ export class CartLensDetailService {
     entity.leftEyeAxis = leftEyeAxis;
     entity.pdLeft = pdLeft;
     entity.pdRight = pdRight;
-    entity.lensType = lensType;
-    entity.lensQuality = lensQuality || 'Standard';
-    entity.lensThicknessId = lensThicknessId;
-    entity.lensUpgradeDetailId = lensUpgradeDetailId;
-    entity.tintId = tintId;
     entity.lensPrice = lensPrice;
-    entity.lensMaterial = lensMaterial;
     entity.prescriptionNotes = prescriptionNotes;
     entity.lensNotes = lensNotes;
     entity.manufacturingNotes = manufacturingNotes;
-    entity.fieldOfVision = fieldOfVision;
     entity.addLeft = addLeft;
     entity.addRight = addRight;
     entity.createdAt = new Date();
@@ -162,10 +154,6 @@ export class CartLensDetailService {
     // Notes
     entity.prescriptionNotes = prescriptionNotes || '';
     entity.lensNotes = lensNotes || '';
-
-    // Default values
-    entity.lensQuality = 'Standard';
-    entity.totalUpgradesPrice = 0;
 
     // Audit fields
     entity.createdAt = new Date();

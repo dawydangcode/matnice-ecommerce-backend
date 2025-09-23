@@ -21,4 +21,33 @@ export class CartService {
     }
     return cart.toModel();
   }
+
+  async getCartById(cartId: number): Promise<CartModel | null> {
+    const cart = await this.cartRepository.findOne({
+      where: { id: cartId, deletedAt: IsNull() },
+    });
+
+    return cart ? cart.toModel() : null;
+  }
+
+  async createCart(userId: number): Promise<CartModel> {
+    const entity = new CartEntity();
+    entity.userId = userId;
+    entity.createdAt = new Date();
+    entity.createdBy = userId;
+    entity.updatedAt = new Date();
+    entity.updatedBy = userId;
+
+    const savedCart = await this.cartRepository.save(entity);
+    return savedCart.toModel();
+  }
+
+  async findOrCreateCartForUser(userId: number): Promise<CartModel> {
+    try {
+      return await this.getCartByUserId(userId);
+    } catch (error) {
+      // Cart not found, create new one
+      return await this.createCart(userId);
+    }
+  }
 }

@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { CartService } from '../cart.service';
 import { CartFrameService } from './cart_frame/cart_frame.service';
 import { CartLensDetailService } from './cart_lens_detail/cart_lens_detail.service';
 import { CartFrameModel } from './cart_frame/models/cart_frame.model';
@@ -13,6 +14,7 @@ import {
 @Injectable()
 export class CartCombinedService {
   constructor(
+    private readonly cartService: CartService,
     private readonly cartFrameService: CartFrameService,
     private readonly cartLensDetailService: CartLensDetailService,
   ) {}
@@ -78,12 +80,30 @@ export class CartCombinedService {
     frame: CartFrameModel;
     lensDetail: CartLensDetailModel;
   }> {
+    // Get or create cart for user
+    let cart;
+    if (data.cartId) {
+      // Use provided cartId
+      cart = await this.cartService.getCartById(data.cartId);
+      if (!cart) {
+        throw new HttpException(
+          `Cart with ID ${data.cartId} not found`,
+          HttpStatus.NOT_FOUND,
+        );
+      }
+    } else {
+      // Get user's active cart or create new one
+      cart = await this.cartService.findOrCreateCartForUser(reqUserId);
+    }
+
+    const cartId = cart.id;
+
     // Calculate total frame price (frame price + any discounts)
     const totalFramePrice = data.frameData.framePrice; // Can add discount logic here later
 
     // Create cart frame
     const frame = await this.cartFrameService.createCartFrame(
-      data.cartId,
+      cartId,
       data.frameData.productId,
       data.frameData.quantity || 1,
       data.frameData.framePrice,

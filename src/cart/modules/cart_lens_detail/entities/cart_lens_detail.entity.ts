@@ -15,14 +15,6 @@ export class CartLensDetailEntity {
   @Column({ name: 'cart_frame_id' })
   cartFrameId!: number;
 
-  @Column({
-    name: 'lens_id',
-    type: 'bigint',
-    nullable: true,
-    default: null,
-  })
-  lensId!: number;
-
   // Prescription fields
   @Column({
     name: 'right_eye_sphere',
@@ -84,37 +76,23 @@ export class CartLensDetailEntity {
   })
   pdRight!: number;
 
-  // Lens configuration
-  @Column({ name: 'lens_type', length: 100, nullable: true })
-  lensType!: string;
-
   @Column({
-    name: 'lens_quality',
-    type: 'varchar',
-    length: 50,
-    default: 'Standard',
-  })
-  lensQuality!: string;
-
-  @Column({ name: 'lens_thickness_id', type: 'bigint', nullable: true })
-  lensThicknessId!: number | undefined;
-
-  @Column({
-    name: 'lens_upgrade_detail_id',
-    type: 'bigint',
-    nullable: true,
-    default: null,
-  })
-  lensUpgradeDetailId!: number | undefined;
-
-  @Column({
-    name: 'total_upgrades_price',
+    name: 'add_left',
     type: 'decimal',
-    precision: 10,
+    precision: 4,
     scale: 2,
-    default: 0,
+    nullable: true,
   })
-  totalUpgradesPrice!: number;
+  addLeft!: number;
+
+  @Column({
+    name: 'add_right',
+    type: 'decimal',
+    precision: 4,
+    scale: 2,
+    nullable: true,
+  })
+  addRight!: number;
 
   @Column({
     name: 'lens_price',
@@ -124,13 +102,6 @@ export class CartLensDetailEntity {
     default: 0,
   })
   lensPrice!: number;
-
-  // Additional lens options
-  @Column({ name: 'lens_material', length: 50, nullable: true })
-  lensMaterial!: string;
-
-  @Column({ name: 'tint_id', type: 'bigint', nullable: true, default: null })
-  tintId!: number | undefined;
 
   // New fields for lens products from LensSelectionPage
   @Column({ name: 'selected_coating_ids', type: 'text', nullable: true })
@@ -151,27 +122,6 @@ export class CartLensDetailEntity {
 
   @Column({ name: 'manufacturing_notes', type: 'text', nullable: true })
   manufacturingNotes!: string;
-
-  @Column({ name: 'field_of_vision', length: 50, nullable: true })
-  fieldOfVision!: string;
-
-  @Column({
-    name: 'add_left',
-    type: 'decimal',
-    precision: 4,
-    scale: 2,
-    nullable: true,
-  })
-  addLeft!: number;
-
-  @Column({
-    name: 'add_right',
-    type: 'decimal',
-    precision: 4,
-    scale: 2,
-    nullable: true,
-  })
-  addRight!: number;
 
   @Column({ name: 'created_at', type: 'timestamp' })
   createdAt!: Date;
@@ -204,7 +154,7 @@ export class CartLensDetailEntity {
     return new CartLensDetailModel(
       this.id,
       this.cartFrameId,
-      this.lensId,
+      undefined, // lensId removed
       this.rightEyeSphere,
       this.rightEyeCylinder,
       this.rightEyeAxis,
@@ -213,18 +163,18 @@ export class CartLensDetailEntity {
       this.leftEyeAxis,
       this.pdLeft,
       this.pdRight,
-      this.lensType,
-      this.lensQuality,
-      this.lensThicknessId,
-      this.lensUpgradeDetailId,
-      this.totalUpgradesPrice,
+      undefined, // lensType removed
+      'Standard', // lensQuality default
+      undefined, // lensThicknessId removed
+      undefined, // lensUpgradeDetailId removed
+      0, // totalUpgradesPrice default
       this.lensPrice,
-      this.lensMaterial,
-      this.tintId,
+      undefined, // lensMaterial removed
+      undefined, // tintId removed
       this.prescriptionNotes,
       this.lensNotes,
       this.manufacturingNotes,
-      this.fieldOfVision,
+      undefined, // fieldOfVision removed
       this.addLeft,
       this.addRight,
       this.selectedCoatingIds,
