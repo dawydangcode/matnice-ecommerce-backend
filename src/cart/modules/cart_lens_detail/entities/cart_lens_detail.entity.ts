@@ -132,6 +132,16 @@ export class CartLensDetailEntity {
   @Column({ name: 'tint_id', type: 'bigint', nullable: true, default: null })
   tintId!: number | undefined;
 
+  // New fields for lens products from LensSelectionPage
+  @Column({ name: 'selected_coating_ids', type: 'text', nullable: true })
+  selectedCoatingIds!: string | null; // JSON array of coating IDs
+
+  @Column({ name: 'selected_tint_color_id', type: 'bigint', nullable: true })
+  selectedTintColorId!: number | null;
+
+  @Column({ name: 'lens_variant_id', type: 'bigint', nullable: true })
+  lensVariantId!: number | null;
+
   // Notes
   @Column({ name: 'prescription_notes', type: 'text', nullable: true })
   prescriptionNotes!: string;
@@ -217,6 +227,9 @@ export class CartLensDetailEntity {
       this.fieldOfVision,
       this.addLeft,
       this.addRight,
+      this.selectedCoatingIds,
+      this.selectedTintColorId,
+      this.lensVariantId,
       this.createdAt,
       this.createdBy,
       this.updatedAt,

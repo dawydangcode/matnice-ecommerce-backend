@@ -7,6 +7,7 @@ import {
   CreateCartItemCompleteDto,
   CartItemSummary,
   CartSummary,
+  AddLensProductToCartDto,
 } from './dtos/cart-combined.dto';
 
 @Injectable()
@@ -65,6 +66,54 @@ export class CartCombinedService {
         data.lensDetail.tintId,
       );
     }
+
+    return { frame, lensDetail };
+  }
+
+  // New method for lens products from LensSelectionPage
+  async addLensProductToCart(
+    data: AddLensProductToCartDto,
+    reqUserId: number,
+  ): Promise<{
+    frame: CartFrameModel;
+    lensDetail: CartLensDetailModel;
+  }> {
+    // Calculate total frame price (frame price + any discounts)
+    const totalFramePrice = data.frameData.framePrice; // Can add discount logic here later
+
+    // Create cart frame
+    const frame = await this.cartFrameService.createCartFrame(
+      data.cartId,
+      data.frameData.productId,
+      data.frameData.quantity || 1,
+      data.frameData.framePrice,
+      totalFramePrice,
+      0, // discount
+      reqUserId,
+    );
+
+    // Create lens detail with all the prescription and lens option data
+    const lensDetail =
+      await this.cartLensDetailService.createCartLensDetailForLensProduct(
+        frame.id,
+        data.lensData.lensVariantId,
+        data.lensData.prescriptionValues.rightEyeSphere,
+        data.lensData.prescriptionValues.rightEyeCylinder,
+        data.lensData.prescriptionValues.rightEyeAxis,
+        data.lensData.prescriptionValues.leftEyeSphere,
+        data.lensData.prescriptionValues.leftEyeCylinder,
+        data.lensData.prescriptionValues.leftEyeAxis,
+        data.lensData.prescriptionValues.pdLeft,
+        data.lensData.prescriptionValues.pdRight,
+        data.lensData.prescriptionValues.addLeft,
+        data.lensData.prescriptionValues.addRight,
+        data.lensData.lensPrice,
+        data.lensData.selectedCoatingIds,
+        data.lensData.selectedTintColorId,
+        data.lensData.prescriptionNotes,
+        data.lensData.lensNotes,
+        reqUserId,
+      );
 
     return { frame, lensDetail };
   }

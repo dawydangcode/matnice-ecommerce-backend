@@ -114,6 +114,69 @@ export class CartLensDetailService {
     return savedLensDetail.toModel();
   }
 
+  // New method for lens products from LensSelectionPage
+  async createCartLensDetailForLensProduct(
+    cartFrameId: number,
+    lensVariantId: number,
+    rightEyeSphere: number,
+    rightEyeCylinder: number | undefined,
+    rightEyeAxis: number | undefined,
+    leftEyeSphere: number,
+    leftEyeCylinder: number | undefined,
+    leftEyeAxis: number | undefined,
+    pdLeft: number | undefined,
+    pdRight: number | undefined,
+    addLeft: number | undefined,
+    addRight: number | undefined,
+    lensPrice: number,
+    selectedCoatingIds: number[],
+    selectedTintColorId: number | undefined,
+    prescriptionNotes: string | undefined,
+    lensNotes: string | undefined,
+    reqUserId: number,
+  ): Promise<CartLensDetailModel> {
+    const entity = new CartLensDetailEntity();
+
+    // Basic fields
+    entity.cartFrameId = cartFrameId;
+    entity.lensVariantId = lensVariantId;
+    entity.lensPrice = lensPrice;
+
+    // Prescription values
+    entity.rightEyeSphere = rightEyeSphere;
+    entity.rightEyeCylinder = rightEyeCylinder || 0;
+    entity.rightEyeAxis = rightEyeAxis || 0;
+    entity.leftEyeSphere = leftEyeSphere;
+    entity.leftEyeCylinder = leftEyeCylinder || 0;
+    entity.leftEyeAxis = leftEyeAxis || 0;
+    entity.pdLeft = pdLeft || 0;
+    entity.pdRight = pdRight || 0;
+    entity.addLeft = addLeft || 0;
+    entity.addRight = addRight || 0;
+
+    // Lens options
+    entity.selectedCoatingIds =
+      selectedCoatingIds.length > 0 ? JSON.stringify(selectedCoatingIds) : null;
+    entity.selectedTintColorId = selectedTintColorId || null;
+
+    // Notes
+    entity.prescriptionNotes = prescriptionNotes || '';
+    entity.lensNotes = lensNotes || '';
+
+    // Default values
+    entity.lensQuality = 'Standard';
+    entity.totalUpgradesPrice = 0;
+
+    // Audit fields
+    entity.createdAt = new Date();
+    entity.createdBy = reqUserId;
+    entity.updatedAt = new Date();
+    entity.updatedBy = reqUserId;
+
+    const savedLensDetail = await this.cartLensDetailRepository.save(entity);
+    return savedLensDetail.toModel();
+  }
+
   async updateCartLensDetail(
     lensDetail: CartLensDetailModel,
     updates: Partial<CartLensDetailModel>,

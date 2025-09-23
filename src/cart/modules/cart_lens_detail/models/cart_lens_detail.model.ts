@@ -24,6 +24,10 @@ export class CartLensDetailModel {
   public readonly fieldOfVision: string | undefined;
   public readonly addLeft: number | undefined;
   public readonly addRight: number | undefined;
+  // New fields for lens products
+  public readonly selectedCoatingIds: string | null;
+  public readonly selectedTintColorId: number | null;
+  public readonly lensVariantId: number | null;
   public readonly createdAt: Date;
   public readonly createdBy: number;
   public readonly updatedAt: Date;
@@ -57,6 +61,9 @@ export class CartLensDetailModel {
     fieldOfVision: string | undefined,
     addLeft: number | undefined,
     addRight: number | undefined,
+    selectedCoatingIds: string | null,
+    selectedTintColorId: number | null,
+    lensVariantId: number | null,
     createdAt: Date,
     createdBy: number,
     updatedAt: Date,
@@ -89,6 +96,9 @@ export class CartLensDetailModel {
     this.fieldOfVision = fieldOfVision;
     this.addLeft = addLeft;
     this.addRight = addRight;
+    this.selectedCoatingIds = selectedCoatingIds;
+    this.selectedTintColorId = selectedTintColorId;
+    this.lensVariantId = lensVariantId;
     this.createdAt = createdAt;
     this.createdBy = createdBy;
     this.updatedAt = updatedAt;

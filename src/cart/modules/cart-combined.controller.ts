@@ -13,6 +13,7 @@ import { RequestModel } from 'src/common/models/request.model';
 import {
   CreateCartItemCompleteDto,
   CartSummary,
+  AddLensProductToCartDto,
 } from './dtos/cart-combined.dto';
 import { CartFrameModel } from './cart_frame/models/cart_frame.model';
 import { CartLensDetailModel } from './cart_lens_detail/models/cart_lens_detail.model';
@@ -31,6 +32,20 @@ export class CartCombinedController {
     lensDetail?: CartLensDetailModel;
   }> {
     return await this.cartCombinedService.createCartItemComplete(
+      body,
+      req.user.userId,
+    );
+  }
+
+  @Post('add-lens-product')
+  async addLensProductToCart(
+    @Req() req: RequestModel,
+    @Body() body: AddLensProductToCartDto,
+  ): Promise<{
+    frame: CartFrameModel;
+    lensDetail: CartLensDetailModel;
+  }> {
+    return await this.cartCombinedService.addLensProductToCart(
       body,
       req.user.userId,
     );
