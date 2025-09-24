@@ -554,10 +554,17 @@ export class LensService {
     // Add pagination with direct values instead of parameters
     query += ` LIMIT ${Number(limit)} OFFSET ${Number(offset)}`;
 
+    console.log('=== DEBUG FILTER LENSES BY PRESCRIPTION ===');
+    console.log('Final query:', query);
+    console.log('Query params:', params);
+    console.log('Conditions:', conditions);
+
     // Execute the query with only WHERE condition parameters
     const lenses = await this.lensRepository.query(query, params);
+    console.log('Query results count:', lenses.length);
+    console.log('Query results:', lenses);
 
-    // Count total for pagination
+    // Count total for pagination (make sure to include lens type filter)
     let countQuery = `
       SELECT COUNT(DISTINCT l.id) as total
       FROM lens l
@@ -567,13 +574,22 @@ export class LensService {
         AND l.status = 'IN_STOCK'
     `;
 
+    // Add lens type filter to count query as well
+    if (lensType) {
+      countQuery += ` AND l.lens_type = '${lensType}'`;
+    }
+
     if (conditions.length > 0) {
       countQuery += ` AND (${conditions.join(' OR ')})`;
     }
 
+    console.log('Count query:', countQuery);
+    console.log('Count query params:', params);
+
     // Use the same parameters for count query
     const totalResult = await this.lensRepository.query(countQuery, params);
     const total = totalResult[0]?.total || 0;
+    console.log('Total count result:', totalResult);
 
     // Format the results
     const formattedLenses = lenses.map((lens: any) => ({
