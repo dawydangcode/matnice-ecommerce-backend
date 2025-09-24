@@ -4,6 +4,8 @@ import { CartFrameService } from './cart_frame/cart_frame.service';
 import { CartLensDetailService } from './cart_lens_detail/cart_lens_detail.service';
 import { CartFrameModel } from './cart_frame/models/cart_frame.model';
 import { CartLensDetailModel } from './cart_lens_detail/models/cart_lens_detail.model';
+import { ProductService } from '../../product/product.service';
+import { ProductImageService } from '../../product/modules/product-image/product-image.service';
 import {
   CreateCartItemCompleteDto,
   CartItemSummary,
@@ -17,6 +19,8 @@ export class CartCombinedService {
     private readonly cartService: CartService,
     private readonly cartFrameService: CartFrameService,
     private readonly cartLensDetailService: CartLensDetailService,
+    private readonly productService: ProductService,
+    private readonly productImageService: ProductImageService,
   ) {}
 
   async createCartItemComplete(
@@ -155,13 +159,54 @@ export class CartCombinedService {
       lensDetailMap.set(detail.cartFrameId, detail);
     });
 
-    // Build cart item summaries
+    // Get product names and images for all frames
+    const productIds = frames.map((frame) => frame.productId);
+    const uniqueProductIds = [...new Set(productIds)];
+    const products = await Promise.all(
+      uniqueProductIds.map(async (productId) => {
+        try {
+          return await this.productService.getProductById(productId);
+        } catch (error) {
+          console.error(`Failed to get product ${productId}:`, error);
+          return null;
+        }
+      }),
+    );
+
+    // Get product images for all unique product IDs
+    const productImages = await Promise.all(
+      uniqueProductIds.map(async (productId) => {
+        try {
+          const images =
+            await this.productImageService.getProductThumbnailImages(productId);
+          // Get the first image with order 'a' (thumbnail)
+          const thumbnailImage = images.find((img) => img.imageOrder === 'a');
+          return thumbnailImage?.imageUrl || null;
+        } catch (error) {
+          console.error(`Failed to get product image ${productId}:`, error);
+          return null;
+        }
+      }),
+    );
+
+    // Create product map for easy lookup
+    const productMap = new Map();
+    const productImageMap = new Map();
+    products.forEach((product, index) => {
+      if (product) {
+        productMap.set(uniqueProductIds[index], product);
+      }
+      productImageMap.set(uniqueProductIds[index], productImages[index]);
+    }); // Build cart item summaries
     const items: CartItemSummary[] = frames.map((frame) => {
       const lensDetail = lensDetailMap.get(frame.id);
+      const product = productMap.get(frame.productId);
 
       return {
         cartFrameId: frame.id,
         productId: frame.productId,
+        productName: product?.productName || 'Unknown Product',
+        productImage: productImageMap.get(frame.productId) || null,
         quantity: frame.quantity,
         framePrice: frame.framePrice,
         totalPrice: frame.totalPrice,
@@ -267,14 +312,14 @@ export class CartCombinedService {
 
   async getCartItemsWithFullDetails(cartId: number): Promise<
     {
-      frame: CartFrameModel;
+      frame: CartFrameModel & { productName?: string; productImage?: string };
       lensDetail?: CartLensDetailModel;
     }[]
   > {
     const frames = await this.cartFrameService.getCartFramesByCartId(cartId);
 
     const result: {
-      frame: CartFrameModel;
+      frame: CartFrameModel & { productName?: string; productImage?: string };
       lensDetail?: CartLensDetailModel;
     }[] = [];
 
@@ -283,8 +328,48 @@ export class CartCombinedService {
         await this.cartLensDetailService.getCartLensDetailByCartFrameId(
           frame.id,
         );
+
+      // Get product details
+      let productName: string | undefined;
+      let productImage: string | undefined;
+
+      try {
+        const product = await this.productService.getProductById(
+          frame.productId,
+        );
+        productName = product.productName;
+
+        // Get product thumbnail image
+        try {
+          const imageResult =
+            await this.productImageService.getProductImagesByProductId(
+              frame.productId,
+              undefined, // no pagination
+            );
+          const thumbnailImage = imageResult.data.find(
+            (img) => img.imageOrder === 'a',
+          );
+          productImage = thumbnailImage?.imageUrl;
+        } catch (imageError) {
+          console.error(
+            `Failed to get product image for product ${frame.productId}:`,
+            imageError,
+          );
+        }
+      } catch (productError) {
+        console.error(
+          `Failed to get product ${frame.productId}:`,
+          productError,
+        );
+        productName = 'Unknown Product';
+      }
+
       result.push({
-        frame,
+        frame: {
+          ...frame,
+          productName,
+          productImage,
+        },
         lensDetail: lensDetail || undefined,
       });
     }

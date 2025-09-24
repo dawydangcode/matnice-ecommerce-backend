@@ -157,6 +157,7 @@ export interface CartItemSummary {
   cartFrameId: number;
   productId: number;
   productName?: string;
+  productImage?: string;
   frameColor?: string;
   quantity: number;
   framePrice: number;

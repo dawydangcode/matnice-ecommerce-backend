@@ -14,6 +14,7 @@ import { CartFrameController } from './modules/cart_frame/cart_frame.controller'
 import { CartCombinedController } from './modules/cart-combined.controller';
 import { CartFrameService } from './modules/cart_frame/cart_frame.service';
 import { CartCombinedService } from './modules/cart-combined.service';
+import { ProductModule } from '../product/product.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { CartCombinedService } from './modules/cart-combined.service';
     forwardRef(() => CartItemModule),
     CartFrameModule,
     CartLensDetailModule,
+    ProductModule,
   ],
   controllers: [
     CartController,
