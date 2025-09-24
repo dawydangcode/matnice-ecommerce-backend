@@ -323,8 +323,35 @@ export class LensImageService {
     lensId: number,
     imageOrder?: string,
     userId?: number,
-  ): Promise<string> {
+  ): Promise<{ imageUrl: string; lensImage: LensImageModel }> {
     try {
+      // Validate lens exists
+      const lens = await this.lensRepository.findOne({
+        where: { id: lensId },
+      });
+
+      if (!lens) {
+        throw new HttpException('Lens not found', HttpStatus.NOT_FOUND);
+      }
+
+      // Check if imageOrder is already taken for this lens
+      if (imageOrder) {
+        const existingImage = await this.lensImageRepository.findOne({
+          where: {
+            lensId,
+            imageOrder,
+            deletedAt: IsNull(),
+          },
+        });
+
+        if (existingImage) {
+          throw new HttpException(
+            `Image order '${imageOrder}' is already taken for this lens`,
+            HttpStatus.CONFLICT,
+          );
+        }
+      }
+
       const lensInfo = await this.getLensInfo(lensId);
       const fileKey = this.generateFileKey();
       const fileExtension = file.originalname.split('.').pop();
@@ -339,13 +366,35 @@ export class LensImageService {
 
       const uploadPath = `${lensInfo.folderPath}/${fileName}`;
 
+      // Upload to S3
       const imageUrl = await this.awsS3Service.uploadFile(
         file.buffer,
         uploadPath,
         file.mimetype,
       );
 
-      return imageUrl;
+      // Save to database
+      const lensImageEntity = new LensImageEntity();
+      lensImageEntity.lensId = lensId;
+      lensImageEntity.imageUrl = imageUrl;
+      lensImageEntity.imageOrder = imageOrder;
+      lensImageEntity.isThumbnail = false;
+      lensImageEntity.createdBy = userId || 1; // Default to 1 if userId not provided
+      lensImageEntity.updatedBy = userId || 1;
+
+      const savedImage = await this.lensImageRepository.save(lensImageEntity);
+
+      this.log('Lens image saved to database:', {
+        id: savedImage.id,
+        lensId,
+        imageUrl,
+        imageOrder,
+      });
+
+      return {
+        imageUrl,
+        lensImage: savedImage.toModel(),
+      };
     } catch (error) {
       this.logError('Error uploading lens image:', error);
       throw new HttpException(

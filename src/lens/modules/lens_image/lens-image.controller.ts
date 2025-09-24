@@ -33,7 +33,7 @@ import {
 } from './dtos/lens-image.dto';
 
 @ApiTags('Lens Images')
-@Controller('lens-images')
+@Controller('api/v1/lens-images')
 @UseGuards(JwtAuthGuard)
 export class LensImageController {
   constructor(private readonly lensImageService: LensImageService) {}
@@ -269,7 +269,7 @@ export class LensImageController {
       }
 
       const userId = req.user?.id;
-      const imageUrl = await this.lensImageService.uploadLensImage(
+      const result = await this.lensImageService.uploadLensImage(
         file,
         Number(lensId),
         imageOrder,
@@ -280,7 +280,8 @@ export class LensImageController {
         statusCode: HttpStatus.OK,
         message: 'Lens image uploaded successfully',
         data: {
-          imageUrl,
+          imageUrl: result.imageUrl,
+          lensImage: result.lensImage,
         },
       });
     } catch (error) {
