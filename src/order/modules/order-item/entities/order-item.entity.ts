@@ -1,5 +1,5 @@
-import { OrderLensDetailEntity } from 'src/order/entities/order-lens-detail.entity';
-import { OrderEntity } from 'src/order/entities/order.entity';
+import { OrderLensDetailEntity } from '../../order-lens-detail/entities/order-lens-detail.entity';
+import { OrderEntity } from '../../../entities/order.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,

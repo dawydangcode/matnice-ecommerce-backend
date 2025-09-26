@@ -8,7 +8,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { OrderStatus, PaymentMethod, PaymentStatus } from '../enums/order.enum';
-import { OrderItemEntity } from './order-item.entity';
+import { OrderItemEntity } from '../modules/order-item/entities/order-item.entity';
 import { OrderModel } from '../models/order.model';
 
 @Entity('order')
