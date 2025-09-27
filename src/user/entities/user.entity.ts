@@ -2,11 +2,13 @@ import {
   Column,
   Entity,
   JoinColumn,
+  OneToMany,
   PrimaryColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { UserModel } from '../models/user.model';
 import { RoleEntity } from 'src/role/entities/role.entity';
+import { UserAddressEntity } from '../modules/user-address/entities/user-address.entity';
 
 @Entity('user')
 export class UserEntity {
@@ -45,6 +47,9 @@ export class UserEntity {
 
   @JoinColumn([{ name: 'role_id', referencedColumnName: 'id' }])
   role: RoleEntity | undefined;
+
+  @OneToMany(() => UserAddressEntity, (address) => address.user)
+  addresses?: UserAddressEntity[];
 
   toModel(isHiddenPassword: boolean): UserModel {
     return new UserModel(
