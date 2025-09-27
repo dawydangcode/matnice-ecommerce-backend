@@ -19,9 +19,12 @@ import {
   GetCartLensDetailParamsDto,
 } from './dtos/cart_lens_detail.dto';
 import { CartLensDetailModel } from './models/cart_lens_detail.model';
+import { RoleType } from 'src/role/enum/role.enum';
+import { Roles } from 'src/role/decorators/roles.decorator';
 
 @ApiTags('Cart / Cart Lens Detail')
 @Controller('api/v1/cart-lens-detail')
+@Roles(RoleType.Admin, RoleType.User, RoleType.Employee, RoleType.Guest)
 export class CartLensDetailController {
   constructor(private readonly cartLensDetailService: CartLensDetailService) {}
 

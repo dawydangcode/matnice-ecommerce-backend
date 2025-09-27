@@ -31,7 +31,6 @@ import { OrderStatus, PaymentStatus } from './enums/order.enum';
 
 @ApiTags('Orders')
 @Controller('api/v1/orders')
-@UseGuards(JwtAuthGuard)
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 

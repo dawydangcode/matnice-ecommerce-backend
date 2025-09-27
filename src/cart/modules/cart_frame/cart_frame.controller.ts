@@ -19,9 +19,12 @@ import {
   GetCartFrameParamsDto,
 } from './dtos/cart_frame.dto';
 import { CartFrameModel } from './models/cart_frame.model';
+import { RoleType } from 'src/role/enum/role.enum';
+import { Roles } from 'src/role/decorators/roles.decorator';
 
 @ApiTags('Cart / Cart Frame')
 @Controller('api/v1/cart-frame')
+@Roles(RoleType.Admin, RoleType.User, RoleType.Employee, RoleType.Guest)
 export class CartFrameController {
   constructor(private readonly cartFrameService: CartFrameService) {}
 

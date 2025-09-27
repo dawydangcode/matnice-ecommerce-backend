@@ -17,9 +17,12 @@ import {
 } from './dtos/cart-combined.dto';
 import { CartFrameModel } from './cart_frame/models/cart_frame.model';
 import { CartLensDetailModel } from './cart_lens_detail/models/cart_lens_detail.model';
+import { RoleType } from 'src/role/enum/role.enum';
+import { Roles } from 'src/role/decorators/roles.decorator';
 
 @ApiTags('Cart / Combined Operations')
 @Controller('api/v1/cart')
+@Roles(RoleType.Admin, RoleType.User, RoleType.Employee, RoleType.Guest)
 export class CartCombinedController {
   constructor(private readonly cartCombinedService: CartCombinedService) {}
 

@@ -19,9 +19,12 @@ import {
   GetCartItemParamsDto,
 } from './dtos/cart_item.dto';
 import { CartItemModel } from './models/cart_item.model';
+import { RoleType } from 'src/role/enum/role.enum';
+import { Roles } from 'src/role/decorators/roles.decorator';
 
 @ApiTags('Cart / Cart Item')
 @Controller('api/v1/cart-item')
+@Roles(RoleType.Admin, RoleType.User, RoleType.Employee, RoleType.Guest)
 export class CartItemController {
   constructor(private readonly cartItemService: CartItemService) {}
 
