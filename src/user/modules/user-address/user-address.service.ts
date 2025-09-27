@@ -22,6 +22,7 @@ export class UserAddressService {
     ward: string,
     addressDetail: string,
     isDefault: boolean,
+    reqUserId: number,
   ): Promise<UserAddressModel> {
     // Nếu address này được đặt làm mặc định, hủy mặc định của các address khác
     if (isDefault) {
@@ -35,6 +36,8 @@ export class UserAddressService {
     entity.ward = ward;
     entity.addressDetail = addressDetail;
     entity.isDefault = isDefault;
+    entity.createdAt = new Date();
+    entity.createdBy = reqUserId;
 
     return await this.userAddressRepository.save(entity);
   }
@@ -97,10 +100,10 @@ export class UserAddressService {
     return await this.getUserAddressById(userAddress.id);
   }
 
-  async deleteUserAddress(id: number): Promise<boolean> {
-    const userAddress = await this.getUserAddressById(id);
-
-    // Nếu xóa address mặc định, đặt address đầu tiên khác làm mặc định
+  async deleteUserAddress(
+    userAddress: UserAddressModel,
+    reqUserId: number,
+  ): Promise<boolean> {
     if (userAddress.isDefault) {
       const otherAddresses = await this.userAddressRepository.find({
         where: { userId: userAddress.userId },
@@ -108,16 +111,23 @@ export class UserAddressService {
       });
 
       if (otherAddresses.length > 1) {
-        const nextDefault = otherAddresses.find((addr) => addr.id !== id);
+        const nextDefault = otherAddresses.find(
+          (addr) => addr.id !== userAddress.id,
+        );
         if (nextDefault) {
           await this.userAddressRepository.update(nextDefault.id, {
             isDefault: true,
+            updatedAt: new Date(),
+            updatedBy: reqUserId,
           });
         }
       }
     }
 
-    await this.userAddressRepository.delete(id);
+    await this.userAddressRepository.update(userAddress.id, {
+      deletedAt: new Date(),
+      deletedBy: reqUserId,
+    });
     return true;
   }
 

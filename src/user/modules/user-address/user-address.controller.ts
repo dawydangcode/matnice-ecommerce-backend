@@ -3,27 +3,18 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
-  Delete,
   Query,
-  HttpStatus,
-  HttpException,
   ParseIntPipe,
   Req,
   Put,
+  Delete,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiParam,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { UserAddressService } from './user-address.service';
-import { UserAddressEntity } from './entities/user-address.entity';
 import {
   CreateUserAddressBodyDto,
+  DeleteUserAddressParamsDto,
   GetUserAddressByIdParamsDto,
   UpdateUserAddressBodyDto,
   UpdateUserAddressParamsDto,
@@ -34,21 +25,6 @@ import { RequestModel } from 'src/common/models/request.model';
 @Controller('api/v1')
 export class UserAddressController {
   constructor(private readonly userAddressService: UserAddressService) {}
-
-  @Post('/user-address/create')
-  async createUserAddress(
-    @Query('userId', ParseIntPipe) userId: number,
-    @Body() body: CreateUserAddressBodyDto,
-  ) {
-    return await this.userAddressService.createUserAddress(
-      userId,
-      body.province,
-      body.district,
-      body.ward,
-      body.addressDetail,
-      body.isDefault,
-    );
-  }
 
   @Get('user-address/list')
   async getUserAddresses() {
@@ -64,6 +40,23 @@ export class UserAddressController {
   async findOne(@Param() params: GetUserAddressByIdParamsDto) {
     return await this.userAddressService.getUserAddressById(
       params.userAddressId,
+    );
+  }
+
+  @Post('/user-address/create')
+  async createUserAddress(
+    @Query('userId', ParseIntPipe) userId: number,
+    @Body() body: CreateUserAddressBodyDto,
+    @Req() req: RequestModel,
+  ) {
+    return await this.userAddressService.createUserAddress(
+      userId,
+      body.province,
+      body.district,
+      body.ward,
+      body.addressDetail,
+      body.isDefault,
+      req.user.userId,
     );
   }
 
@@ -89,20 +82,20 @@ export class UserAddressController {
 
   @Delete('user-address/:userAddressId/delete')
   async remove(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<{ message: string }> {
-    await this.userAddressService.deleteUserAddress(id);
-    return { message: 'Địa chỉ đã được xóa thành công' };
+    @Param() params: DeleteUserAddressParamsDto,
+    @Req() req: RequestModel,
+  ) {
+    const userAddress = await this.userAddressService.getUserAddressById(
+      params.userAddressId,
+    );
+    await this.userAddressService.deleteUserAddress(
+      userAddress,
+      req.user.userId,
+    );
+    return true;
   }
 
-  @Patch('user-address/:userAddressId/set-default')
-  @ApiOperation({ summary: 'Đặt địa chỉ làm mặc định' })
-  @ApiParam({ name: 'id', type: 'number', description: 'ID của địa chỉ' })
-  @ApiResponse({
-    status: 200,
-    description: 'Địa chỉ đã được đặt làm mặc định',
-    type: UserAddressEntity,
-  })
+  @Put('user-address/:userAddressId/set-default')
   async setDefault(@Param('id', ParseIntPipe) id: number) {
     return await this.userAddressService.setDefault(id);
   }
