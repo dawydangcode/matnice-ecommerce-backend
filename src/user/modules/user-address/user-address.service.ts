@@ -5,49 +5,55 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateUserAddressDto } from './dto/create-user-address.dto';
-import { UpdateUserAddressDto } from './dto/update-user-address.dto';
 import { UserAddressEntity } from './entities/user-address.entity';
+import { UserAddressModel } from './models/user-address.model';
 
 @Injectable()
 export class UserAddressService {
   constructor(
     @InjectRepository(UserAddressEntity)
-    private userAddressRepository: Repository<UserAddressEntity>,
+    private userAddressRepository: Repository<UserAddressModel>,
   ) {}
 
   async createUserAddress(
     userId: number,
-    createUserAddressDto: CreateUserAddressDto,
-  ): Promise<UserAddressEntity> {
+    province: string,
+    district: string,
+    ward: string,
+    addressDetail: string,
+    isDefault: boolean,
+  ): Promise<UserAddressModel> {
     // Nếu address này được đặt làm mặc định, hủy mặc định của các address khác
-    if (createUserAddressDto.isDefault) {
+    if (isDefault) {
       await this.userAddressRepository.update({ userId }, { isDefault: false });
     }
 
-    const userAddress = this.userAddressRepository.create({
-      ...createUserAddressDto,
-      userId,
-    });
+    const entity = new UserAddressEntity();
+    entity.userId = userId;
+    entity.province = province;
+    entity.district = district;
+    entity.ward = ward;
+    entity.addressDetail = addressDetail;
+    entity.isDefault = isDefault;
 
-    return await this.userAddressRepository.save(userAddress);
+    return await this.userAddressRepository.save(entity);
   }
 
-  async getUserAddresses(): Promise<UserAddressEntity[]> {
+  async getUserAddresses(): Promise<UserAddressModel[]> {
     return await this.userAddressRepository.find({
       relations: ['user'],
       order: { createdAt: 'DESC' },
     });
   }
 
-  async getUserAddressByUserId(userId: number): Promise<UserAddressEntity[]> {
+  async getUserAddressByUserId(userId: number): Promise<UserAddressModel[]> {
     return await this.userAddressRepository.find({
       where: { userId },
       order: { isDefault: 'DESC', createdAt: 'DESC' },
     });
   }
 
-  async getUserAddressById(id: number): Promise<UserAddressEntity> {
+  async getUserAddressById(id: number): Promise<UserAddressModel> {
     const userAddress = await this.userAddressRepository.findOne({
       where: { id },
       relations: ['user'],
@@ -61,35 +67,37 @@ export class UserAddressService {
   }
 
   async updateUserAddress(
-    id: number,
-    updateUserAddressDto: UpdateUserAddressDto,
-  ): Promise<UserAddressEntity> {
-    const userAddress = await this.getUserAddressById(id);
+    userAddress: UserAddressModel,
+    province: string | undefined,
+    district: string | undefined,
+    ward: string | undefined,
+    addressDetail: string | undefined,
+    isDefault: boolean | undefined,
+    reqUserId: number,
+  ): Promise<UserAddressModel> {
+    await this.getUserAddressById(userAddress.id);
 
     // Nếu address này được đặt làm mặc định, hủy mặc định của các address khác cùng user
-    if (updateUserAddressDto.isDefault) {
+    if (isDefault) {
       await this.userAddressRepository.update(
         { userId: userAddress.userId },
         { isDefault: false },
       );
-
-      // Ngoại trừ address hiện tại
-      await this.userAddressRepository
-        .createQueryBuilder()
-        .update(UserAddressEntity)
-        .set({ isDefault: false })
-        .where('userId = :userId AND id != :id', {
-          userId: userAddress.userId,
-          id,
-        })
-        .execute();
     }
+    await this.userAddressRepository.update(userAddress.id, {
+      province: province,
+      district: district,
+      ward: ward,
+      addressDetail: addressDetail,
+      isDefault: isDefault,
+      updatedAt: new Date(),
+      updatedBy: reqUserId,
+    });
 
-    await this.userAddressRepository.update(id, updateUserAddressDto);
-    return await this.getUserAddressById(id);
+    return await this.getUserAddressById(userAddress.id);
   }
 
-  async deleteUserAddress(id: number): Promise<void> {
+  async deleteUserAddress(id: number): Promise<boolean> {
     const userAddress = await this.getUserAddressById(id);
 
     // Nếu xóa address mặc định, đặt address đầu tiên khác làm mặc định
@@ -110,9 +118,10 @@ export class UserAddressService {
     }
 
     await this.userAddressRepository.delete(id);
+    return true;
   }
 
-  async setDefault(id: number): Promise<UserAddressEntity> {
+  async setDefault(id: number): Promise<UserAddressModel> {
     const userAddress = await this.getUserAddressById(id);
 
     // Hủy mặc định của các address khác cùng user
