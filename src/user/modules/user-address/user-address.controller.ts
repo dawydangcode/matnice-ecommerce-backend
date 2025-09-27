@@ -24,11 +24,11 @@ import { UpdateUserAddressDto } from './dto/update-user-address.dto';
 import { UserAddressEntity } from './entities/user-address.entity';
 
 @ApiTags('User Addresses')
-@Controller('user-address')
+@Controller('api/v1')
 export class UserAddressController {
   constructor(private readonly userAddressService: UserAddressService) {}
 
-  @Post()
+  @Post('/user-address/create')
   @ApiOperation({ summary: 'Tạo địa chỉ mới cho user' })
   @ApiQuery({ name: 'userId', type: 'number', description: 'ID của user' })
   @ApiResponse({
@@ -36,11 +36,14 @@ export class UserAddressController {
     description: 'Địa chỉ đã được tạo thành công',
     type: UserAddressEntity,
   })
-  async create(
+  async createUserAddress(
     @Query('userId', ParseIntPipe) userId: number,
     @Body() createUserAddressDto: CreateUserAddressDto,
   ): Promise<UserAddressEntity> {
-    return await this.userAddressService.create(userId, createUserAddressDto);
+    return await this.userAddressService.createUserAddress(
+      userId,
+      createUserAddressDto,
+    );
   }
 
   @Get()
@@ -51,7 +54,7 @@ export class UserAddressController {
     type: [UserAddressEntity],
   })
   async findAll(): Promise<UserAddressEntity[]> {
-    return await this.userAddressService.findAll();
+    return await this.userAddressService.getUserAddresses();
   }
 
   @Get('user/:userId')
@@ -65,7 +68,7 @@ export class UserAddressController {
   async findByUser(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<UserAddressEntity[]> {
-    return await this.userAddressService.findByUser(userId);
+    return await this.userAddressService.getUserAddressByUserId(userId);
   }
 
   @Get(':id')
@@ -79,7 +82,7 @@ export class UserAddressController {
   async findOne(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<UserAddressEntity> {
-    return await this.userAddressService.findOne(id);
+    return await this.userAddressService.getUserAddressById(id);
   }
 
   @Patch(':id')
@@ -94,7 +97,10 @@ export class UserAddressController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserAddressDto: UpdateUserAddressDto,
   ): Promise<UserAddressEntity> {
-    return await this.userAddressService.update(id, updateUserAddressDto);
+    return await this.userAddressService.updateUserAddress(
+      id,
+      updateUserAddressDto,
+    );
   }
 
   @Delete(':id')
@@ -107,7 +113,7 @@ export class UserAddressController {
   async remove(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<{ message: string }> {
-    await this.userAddressService.remove(id);
+    await this.userAddressService.deleteUserAddress(id);
     return { message: 'Địa chỉ đã được xóa thành công' };
   }
 

@@ -16,7 +16,7 @@ export class UserAddressService {
     private userAddressRepository: Repository<UserAddressEntity>,
   ) {}
 
-  async create(
+  async createUserAddress(
     userId: number,
     createUserAddressDto: CreateUserAddressDto,
   ): Promise<UserAddressEntity> {
@@ -33,21 +33,21 @@ export class UserAddressService {
     return await this.userAddressRepository.save(userAddress);
   }
 
-  async findAll(): Promise<UserAddressEntity[]> {
+  async getUserAddresses(): Promise<UserAddressEntity[]> {
     return await this.userAddressRepository.find({
       relations: ['user'],
       order: { createdAt: 'DESC' },
     });
   }
 
-  async findByUser(userId: number): Promise<UserAddressEntity[]> {
+  async getUserAddressByUserId(userId: number): Promise<UserAddressEntity[]> {
     return await this.userAddressRepository.find({
       where: { userId },
       order: { isDefault: 'DESC', createdAt: 'DESC' },
     });
   }
 
-  async findOne(id: number): Promise<UserAddressEntity> {
+  async getUserAddressById(id: number): Promise<UserAddressEntity> {
     const userAddress = await this.userAddressRepository.findOne({
       where: { id },
       relations: ['user'],
@@ -60,11 +60,11 @@ export class UserAddressService {
     return userAddress;
   }
 
-  async update(
+  async updateUserAddress(
     id: number,
     updateUserAddressDto: UpdateUserAddressDto,
   ): Promise<UserAddressEntity> {
-    const userAddress = await this.findOne(id);
+    const userAddress = await this.getUserAddressById(id);
 
     // Nếu address này được đặt làm mặc định, hủy mặc định của các address khác cùng user
     if (updateUserAddressDto.isDefault) {
@@ -86,11 +86,11 @@ export class UserAddressService {
     }
 
     await this.userAddressRepository.update(id, updateUserAddressDto);
-    return await this.findOne(id);
+    return await this.getUserAddressById(id);
   }
 
-  async remove(id: number): Promise<void> {
-    const userAddress = await this.findOne(id);
+  async deleteUserAddress(id: number): Promise<void> {
+    const userAddress = await this.getUserAddressById(id);
 
     // Nếu xóa address mặc định, đặt address đầu tiên khác làm mặc định
     if (userAddress.isDefault) {
@@ -113,7 +113,7 @@ export class UserAddressService {
   }
 
   async setDefault(id: number): Promise<UserAddressEntity> {
-    const userAddress = await this.findOne(id);
+    const userAddress = await this.getUserAddressById(id);
 
     // Hủy mặc định của các address khác cùng user
     await this.userAddressRepository.update(
@@ -124,6 +124,6 @@ export class UserAddressService {
     // Đặt address này làm mặc định
     await this.userAddressRepository.update(id, { isDefault: true });
 
-    return await this.findOne(id);
+    return await this.getUserAddressById(id);
   }
 }
