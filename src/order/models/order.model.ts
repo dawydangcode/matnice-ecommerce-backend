@@ -12,7 +12,14 @@ export class OrderModel {
   public readonly paymentStatus: PaymentStatus;
   public readonly trackingNumber?: string;
   public readonly deliveryDate?: Date;
-  public readonly address: string;
+  public readonly fullName: string;
+  public readonly phone: string;
+  public readonly email: string;
+  public readonly province: string;
+  public readonly district: string;
+  public readonly ward: string;
+  public readonly addressDetail: string;
+  public readonly notes?: string;
   public readonly status: OrderStatus;
   public readonly createdAt: Date;
   public readonly createdBy: number;
@@ -33,7 +40,14 @@ export class OrderModel {
     paymentStatus: PaymentStatus,
     trackingNumber: string | undefined,
     deliveryDate: Date | undefined,
-    address: string,
+    fullName: string,
+    phone: string,
+    email: string,
+    province: string,
+    district: string,
+    ward: string,
+    addressDetail: string,
+    notes: string | undefined,
     status: OrderStatus,
     createdAt: Date,
     createdBy: number,
@@ -53,7 +67,14 @@ export class OrderModel {
     this.paymentStatus = paymentStatus;
     this.trackingNumber = trackingNumber;
     this.deliveryDate = deliveryDate;
-    this.address = address;
+    this.fullName = fullName;
+    this.phone = phone;
+    this.email = email;
+    this.province = province;
+    this.district = district;
+    this.ward = ward;
+    this.addressDetail = addressDetail;
+    this.notes = notes;
     this.status = status;
     this.createdAt = createdAt;
     this.createdBy = createdBy;

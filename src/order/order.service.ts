@@ -34,7 +34,14 @@ export class OrderService {
       orderEntity.totalPrice = createOrderDto.totalPrice;
       orderEntity.paymentMethod = createOrderDto.paymentMethod;
       orderEntity.paymentStatus = PaymentStatus.PENDING;
-      orderEntity.address = createOrderDto.address;
+      orderEntity.fullName = createOrderDto.fullName;
+      orderEntity.phone = createOrderDto.phone;
+      orderEntity.email = createOrderDto.email;
+      orderEntity.province = createOrderDto.province;
+      orderEntity.district = createOrderDto.district;
+      orderEntity.ward = createOrderDto.ward;
+      orderEntity.addressDetail = createOrderDto.addressDetail;
+      orderEntity.notes = createOrderDto.notes;
       orderEntity.status = OrderStatus.PENDING;
       orderEntity.createdBy = userId;
       orderEntity.updatedBy = userId;
@@ -83,7 +90,7 @@ export class OrderService {
 
       if (params.search) {
         queryBuilder.andWhere(
-          '(order.trackingNumber LIKE :search OR order.address LIKE :search)',
+          '(order.trackingNumber LIKE :search OR order.fullName LIKE :search OR order.phone LIKE :search OR order.addressDetail LIKE :search)',
           { search: `%${params.search}%` },
         );
       }

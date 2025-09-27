@@ -55,8 +55,29 @@ export class OrderEntity {
   @Column({ name: 'delivery_date', type: 'timestamp', nullable: true })
   deliveryDate?: Date;
 
-  @Column({ name: 'address', type: 'varchar' })
-  address!: string;
+  @Column({ name: 'full_name', type: 'varchar' })
+  fullName!: string;
+
+  @Column({ name: 'phone', type: 'varchar' })
+  phone!: string;
+
+  @Column({ name: 'email', type: 'varchar' })
+  email!: string;
+
+  @Column({ name: 'province', type: 'varchar' })
+  province!: string;
+
+  @Column({ name: 'district', type: 'varchar' })
+  district!: string;
+
+  @Column({ name: 'ward', type: 'varchar' })
+  ward!: string;
+
+  @Column({ name: 'address_detail', type: 'varchar' })
+  addressDetail!: string;
+
+  @Column({ name: 'notes', type: 'text', nullable: true })
+  notes?: string;
 
   @Column({ name: 'status', type: 'varchar' })
   status!: OrderStatus;
@@ -96,7 +117,14 @@ export class OrderEntity {
       this.paymentStatus,
       this.trackingNumber,
       this.deliveryDate,
-      this.address,
+      this.fullName,
+      this.phone,
+      this.email,
+      this.province,
+      this.district,
+      this.ward,
+      this.addressDetail,
+      this.notes,
       this.status,
       this.createdAt,
       this.createdBy,

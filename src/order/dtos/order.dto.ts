@@ -70,7 +70,36 @@ export class OrderDto {
 
   @ApiProperty()
   @IsString()
-  address!: string;
+  fullName!: string;
+
+  @ApiProperty()
+  @IsString()
+  phone!: string;
+
+  @ApiProperty()
+  @IsString()
+  email!: string;
+
+  @ApiProperty()
+  @IsString()
+  province!: string;
+
+  @ApiProperty()
+  @IsString()
+  district!: string;
+
+  @ApiProperty()
+  @IsString()
+  ward!: string;
+
+  @ApiProperty()
+  @IsString()
+  addressDetail!: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  notes?: string;
 
   @ApiProperty({ enum: OrderStatus })
   @IsEnum(OrderStatus)
@@ -127,7 +156,36 @@ export class CreateOrderDto {
 
   @ApiProperty()
   @IsString()
-  address!: string;
+  fullName!: string;
+
+  @ApiProperty()
+  @IsString()
+  phone!: string;
+
+  @ApiProperty()
+  @IsString()
+  email!: string;
+
+  @ApiProperty()
+  @IsString()
+  province!: string;
+
+  @ApiProperty()
+  @IsString()
+  district!: string;
+
+  @ApiProperty()
+  @IsString()
+  ward!: string;
+
+  @ApiProperty()
+  @IsString()
+  addressDetail!: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  notes?: string;
 }
 
 // Update Order DTO
