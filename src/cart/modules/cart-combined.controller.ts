@@ -26,6 +26,12 @@ import { Roles } from 'src/role/decorators/roles.decorator';
 export class CartCombinedController {
   constructor(private readonly cartCombinedService: CartCombinedService) {}
 
+  @Get('test')
+  async testEndpoint() {
+    console.log('[CartCombinedController] Test endpoint called');
+    return { message: 'Cart Combined Controller is working!' };
+  }
+
   @Post('item/create-complete')
   async createCartItemComplete(
     @Req() req: RequestModel,
@@ -48,6 +54,10 @@ export class CartCombinedController {
     frame: CartFrameModel;
     lensDetail: CartLensDetailModel;
   }> {
+    console.log('[CartCombinedController] add-lens-product endpoint called');
+    console.log('User ID:', req.user.userId);
+    console.log('Request body:', JSON.stringify(body, null, 2));
+
     return await this.cartCombinedService.addLensProductToCart(
       body,
       req.user.userId,
