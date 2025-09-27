@@ -21,7 +21,7 @@ import { RoleType } from 'src/role/enum/role.enum';
 import { Roles } from 'src/role/decorators/roles.decorator';
 
 @ApiTags('Cart / Combined Operations')
-@Controller('api/v1/cart')
+@Controller('api/v1/cart-combined')
 @Roles(RoleType.Admin, RoleType.User, RoleType.Employee, RoleType.Guest)
 export class CartCombinedController {
   constructor(private readonly cartCombinedService: CartCombinedService) {}
@@ -66,7 +66,23 @@ export class CartCombinedController {
       lensDetail?: CartLensDetailModel;
     }[]
   > {
-    return await this.cartCombinedService.getCartItemsWithFullDetails(cartId);
+    const cartIdNum = Number(cartId);
+    console.log(
+      `[CartCombinedController] Received cartId:`,
+      cartId,
+      `Type:`,
+      typeof cartId,
+      `Converted:`,
+      cartIdNum,
+    );
+    if (isNaN(cartIdNum) || cartIdNum <= 0) {
+      throw new Error(
+        `[CartCombinedController] Invalid cartId received: ${cartId} (type: ${typeof cartId})`,
+      );
+    }
+    return await this.cartCombinedService.getCartItemsWithFullDetails(
+      cartIdNum,
+    );
   }
 
   @Delete('item/:cartFrameId/delete-complete')

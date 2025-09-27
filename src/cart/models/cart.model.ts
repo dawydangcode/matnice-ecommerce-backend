@@ -6,6 +6,7 @@ export class CartModel {
   public readonly updatedAt: Date | undefined;
   public readonly updatedBy: number | undefined;
   public readonly deletedAt: Date | undefined;
+  public readonly deletedBy: number | undefined;
 
   constructor(
     id: number,
@@ -26,5 +27,4 @@ export class CartModel {
     this.deletedAt = deletedAt;
     this.deletedBy = deletedBy;
   }
-  public readonly deletedBy: number | undefined;
 }

@@ -33,6 +33,25 @@ export class CartEntity {
   deletedBy!: number;
 
   toModel(): CartModel {
+    console.log(
+      '[CartEntity] toModel called - Entity ID:',
+      this.id,
+      'Type:',
+      typeof this.id,
+    );
+
+    if (
+      !this.id ||
+      this.id === null ||
+      this.id === undefined ||
+      isNaN(this.id)
+    ) {
+      console.error('[CartEntity] Invalid entity ID in toModel:', this.id);
+      throw new Error(
+        `[CartEntity] Invalid entity ID: ${this.id} (type: ${typeof this.id})`,
+      );
+    }
+
     return new CartModel(
       this.id,
       this.userId,

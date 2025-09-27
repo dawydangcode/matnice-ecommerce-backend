@@ -24,11 +24,25 @@ export class CartFrameService {
   }
 
   async getCartFramesByCartId(cartId: number): Promise<CartFrameModel[]> {
+    console.log(
+      '[CartFrameService] getCartFramesByCartId called with cartId:',
+      cartId,
+      'Type:',
+      typeof cartId,
+    );
+
+    if (!cartId || cartId === null || cartId === undefined || isNaN(cartId)) {
+      throw new Error(
+        `[CartFrameService] Invalid cartId passed: ${cartId} (type: ${typeof cartId})`,
+      );
+    }
+
     const cartFrames = await this.cartFrameRepository.find({
       where: { cartId, deletedAt: IsNull() },
       order: { addedAt: 'DESC' },
     });
 
+    console.log('[CartFrameService] Found cartFrames:', cartFrames.length);
     return cartFrames.map((frame) => frame.toModel());
   }
 

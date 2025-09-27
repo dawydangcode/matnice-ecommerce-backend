@@ -316,6 +316,19 @@ export class CartCombinedService {
       lensDetail?: CartLensDetailModel;
     }[]
   > {
+    console.log(
+      '[CartCombinedService] getCartItemsWithFullDetails called with cartId:',
+      cartId,
+      'Type:',
+      typeof cartId,
+    );
+
+    if (!cartId || cartId === null || cartId === undefined || isNaN(cartId)) {
+      throw new Error(
+        `[CartCombinedService] Invalid cartId passed: ${cartId} (type: ${typeof cartId})`,
+      );
+    }
+
     const frames = await this.cartFrameService.getCartFramesByCartId(cartId);
 
     const result: {
