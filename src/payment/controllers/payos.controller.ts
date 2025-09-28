@@ -112,6 +112,13 @@ export class PayOSController {
     @Res() res: Response,
   ) {
     try {
+      console.log('---[PayOS] Embedded Payment Request---');
+      console.log('User:', req.user?.userId);
+      console.log(
+        'Payload:',
+        JSON.stringify(createEmbeddedPaymentDto, null, 2),
+      );
+
       const userId = req.user.userId;
 
       // Get cart items and summary
@@ -125,6 +132,7 @@ export class PayOSController {
       ]);
 
       if (!cartItems || cartItems.length === 0) {
+        console.error('---[PayOS] Cart is empty---');
         return res.status(HttpStatus.BAD_REQUEST).json({
           statusCode: HttpStatus.BAD_REQUEST,
           message: 'Cart is empty',
@@ -153,7 +161,7 @@ export class PayOSController {
       // Create payment record in database (will be linked to order later)
       const payment = await this.paymentService.createPayment(
         {
-          orderId: 0, // Will be updated when order is created
+          orderId: undefined, // Will be updated when order is created after successful payment
           paymentMethod: PaymentMethod.VNPAY,
           amount: totalAmount,
           transactionId: orderCode.toString(),
@@ -187,6 +195,8 @@ export class PayOSController {
         },
       });
     } catch (error) {
+      console.error('---[PayOS] Embedded Payment Error---');
+      console.error(error);
       throw error;
     }
   }

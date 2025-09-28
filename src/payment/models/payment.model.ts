@@ -2,7 +2,7 @@ import { PaymentMethod, PaymentStatus } from '../enums/payment.enum';
 
 export class PaymentModel {
   public readonly id: number;
-  public readonly orderId: number;
+  public readonly orderId: number | null;
   public readonly paymentMethod: PaymentMethod;
   public readonly amount: number;
   public readonly status: PaymentStatus;
@@ -16,7 +16,7 @@ export class PaymentModel {
 
   constructor(
     id: number,
-    orderId: number,
+    orderId: number | null,
     paymentMethod: PaymentMethod,
     amount: number,
     status: PaymentStatus,

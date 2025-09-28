@@ -58,10 +58,11 @@ export class PaymentDto {
 
 // Create Payment DTO
 export class CreatePaymentDto {
-  @ApiProperty()
+  @ApiProperty({ required: false })
+  @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  orderId!: number;
+  orderId?: number;
 
   @ApiProperty({ enum: PaymentMethod })
   @IsEnum(PaymentMethod)

@@ -25,7 +25,11 @@ export class PaymentService {
   ): Promise<PaymentModel> {
     try {
       const paymentEntity = new PaymentEntity();
-      paymentEntity.orderId = createPaymentDto.orderId;
+      // Allow creating payments without an order (embedded cart payments)
+      paymentEntity.orderId =
+        createPaymentDto.orderId === undefined
+          ? null
+          : createPaymentDto.orderId;
       paymentEntity.paymentMethod = createPaymentDto.paymentMethod;
       paymentEntity.amount = createPaymentDto.amount;
       paymentEntity.status = PaymentStatus.PENDING;
@@ -35,9 +39,13 @@ export class PaymentService {
 
       const savedPayment = await this.paymentRepository.save(paymentEntity);
       return savedPayment.toModel();
-    } catch (error) {
+    } catch (error: any) {
+      console.error('---[PaymentService] Create Payment Error---');
+      console.error('Error details:', error);
+      console.error('CreatePaymentDto:', createPaymentDto);
+      console.error('UserId:', userId);
       throw new HttpException(
-        'Failed to create payment',
+        `Failed to create payment: ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

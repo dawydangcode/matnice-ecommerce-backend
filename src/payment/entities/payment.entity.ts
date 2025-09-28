@@ -14,8 +14,8 @@ export class PaymentEntity {
   @PrimaryGeneratedColumn({ name: 'id' })
   id!: number;
 
-  @Column({ name: 'order_id' })
-  orderId!: number;
+  @Column({ name: 'order_id', type: 'int', nullable: true })
+  orderId!: number | null;
 
   @Column({ name: 'payment_method', type: 'varchar' })
   paymentMethod!: PaymentMethod;
@@ -50,7 +50,7 @@ export class PaymentEntity {
   toModel(): PaymentModel {
     return new PaymentModel(
       this.id,
-      this.orderId,
+      this.orderId === undefined ? null : this.orderId,
       this.paymentMethod,
       this.amount,
       this.status,
