@@ -1,0 +1,18 @@
+{
+  "code": "00",
+  "desc": "success",
+  "success": true,
+  "data": {
+    "orderCode": 1234567890,
+    "amount": 10000,
+    "description": "Test payment for cart",
+    "accountNumber": "12345678",
+    "reference": "TXN123",
+    "transactionDateTime": "2024-01-20T10:30:00.000Z",
+    "currency": "VND",
+    "paymentLinkId": "abc123def456",
+    "code": "00",
+    "desc": "Thành công"
+  },
+  "signature": "6314999157894035123edb60a74368da5bfdcfa532eb00bcebfdbed8bc8e1dfa"
+}
