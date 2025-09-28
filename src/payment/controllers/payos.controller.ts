@@ -30,7 +30,7 @@ import { Public } from 'src/middlewares/guards/jwt-auth.guard';
 import { type Webhook } from '@payos/node';
 
 @ApiTags('PayOS Payment')
-@Controller('api/v1/payos')
+@Controller('api/payment/payos')
 export class PayOSController {
   constructor(
     private readonly payosService: PayOSService,
