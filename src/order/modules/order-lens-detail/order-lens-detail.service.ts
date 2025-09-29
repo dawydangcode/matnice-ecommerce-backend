@@ -24,18 +24,42 @@ export class OrderLensDetailService {
     createDto: CreateOrderLensDetailDto,
   ): Promise<OrderLensDetailResponseDto> {
     try {
+      console.log(
+        '[OrderLensDetailService] Creating lens detail with DTO:',
+        createDto,
+      );
+
       const orderLensDetailEntity = this.orderLensDetailRepository.create({
         ...createDto,
         updatedBy: createDto.createdBy,
       });
 
+      console.log(
+        '[OrderLensDetailService] Created entity:',
+        orderLensDetailEntity,
+      );
+
       const savedEntity = await this.orderLensDetailRepository.save(
         orderLensDetailEntity,
       );
+
+      console.log('[OrderLensDetailService] Saved lens detail successfully');
       const model = savedEntity.toModel();
       return this.mapToResponseDto(model);
     } catch (error) {
-      throw new BadRequestException('Failed to create order lens detail');
+      console.error(
+        '[OrderLensDetailService] Error creating lens detail:',
+        error,
+      );
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      const errorStack =
+        error instanceof Error ? error.stack : 'No stack trace';
+      console.error('[OrderLensDetailService] Error message:', errorMessage);
+      console.error('[OrderLensDetailService] Error stack:', errorStack);
+      throw new BadRequestException(
+        `Failed to create order lens detail: ${errorMessage}`,
+      );
     }
   }
 

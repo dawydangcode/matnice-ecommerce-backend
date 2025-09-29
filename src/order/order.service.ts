@@ -12,12 +12,20 @@ import {
 } from './dtos/order.dto';
 import { OrderStatus, PaymentStatus } from './enums/order.enum';
 import { throwError } from 'rxjs';
+import { CartService } from '../cart/cart.service';
+import { CartCombinedService } from '../cart/modules/cart-combined.service';
+import { OrderItemService } from './modules/order-item/order-item.service';
+import { OrderLensDetailService } from './modules/order-lens-detail/order-lens-detail.service';
 
 @Injectable()
 export class OrderService {
   constructor(
     @InjectRepository(OrderEntity)
     private readonly orderRepository: Repository<OrderEntity>,
+    private readonly cartService: CartService,
+    private readonly cartCombinedService: CartCombinedService,
+    private readonly orderItemService: OrderItemService,
+    private readonly orderLensDetailService: OrderLensDetailService,
   ) {}
 
   async createOrder(
@@ -25,10 +33,27 @@ export class OrderService {
     userId: number,
   ): Promise<OrderModel> {
     try {
+      // Get user's cart
+      const userCart = await this.cartService.getCartByUserId(userId);
+
+      // Get user's cart items with full details
+      const cartItems =
+        await this.cartCombinedService.getCartItemsWithFullDetails(userCart.id);
+
+      if (!cartItems || cartItems.length === 0) {
+        throw new HttpException(
+          'Cannot create order: Cart is empty',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      // Use actual cart ID
+      const currentCartId = userCart.id;
+
       // Create order entity
       const orderEntity = new OrderEntity();
       orderEntity.userId = userId; // Use userId from JWT token
-      orderEntity.cartId = createOrderDto.cartId || 0; // Default cartId if not provided
+      orderEntity.cartId = currentCartId; // Use actual cart ID
       orderEntity.orderDate = new Date();
       orderEntity.subtotal = createOrderDto.subtotal;
       orderEntity.shippingCost = createOrderDto.shippingCost;
@@ -50,7 +75,83 @@ export class OrderService {
       // Save order
       const savedOrder = await this.orderRepository.save(orderEntity);
 
-      // Note: Order items and lens details are now handled by their respective submodules
+      // Create order items from cart items
+      console.log(
+        `[OrderService] Creating order items for ${cartItems.length} cart items`,
+      );
+
+      for (let i = 0; i < cartItems.length; i++) {
+        const cartItem = cartItems[i];
+        console.log(`[OrderService] Processing cart item ${i + 1}:`, {
+          frameId: cartItem.frame.id,
+          productId: cartItem.frame.productId,
+          hasLensDetail: !!cartItem.lensDetail,
+        });
+
+        try {
+          const orderItemDto = {
+            orderId: savedOrder.id,
+            productId: cartItem.frame.productId,
+            quantity: cartItem.frame.quantity,
+            framePrice: cartItem.frame.framePrice,
+            totalPrice: cartItem.frame.totalPrice,
+            discount: cartItem.frame.discount || 0,
+          };
+
+          console.log(
+            `[OrderService] Creating order item with DTO:`,
+            orderItemDto,
+          );
+          const orderItem = await this.orderItemService.createOrderItem(
+            orderItemDto,
+            userId,
+          );
+          console.log(
+            `[OrderService] Created order item with ID: ${orderItem.id}`,
+          );
+
+          // Create lens details if exists
+          if (cartItem.lensDetail) {
+            console.log(
+              `[OrderService] Creating lens detail for order item ${orderItem.id}`,
+            );
+
+            const lensDetailDto = {
+              orderItemId: orderItem.id,
+              lensVariantId: cartItem.lensDetail.lensId || 1, // Default lens variant ID
+              rightEyeSphere: cartItem.lensDetail.rightEyeSphere || 0,
+              rightEyeCylinder: cartItem.lensDetail.rightEyeCylinder || 0,
+              rightEyeAxis: cartItem.lensDetail.rightEyeAxis || 0,
+              leftEyeSphere: cartItem.lensDetail.leftEyeSphere || 0,
+              leftEyeCylinder: cartItem.lensDetail.leftEyeCylinder || 0,
+              leftEyeAxis: cartItem.lensDetail.leftEyeAxis || 0,
+              pdLeft: cartItem.lensDetail.pdLeft || 31.5,
+              pdRight: cartItem.lensDetail.pdRight || 31.5,
+              lensPrice: cartItem.lensDetail.lensPrice || 0,
+              prescriptionNotes: cartItem.lensDetail.prescriptionNotes || '',
+              lensNotes: cartItem.lensDetail.lensNotes || '',
+              addLeft: cartItem.lensDetail.addLeft,
+              addRight: cartItem.lensDetail.addRight,
+              createdBy: userId,
+            };
+
+            console.log(
+              `[OrderService] Creating lens detail with DTO:`,
+              lensDetailDto,
+            );
+            await this.orderLensDetailService.create(lensDetailDto);
+            console.log(`[OrderService] Created lens detail successfully`);
+          }
+        } catch (itemError) {
+          console.error(
+            `[OrderService] Error processing cart item ${i + 1}:`,
+            itemError,
+          );
+          throw itemError;
+        }
+      }
+
+      console.log(`[OrderService] Successfully created all order items`);
 
       return savedOrder.toModel();
     } catch (error) {

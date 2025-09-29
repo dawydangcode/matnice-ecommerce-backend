@@ -23,6 +23,12 @@ export class OrderItemService {
     userId: number,
   ): Promise<OrderItemModel> {
     try {
+      console.log(
+        '[OrderItemService] Creating order item with DTO:',
+        createOrderItemDto,
+      );
+      console.log('[OrderItemService] userId:', userId);
+
       const orderItemEntity = new OrderItemEntity();
       orderItemEntity.orderId = createOrderItemDto.orderId;
       orderItemEntity.productId = createOrderItemDto.productId;
@@ -34,12 +40,23 @@ export class OrderItemService {
       orderItemEntity.createdBy = userId;
       orderItemEntity.updatedBy = userId;
 
+      console.log('[OrderItemService] Created entity:', orderItemEntity);
+
       const savedOrderItem =
         await this.orderItemRepository.save(orderItemEntity);
+
+      console.log('[OrderItemService] Saved order item:', savedOrderItem);
       return savedOrderItem.toModel();
     } catch (error) {
+      console.error('[OrderItemService] Error creating order item:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      const errorStack =
+        error instanceof Error ? error.stack : 'No stack trace available';
+      console.error('[OrderItemService] Error message:', errorMessage);
+      console.error('[OrderItemService] Error stack:', errorStack);
       throw new HttpException(
-        'Failed to create order item',
+        `Failed to create order item: ${errorMessage}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

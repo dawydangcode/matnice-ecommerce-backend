@@ -5,12 +5,14 @@ import { OrderService } from './order.service';
 import { OrderEntity } from './entities/order.entity';
 import { OrderItemModule } from './modules/order-item/order-item.module';
 import { OrderLensDetailModule } from './modules/order-lens-detail/order-lens-detail.module';
+import { CartModule } from '../cart/cart.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([OrderEntity]),
     OrderItemModule,
     OrderLensDetailModule,
+    CartModule,
   ],
   controllers: [OrderController],
   providers: [OrderService],
