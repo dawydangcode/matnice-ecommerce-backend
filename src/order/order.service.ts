@@ -11,6 +11,7 @@ import {
   GetOrdersQueryDto,
 } from './dtos/order.dto';
 import { OrderStatus, PaymentStatus } from './enums/order.enum';
+import { throwError } from 'rxjs';
 
 @Injectable()
 export class OrderService {
@@ -26,8 +27,8 @@ export class OrderService {
     try {
       // Create order entity
       const orderEntity = new OrderEntity();
-      orderEntity.userId = createOrderDto.userId;
-      orderEntity.cartId = createOrderDto.cartId;
+      orderEntity.userId = userId; // Use userId from JWT token
+      orderEntity.cartId = createOrderDto.cartId || 0; // Default cartId if not provided
       orderEntity.orderDate = new Date();
       orderEntity.subtotal = createOrderDto.subtotal;
       orderEntity.shippingCost = createOrderDto.shippingCost;

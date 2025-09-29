@@ -125,15 +125,17 @@ export class OrderDto {
 
 // Create Order DTO
 export class CreateOrderDto {
-  @ApiProperty()
+  @ApiProperty({ required: false })
+  @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  userId!: number;
+  userId?: number;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
+  @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  cartId!: number;
+  cartId?: number;
 
   @ApiProperty()
   @IsNumber()

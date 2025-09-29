@@ -35,6 +35,7 @@ export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Create a new order' })
   @ApiResponse({
     status: HttpStatus.CREATED,
