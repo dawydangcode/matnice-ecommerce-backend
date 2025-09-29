@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Param, Post, UseGuards, Req } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CartCombinedService } from './modules/cart-combined.service';
 import { CartService } from './cart.service';
@@ -15,6 +15,40 @@ export class CartController {
     private readonly cartCombinedService: CartCombinedService,
     private readonly cartService: CartService,
   ) {}
+
+  @Get('my-cart/id')
+  @ApiOperation({ summary: 'Get current user cart ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'User cart ID retrieved successfully',
+  })
+  async getMyCartId(@Req() req: RequestModel) {
+    console.log('=== MY CART ID CALLED ===');
+    console.log('User ID from request:', req.user.userId);
+
+    // Get or create cart for current user
+    const cart = await this.cartService.findOrCreateCartForUser(
+      req.user.userId,
+    );
+
+    console.log('Cart found/created:', cart);
+    return { cartId: cart.id };
+  }
+
+  @Post('create')
+  @ApiOperation({ summary: 'Create new cart for current user' })
+  @ApiResponse({
+    status: 201,
+    description: 'Cart created successfully',
+  })
+  async createCart(@Req() req: RequestModel) {
+    console.log('=== CREATE CART CALLED ===');
+    console.log('User ID from request:', req.user.userId);
+
+    const cart = await this.cartService.createCart(req.user.userId);
+    console.log('Cart created:', cart);
+    return { cartId: cart.id };
+  }
 
   @Get('my-cart/items-with-details')
   @ApiOperation({ summary: 'Get current user cart items with details' })

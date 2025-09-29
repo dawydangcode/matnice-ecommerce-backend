@@ -6,6 +6,7 @@ import { CartFrameModel } from './cart_frame/models/cart_frame.model';
 import { CartLensDetailModel } from './cart_lens_detail/models/cart_lens_detail.model';
 import { ProductService } from '../../product/product.service';
 import { ProductImageService } from '../../product/modules/product-image/product-image.service';
+import { ProductColorService } from '../../product/modules/product-color/product-color.service';
 import {
   CreateCartItemCompleteDto,
   CartItemSummary,
@@ -21,6 +22,7 @@ export class CartCombinedService {
     private readonly cartLensDetailService: CartLensDetailService,
     private readonly productService: ProductService,
     private readonly productImageService: ProductImageService,
+    private readonly productColorService: ProductColorService,
   ) {}
 
   async createCartItemComplete(
@@ -39,6 +41,7 @@ export class CartCombinedService {
       data.frame.totalPrice,
       data.frame.discount || 0,
       reqUserId,
+      data.frame.selectedColorId,
     );
 
     let lensDetail: CartLensDetailModel | undefined;
@@ -114,6 +117,7 @@ export class CartCombinedService {
       totalFramePrice,
       0, // discount
       reqUserId,
+      data.frameData.selectedColorId,
     );
 
     // Create lens detail with all the prescription and lens option data
@@ -173,7 +177,40 @@ export class CartCombinedService {
       }),
     );
 
-    // Get product images for all unique product IDs
+    // Get product colors for frames with selectedColorId
+    const frameColorData = await Promise.all(
+      frames.map(async (frame) => {
+        if (frame.selectedColorId) {
+          try {
+            const color = await this.productColorService.getProductColorById(
+              frame.selectedColorId,
+            );
+            const colorImages =
+              await this.productImageService.getProductImagesByColorId(
+                frame.productId,
+                frame.selectedColorId,
+              );
+            const thumbnailImage = colorImages.find(
+              (img) => img.imageOrder === 'a',
+            );
+            return {
+              frameId: frame.id,
+              color: color,
+              colorImage: thumbnailImage?.imageUrl || null,
+            };
+          } catch (error) {
+            console.error(
+              `Failed to get color data for frame ${frame.id}:`,
+              error,
+            );
+            return { frameId: frame.id, color: null, colorImage: null };
+          }
+        }
+        return { frameId: frame.id, color: null, colorImage: null };
+      }),
+    );
+
+    // Get product images for frames without selectedColorId (fallback to product images)
     const productImages = await Promise.all(
       uniqueProductIds.map(async (productId) => {
         try {
@@ -192,21 +229,48 @@ export class CartCombinedService {
     // Create product map for easy lookup
     const productMap = new Map();
     const productImageMap = new Map();
+    const frameColorMap = new Map();
+
     products.forEach((product, index) => {
       if (product) {
         productMap.set(uniqueProductIds[index], product);
       }
       productImageMap.set(uniqueProductIds[index], productImages[index]);
+    });
+
+    frameColorData.forEach((colorData) => {
+      frameColorMap.set(colorData.frameId, colorData);
     }); // Build cart item summaries
     const items: CartItemSummary[] = frames.map((frame) => {
       const lensDetail = lensDetailMap.get(frame.id);
       const product = productMap.get(frame.productId);
+      const frameColorData = frameColorMap.get(frame.id);
+
+      // Build full product name with variant
+      let fullProductName = product?.productName || 'Unknown Product';
+      if (product?.productNumber) {
+        fullProductName = `${product.productNumber}`;
+      }
+
+      // Use color-specific image if available, otherwise fallback to product image
+      const productImage =
+        frameColorData?.colorImage ||
+        productImageMap.get(frame.productId) ||
+        null;
 
       return {
         cartFrameId: frame.id,
         productId: frame.productId,
-        productName: product?.productName || 'Unknown Product',
-        productImage: productImageMap.get(frame.productId) || null,
+        productName: fullProductName,
+        productImage: productImage,
+        selectedColor: frameColorData?.color
+          ? {
+              id: frameColorData.color.id,
+              colorName: frameColorData.color.colorName,
+              colorCode: frameColorData.color.colorCode,
+              productVariantName: frameColorData.color.productVariantName,
+            }
+          : null,
         quantity: frame.quantity,
         framePrice: frame.framePrice,
         totalPrice: frame.totalPrice,

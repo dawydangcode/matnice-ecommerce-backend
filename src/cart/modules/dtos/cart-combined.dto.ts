@@ -159,6 +159,12 @@ export interface CartItemSummary {
   productName?: string;
   productImage?: string;
   frameColor?: string;
+  selectedColor?: {
+    id: number;
+    colorName: string;
+    colorCode: string;
+    productVariantName?: string;
+  } | null;
   quantity: number;
   framePrice: number;
   totalPrice: number;
