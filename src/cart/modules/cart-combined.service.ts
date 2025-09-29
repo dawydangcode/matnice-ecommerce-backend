@@ -7,6 +7,9 @@ import { CartLensDetailModel } from './cart_lens_detail/models/cart_lens_detail.
 import { ProductService } from '../../product/product.service';
 import { ProductImageService } from '../../product/modules/product-image/product-image.service';
 import { ProductColorService } from '../../product/modules/product-color/product-color.service';
+import { LensService } from '../../lens/lens.service';
+import { LensVariantService } from '../../lens/modules/lens_variant/lens_variant.service';
+import { LensImageService } from '../../lens/modules/lens_image/lens-image.service';
 import {
   CreateCartItemCompleteDto,
   CartItemSummary,
@@ -23,6 +26,9 @@ export class CartCombinedService {
     private readonly productService: ProductService,
     private readonly productImageService: ProductImageService,
     private readonly productColorService: ProductColorService,
+    private readonly lensService: LensService,
+    private readonly lensVariantService: LensVariantService,
+    private readonly lensImageService: LensImageService,
   ) {}
 
   async createCartItemComplete(
@@ -177,6 +183,80 @@ export class CartCombinedService {
       }),
     );
 
+    // Get lens information for lens details with lensVariantId
+    const lensVariantIds = lensDetails
+      .filter((detail) => detail.lensVariantId)
+      .map((detail) => detail.lensVariantId)
+      .filter((id): id is number => id !== null);
+    const uniqueLensVariantIds = [...new Set(lensVariantIds)];
+
+    const lensVariants = await Promise.all(
+      uniqueLensVariantIds.map(async (lensVariantId) => {
+        try {
+          return await this.lensVariantService.findById(lensVariantId);
+        } catch (error) {
+          console.error(`Failed to get lens variant ${lensVariantId}:`, error);
+          return null;
+        }
+      }),
+    );
+
+    // Get lens information for the lens variants
+    const lensIds = lensVariants
+      .filter(
+        (variant): variant is NonNullable<typeof variant> =>
+          variant !== null && variant.lensId !== undefined,
+      )
+      .map((variant) => variant.lensId)
+      .filter((id): id is number => typeof id === 'number');
+    const uniqueLensIds = [...new Set(lensIds)];
+
+    const lenses = await Promise.all(
+      uniqueLensIds.map(async (lensId) => {
+        try {
+          return await this.lensService.getLensById(lensId);
+        } catch (error) {
+          console.error(`Failed to get lens ${lensId}:`, error);
+          return null;
+        }
+      }),
+    );
+
+    // Get lens images for lenses (imageorder = 'a')
+    const lensImages = await Promise.all(
+      uniqueLensIds.map(async (lensId) => {
+        try {
+          const primaryImage =
+            await this.lensImageService.getPrimaryImageForLens(lensId);
+          return { lensId, imageUrl: primaryImage?.imageUrl || null };
+        } catch (error) {
+          console.error(`Failed to get lens images for lens ${lensId}:`, error);
+          return { lensId, imageUrl: null };
+        }
+      }),
+    );
+
+    // Create maps for easy lookup
+    const lensVariantMap = new Map();
+    const lensMap = new Map();
+    const lensImageMap = new Map();
+
+    lensVariants.forEach((variant, index) => {
+      if (variant) {
+        lensVariantMap.set(uniqueLensVariantIds[index], variant);
+      }
+    });
+
+    lenses.forEach((lens, index) => {
+      if (lens) {
+        lensMap.set(uniqueLensIds[index], lens);
+      }
+    });
+
+    lensImages.forEach((imageData) => {
+      lensImageMap.set(imageData.lensId, imageData.imageUrl);
+    });
+
     // Get product colors for frames with selectedColorId
     const frameColorData = await Promise.all(
       frames.map(async (frame) => {
@@ -309,6 +389,40 @@ export class CartCombinedService {
               },
             }
           : undefined,
+        lensInfo: lensDetail?.lensVariantId
+          ? (() => {
+              const lensVariant = lensVariantMap.get(lensDetail.lensVariantId);
+              const lens = lensVariant?.lensId
+                ? lensMap.get(lensVariant.lensId)
+                : null;
+              const lensImage = lens?.id ? lensImageMap.get(lens.id) : null;
+              return lens
+                ? {
+                    id: lens.id,
+                    name: lens.name,
+                    lensType: lens.lensType,
+                    description: lens.description,
+                    origin: lens.origin,
+                    status: lens.status,
+                    image: lensImage,
+                  }
+                : null;
+            })()
+          : null,
+        lensVariantInfo: lensDetail?.lensVariantId
+          ? (() => {
+              const lensVariant = lensVariantMap.get(lensDetail.lensVariantId);
+              return lensVariant
+                ? {
+                    id: lensVariant.id,
+                    design: lensVariant.design,
+                    material: lensVariant.material,
+                    price: lensVariant.price,
+                    stock: lensVariant.stock,
+                  }
+                : null;
+            })()
+          : null,
       };
     });
 

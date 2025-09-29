@@ -15,6 +15,7 @@ import { CartCombinedController } from './modules/cart-combined.controller';
 import { CartFrameService } from './modules/cart_frame/cart_frame.service';
 import { CartCombinedService } from './modules/cart-combined.service';
 import { ProductModule } from '../product/product.module';
+import { LensModule } from '../lens/lens.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ProductModule } from '../product/product.module';
     CartFrameModule,
     CartLensDetailModule,
     ProductModule,
+    LensModule,
   ],
   controllers: [
     CartController,

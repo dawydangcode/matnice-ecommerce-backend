@@ -176,6 +176,22 @@ export interface CartItemSummary {
     lensQuality: string;
     lensPrice: number;
     totalUpgradesPrice: number;
+    lensInfo?: {
+      id: number;
+      name: string;
+      lensType: string;
+      description?: string;
+      origin?: string;
+      status?: string;
+      image?: string;
+    };
+    lensVariantInfo?: {
+      id: number;
+      design: string;
+      material: string;
+      price: number;
+      stock: number;
+    };
     prescription: {
       rightEye: {
         sphere: number | undefined;
