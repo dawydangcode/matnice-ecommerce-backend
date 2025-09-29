@@ -96,6 +96,7 @@ export class OrderService {
             framePrice: cartItem.frame.framePrice,
             totalPrice: cartItem.frame.totalPrice,
             discount: cartItem.frame.discount || 0,
+            selectedColorId: cartItem.frame.selectedColorId,
           };
 
           console.log(

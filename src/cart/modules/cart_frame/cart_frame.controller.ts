@@ -73,6 +73,7 @@ export class CartFrameController {
       body.totalPrice,
       body.discount || 0,
       req.user.userId,
+      body.selectedColorId,
     );
   }
 
@@ -91,6 +92,8 @@ export class CartFrameController {
     if (body.framePrice !== undefined) updates.framePrice = body.framePrice;
     if (body.totalPrice !== undefined) updates.totalPrice = body.totalPrice;
     if (body.discount !== undefined) updates.discount = body.discount;
+    if (body.selectedColorId !== undefined)
+      updates.selectedColorId = body.selectedColorId;
 
     return await this.cartFrameService.updateCartFrame(
       cartFrame,

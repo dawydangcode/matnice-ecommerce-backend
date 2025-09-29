@@ -49,6 +49,9 @@ export class CartFrameEntity {
   })
   discount!: number;
 
+  @Column({ name: 'selected_color_id', nullable: true })
+  selectedColorId?: number;
+
   @Column({ name: 'added_at', type: 'timestamp', nullable: true })
   addedAt!: Date;
 
@@ -97,6 +100,7 @@ export class CartFrameEntity {
       typeof this.discount === 'string'
         ? parseFloat(this.discount)
         : this.discount,
+      this.selectedColorId,
       this.addedAt,
       this.createdAt,
       this.createdBy,

@@ -6,6 +6,7 @@ export class CartFrameModel {
   public readonly framePrice: number;
   public readonly totalPrice: number;
   public readonly discount: number;
+  public readonly selectedColorId?: number;
   public readonly addedAt: Date | undefined;
   public readonly createdAt: Date;
   public readonly createdBy: number;
@@ -22,6 +23,7 @@ export class CartFrameModel {
     framePrice: number,
     totalPrice: number,
     discount: number,
+    selectedColorId: number | undefined,
     addedAt: Date | undefined,
     createdAt: Date,
     createdBy: number,
@@ -37,6 +39,7 @@ export class CartFrameModel {
     this.framePrice = framePrice;
     this.totalPrice = totalPrice;
     this.discount = discount;
+    this.selectedColorId = selectedColorId;
     this.addedAt = addedAt;
     this.createdAt = createdAt;
     this.createdBy = createdBy;

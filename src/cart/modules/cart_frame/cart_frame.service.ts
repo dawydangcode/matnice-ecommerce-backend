@@ -76,6 +76,7 @@ export class CartFrameService {
     totalPrice: number,
     discount: number = 0,
     reqUserId: number,
+    selectedColorId?: number,
   ): Promise<CartFrameModel> {
     const entity = new CartFrameEntity();
     entity.cartId = cartId;
@@ -84,6 +85,7 @@ export class CartFrameService {
     entity.framePrice = framePrice;
     entity.totalPrice = totalPrice;
     entity.discount = discount;
+    entity.selectedColorId = selectedColorId;
     entity.addedAt = new Date();
     entity.createdAt = new Date();
     entity.createdBy = reqUserId;
@@ -101,6 +103,7 @@ export class CartFrameService {
       framePrice?: number;
       totalPrice?: number;
       discount?: number;
+      selectedColorId?: number;
     },
     reqUserId: number,
   ): Promise<CartFrameModel> {
@@ -115,6 +118,8 @@ export class CartFrameService {
     if (updates.totalPrice !== undefined)
       updateData.totalPrice = updates.totalPrice;
     if (updates.discount !== undefined) updateData.discount = updates.discount;
+    if (updates.selectedColorId !== undefined)
+      updateData.selectedColorId = updates.selectedColorId;
 
     await this.cartFrameRepository.update(
       { id: cartFrame.id, deletedAt: IsNull() },

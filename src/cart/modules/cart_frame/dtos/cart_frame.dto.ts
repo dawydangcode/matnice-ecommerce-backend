@@ -28,6 +28,11 @@ export class CreateCartFrameDto {
   @IsOptional()
   @IsNumber()
   discount?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  selectedColorId?: number;
 }
 
 export class UpdateCartFrameDto extends PickType(CreateCartFrameDto, [
@@ -35,6 +40,7 @@ export class UpdateCartFrameDto extends PickType(CreateCartFrameDto, [
   'framePrice',
   'totalPrice',
   'discount',
+  'selectedColorId',
 ]) {}
 
 export class GetCartFrameParamsDto {
