@@ -26,6 +26,10 @@ import {
   CreateEmbeddedPaymentDto,
 } from '../dtos/payos.dto';
 import { PaymentMethod, PaymentStatus } from '../enums/payment.enum';
+import {
+  OrderStatus,
+  PaymentStatus as OrderPaymentStatus,
+} from 'src/order/enums/order.enum';
 import { RequestModel } from 'src/common/models/request.model';
 import { Public } from 'src/middlewares/guards/jwt-auth.guard';
 import { type Webhook } from '@payos/node';
@@ -547,7 +551,22 @@ export class PayOSController {
         });
       }
 
-      // 5. Update payment with order ID using raw repository update
+      // 5. Update order status to PROCESSING (since payment is completed)
+      try {
+        await this.orderService['orderRepository'].update(order.id, {
+          status: OrderStatus.PROCESSING, // Order status: processing (payment completed)
+          paymentStatus: OrderPaymentStatus.COMPLETED, // Payment status: completed
+          updatedBy: userId,
+        });
+        console.log(
+          `📋 Order status updated to PROCESSING for order ID: ${order.id}`,
+        );
+      } catch (error) {
+        console.error('❌ Error updating order status:', error);
+        // Continue even if order status update fails
+      }
+
+      // 6. Update payment with order ID using raw repository update
       try {
         await this.paymentService['paymentRepository'].update(payment.id, {
           orderId: order.id,
@@ -559,7 +578,7 @@ export class PayOSController {
         // Continue with cart clearing even if payment update fails
       }
 
-      // 6. Clear cart
+      // 7. Clear cart
       try {
         await this.cartCombinedService.clearCart(userCart.id, userId);
         console.log('🧹 Cart cleared successfully');
