@@ -444,16 +444,40 @@ export class LensService {
 
     // Tính toán summary statistics nếu có variants
     if (result.variants && result.variants.length > 0) {
-      const prices = result.variants.map((v) => v.price).filter((p) => p > 0);
+      const variantPrices = result.variants
+        .map((v) => v.price)
+        .filter((p) => p > 0);
       const stocks = result.variants.map((v) => v.stock);
+
+      // Tính khoảng giá đầy đủ
+      let minPrice = 0;
+      let maxPrice = 0;
+
+      if (variantPrices.length > 0) {
+        const minVariantPrice = Math.min(...variantPrices);
+        const maxVariantPrice = Math.max(...variantPrices);
+
+        // Giá coating
+        const coatingPrices =
+          result.coatings?.map((c) => Number(c.price)).filter((p) => p > 0) ||
+          [];
+        const minCoatingPrice =
+          coatingPrices.length > 0 ? Math.min(...coatingPrices) : 0;
+        const maxCoatingPrice =
+          coatingPrices.length > 0 ? Math.max(...coatingPrices) : 0;
+
+        // Tính khoảng giá cuối cùng
+        minPrice = minVariantPrice; // Giá thấp nhất không cộng coating
+        maxPrice = maxVariantPrice + maxCoatingPrice; // Giá cao nhất cộng coating cao nhất
+      }
 
       result.summary = {
         totalVariants: result.variants.length,
         totalCoatings: result.coatings?.length || 0,
         totalImages: result.images?.length || 0,
         priceRange: {
-          min: prices.length > 0 ? Math.min(...prices) : 0,
-          max: prices.length > 0 ? Math.max(...prices) : 0,
+          min: minPrice,
+          max: maxPrice,
         },
         availableStock: stocks.reduce((sum, stock) => sum + stock, 0),
       };
@@ -498,7 +522,7 @@ export class LensService {
       LEFT JOIN brand_lens bl ON l.brand_lens_id = bl.id AND bl.deleted_at IS NULL
       LEFT JOIN lens_variant lv ON l.id = lv.lens_id AND lv.deleted_at IS NULL
       LEFT JOIN lens_refraction_range lrr ON lv.id = lrr.lens_variant_id AND lrr.deleted_at IS NULL
-      LEFT JOIN lens_image li ON l.id = li.lens_id AND li.deleted_at IS NULL AND li.is_thumbnail = 1
+      LEFT JOIN lens_image li ON l.id = li.lens_id AND li.deleted_at IS NULL AND li.image_order = 'a'
       WHERE l.deleted_at IS NULL 
         AND l.status = 'IN_STOCK'
     `;
@@ -618,26 +642,34 @@ export class LensService {
     const total = totalResult[0]?.total || 0;
     console.log('Total count result:', totalResult);
 
-    // Format the results
-    const formattedLenses = lenses.map((lens: any) => ({
-      id: lens.id,
-      name: lens.name,
-      description: lens.description,
-      lensType: lens.lensType,
-      origin: lens.origin,
-      status: lens.status,
-      basePrice: Number(lens.basePrice) || 0,
-      brandLens: lens.brandLensId
-        ? {
-            id: lens.brandLensId,
-            name: lens.brandLensName,
-            description: lens.brandLensDescription,
-          }
-        : null,
-      imageUrl: lens.imageUrl,
-      imageOrder: lens.imageOrder,
-      isThumbnail: Boolean(lens.isThumbnail),
-    }));
+    // Format the results and calculate price ranges
+    const formattedLenses = await Promise.all(
+      lenses.map(async (lens: any) => {
+        // Calculate price range for this lens
+        const priceRange = await this.calculateLensPriceRange(lens.id);
+        
+        return {
+          id: lens.id,
+          name: lens.name,
+          description: lens.description,
+          lensType: lens.lensType,
+          origin: lens.origin,
+          status: lens.status,
+          basePrice: Number(lens.basePrice) || 0,
+          priceRange,
+          brandLens: lens.brandLensId
+            ? {
+                id: lens.brandLensId,
+                name: lens.brandLensName,
+                description: lens.brandLensDescription,
+              }
+            : null,
+          imageUrl: lens.imageUrl,
+          imageOrder: lens.imageOrder,
+          isThumbnail: Boolean(lens.isThumbnail),
+        };
+      })
+    );
 
     return {
       data: formattedLenses,
@@ -648,5 +680,40 @@ export class LensService {
         totalPages: Math.ceil(Number(total) / (pagination?.limit || 20)),
       },
     };
+  }
+
+  private async calculateLensPriceRange(lensId: string): Promise<{ min: number; max: number }> {
+    try {
+      // Get variant prices
+      const variantPrices = await this.lensRepository.query(
+        `SELECT price FROM lens_variant WHERE lens_id = ? AND deleted_at IS NULL`,
+        [lensId],
+      );
+      
+      // Get coating prices  
+      const coatingPrices = await this.lensRepository.query(
+        `SELECT price FROM lens_coating WHERE lens_id = ? AND deleted_at IS NULL`,
+        [lensId],
+      );
+      
+      const variants = variantPrices.map(v => Number(v.price)).filter(p => p > 0);
+      const coatings = coatingPrices.map(c => Number(c.price)).filter(p => p > 0);
+      
+      if (variants.length === 0) {
+        return { min: 0, max: 0 };
+      }
+      
+      const minVariantPrice = Math.min(...variants);
+      const maxVariantPrice = Math.max(...variants);
+      const maxCoatingPrice = coatings.length > 0 ? Math.max(...coatings) : 0;
+      
+      return {
+        min: minVariantPrice,
+        max: maxVariantPrice + maxCoatingPrice,
+      };
+    } catch (error) {
+      console.error(`Error calculating price range for lens ${lensId}:`, error);
+      return { min: 0, max: 0 };
+    }
   }
 }
