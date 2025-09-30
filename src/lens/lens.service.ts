@@ -647,7 +647,7 @@ export class LensService {
       lenses.map(async (lens: any) => {
         // Calculate price range for this lens
         const priceRange = await this.calculateLensPriceRange(lens.id);
-        
+
         return {
           id: lens.id,
           name: lens.name,
@@ -668,7 +668,7 @@ export class LensService {
           imageOrder: lens.imageOrder,
           isThumbnail: Boolean(lens.isThumbnail),
         };
-      })
+      }),
     );
 
     return {
@@ -682,31 +682,37 @@ export class LensService {
     };
   }
 
-  private async calculateLensPriceRange(lensId: string): Promise<{ min: number; max: number }> {
+  private async calculateLensPriceRange(
+    lensId: string,
+  ): Promise<{ min: number; max: number }> {
     try {
       // Get variant prices
       const variantPrices = await this.lensRepository.query(
         `SELECT price FROM lens_variant WHERE lens_id = ? AND deleted_at IS NULL`,
         [lensId],
       );
-      
-      // Get coating prices  
+
+      // Get coating prices
       const coatingPrices = await this.lensRepository.query(
         `SELECT price FROM lens_coating WHERE lens_id = ? AND deleted_at IS NULL`,
         [lensId],
       );
-      
-      const variants = variantPrices.map(v => Number(v.price)).filter(p => p > 0);
-      const coatings = coatingPrices.map(c => Number(c.price)).filter(p => p > 0);
-      
+
+      const variants = variantPrices
+        .map((v) => Number(v.price))
+        .filter((p) => p > 0);
+      const coatings = coatingPrices
+        .map((c) => Number(c.price))
+        .filter((p) => p > 0);
+
       if (variants.length === 0) {
         return { min: 0, max: 0 };
       }
-      
+
       const minVariantPrice = Math.min(...variants);
       const maxVariantPrice = Math.max(...variants);
       const maxCoatingPrice = coatings.length > 0 ? Math.max(...coatings) : 0;
-      
+
       return {
         min: minVariantPrice,
         max: maxVariantPrice + maxCoatingPrice,
