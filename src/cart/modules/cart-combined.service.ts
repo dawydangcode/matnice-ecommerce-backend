@@ -10,6 +10,8 @@ import { ProductColorService } from '../../product/modules/product-color/product
 import { LensService } from '../../lens/lens.service';
 import { LensVariantService } from '../../lens/modules/lens_variant/lens_variant.service';
 import { LensImageService } from '../../lens/modules/lens_image/lens-image.service';
+import { LensCoatingService } from '../../lens/modules/lens_coating/lens_coating.service';
+import { LensTintColorService } from '../../lens/modules/lens_tint_color/lens_tint_color.service';
 import {
   CreateCartItemCompleteDto,
   CartItemSummary,
@@ -29,6 +31,8 @@ export class CartCombinedService {
     private readonly lensService: LensService,
     private readonly lensVariantService: LensVariantService,
     private readonly lensImageService: LensImageService,
+    private readonly lensCoatingService: LensCoatingService,
+    private readonly lensTintColorService: LensTintColorService,
   ) {}
 
   async createCartItemComplete(
@@ -332,7 +336,95 @@ export class CartCombinedService {
 
     frameColorData.forEach((colorData) => {
       frameColorMap.set(colorData.frameId, colorData);
-    }); // Build cart item summaries
+    });
+
+    // Process coating and tint color data for lens details
+    const coatingMap = new Map();
+    const tintColorMap = new Map();
+
+    // Collect all coating IDs and tint color IDs from lens details
+    const allCoatingIds = new Set<number>();
+    const allTintColorIds = new Set<number>();
+
+    lensDetails.forEach((detail) => {
+      // Parse selectedCoatingIds JSON
+      if (detail.selectedCoatingIds) {
+        try {
+          const coatingIds = JSON.parse(detail.selectedCoatingIds);
+          if (Array.isArray(coatingIds)) {
+            coatingIds.forEach((id) => {
+              if (typeof id === 'number') {
+                allCoatingIds.add(id);
+              }
+            });
+          }
+        } catch (error) {
+          console.error(
+            `Failed to parse coating IDs for lens detail ${detail.id}:`,
+            error,
+          );
+        }
+      }
+
+      // Collect tint color IDs
+      if (detail.selectedTintColorId) {
+        allTintColorIds.add(detail.selectedTintColorId);
+      }
+    });
+
+    // Fetch all coatings
+    if (allCoatingIds.size > 0) {
+      try {
+        const coatings = await Promise.all(
+          Array.from(allCoatingIds).map(async (coatingId) => {
+            try {
+              return await this.lensCoatingService.getLensCoatingById(
+                coatingId,
+              );
+            } catch (error) {
+              console.error(`Failed to get coating ${coatingId}:`, error);
+              return null;
+            }
+          }),
+        );
+
+        coatings.forEach((coating, index) => {
+          if (coating) {
+            coatingMap.set(Array.from(allCoatingIds)[index], coating);
+          }
+        });
+      } catch (error) {
+        console.error('Failed to fetch coatings:', error);
+      }
+    }
+
+    // Fetch all tint colors
+    if (allTintColorIds.size > 0) {
+      try {
+        const tintColors = await Promise.all(
+          Array.from(allTintColorIds).map(async (tintColorId) => {
+            try {
+              return await this.lensTintColorService.getLensTintColorById(
+                tintColorId,
+              );
+            } catch (error) {
+              console.error(`Failed to get tint color ${tintColorId}:`, error);
+              return null;
+            }
+          }),
+        );
+
+        tintColors.forEach((tintColor, index) => {
+          if (tintColor) {
+            tintColorMap.set(Array.from(allTintColorIds)[index], tintColor);
+          }
+        });
+      } catch (error) {
+        console.error('Failed to fetch tint colors:', error);
+      }
+    }
+
+    // Build cart item summaries
     const items: CartItemSummary[] = frames.map((frame) => {
       const lensDetail = lensDetailMap.get(frame.id);
       const product = productMap.get(frame.productId);
@@ -368,28 +460,82 @@ export class CartCombinedService {
         totalPrice: frame.totalPrice,
         discount: frame.discount,
         lensDetail: lensDetail
-          ? {
-              id: lensDetail.id,
-              lensId: lensDetail.lensId ?? undefined,
-              lensType: lensDetail.lensType ?? undefined,
-              lensQuality: lensDetail.lensQuality,
-              lensPrice: lensDetail.lensPrice,
-              totalUpgradesPrice: lensDetail.totalUpgradesPrice,
-              prescription: {
-                rightEye: {
-                  sphere: lensDetail.rightEyeSphere ?? undefined,
-                  cylinder: lensDetail.rightEyeCylinder ?? undefined,
-                  axis: lensDetail.rightEyeAxis ?? undefined,
+          ? (() => {
+              // Process coating data for this lens detail
+              const selectedCoatings: {
+                id: number;
+                name: string;
+                price: number;
+                description?: string;
+              }[] = [];
+              if (lensDetail.selectedCoatingIds) {
+                try {
+                  const coatingIds = JSON.parse(lensDetail.selectedCoatingIds);
+                  if (Array.isArray(coatingIds)) {
+                    coatingIds.forEach((coatingId) => {
+                      const coating = coatingMap.get(coatingId);
+                      if (coating) {
+                        selectedCoatings.push({
+                          id: coating.id,
+                          name: coating.name,
+                          price: coating.price || 0,
+                          description: coating.description,
+                        });
+                      }
+                    });
+                  }
+                } catch (error) {
+                  console.error(
+                    `Failed to process coating IDs for lens detail ${lensDetail.id}:`,
+                    error,
+                  );
+                }
+              }
+
+              // Process tint color data for this lens detail
+              const selectedTintColor = lensDetail.selectedTintColorId
+                ? (() => {
+                    const tintColor = tintColorMap.get(
+                      lensDetail.selectedTintColorId,
+                    );
+                    return tintColor
+                      ? {
+                          id: tintColor.id,
+                          name: tintColor.name,
+                          colorCode: tintColor.colorCode,
+                          price: tintColor.price || 0,
+                          description: tintColor.description,
+                        }
+                      : null;
+                  })()
+                : null;
+
+              return {
+                id: lensDetail.id,
+                lensId: lensDetail.lensId ?? undefined,
+                lensType: lensDetail.lensType ?? undefined,
+                lensQuality: lensDetail.lensQuality,
+                lensPrice: lensDetail.lensPrice,
+                totalUpgradesPrice: lensDetail.totalUpgradesPrice,
+                selectedCoatings:
+                  selectedCoatings.length > 0 ? selectedCoatings : undefined,
+                selectedTintColor,
+                prescription: {
+                  rightEye: {
+                    sphere: lensDetail.rightEyeSphere ?? undefined,
+                    cylinder: lensDetail.rightEyeCylinder ?? undefined,
+                    axis: lensDetail.rightEyeAxis ?? undefined,
+                  },
+                  leftEye: {
+                    sphere: lensDetail.leftEyeSphere ?? undefined,
+                    cylinder: lensDetail.leftEyeCylinder ?? undefined,
+                    axis: lensDetail.leftEyeAxis ?? undefined,
+                  },
+                  pdLeft: lensDetail.pdLeft ?? undefined,
+                  pdRight: lensDetail.pdRight ?? undefined,
                 },
-                leftEye: {
-                  sphere: lensDetail.leftEyeSphere ?? undefined,
-                  cylinder: lensDetail.leftEyeCylinder ?? undefined,
-                  axis: lensDetail.leftEyeAxis ?? undefined,
-                },
-                pdLeft: lensDetail.pdLeft ?? undefined,
-                pdRight: lensDetail.pdRight ?? undefined,
-              },
-            }
+              };
+            })()
           : undefined,
         lensInfo: lensDetail?.lensVariantId
           ? (() => {
@@ -435,7 +581,7 @@ export class CartCombinedService {
       0,
     );
     const totalLensPrice = lensDetails.reduce(
-      (sum, detail) => sum + detail.lensPrice,
+      (sum, detail) => sum + detail.lensPrice + (detail.totalUpgradesPrice || 0),
       0,
     );
     const totalDiscount = frames.reduce(

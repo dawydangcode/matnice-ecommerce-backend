@@ -176,6 +176,19 @@ export interface CartItemSummary {
     lensQuality: string;
     lensPrice: number;
     totalUpgradesPrice: number;
+    selectedCoatings?: {
+      id: number;
+      name: string;
+      price: number;
+      description?: string;
+    }[];
+    selectedTintColor?: {
+      id: number;
+      name: string;
+      colorCode?: string;
+      price?: number;
+      description?: string;
+    } | null;
     lensInfo?: {
       id: number;
       name: string;
