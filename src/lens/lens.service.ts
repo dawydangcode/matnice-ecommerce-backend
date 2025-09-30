@@ -45,14 +45,21 @@ export class LensService {
         bl.id as brandLensId,
         bl.name as brandLensName,
         bl.description as brandLensDescription,
-        cl.id as categoryLensId,
-        cl.name as categoryLensName,
-        cl.description as categoryLensDescription,
+        (SELECT cl.id FROM lens_category lcat 
+         JOIN category_lens cl ON lcat.category_lens_id = cl.id 
+         WHERE lcat.lens_id = l.id AND lcat.deleted_at IS NULL AND cl.deleted_at IS NULL 
+         LIMIT 1) as categoryLensId,
+        (SELECT cl.name FROM lens_category lcat 
+         JOIN category_lens cl ON lcat.category_lens_id = cl.id 
+         WHERE lcat.lens_id = l.id AND lcat.deleted_at IS NULL AND cl.deleted_at IS NULL 
+         LIMIT 1) as categoryLensName,
+        (SELECT cl.description FROM lens_category lcat 
+         JOIN category_lens cl ON lcat.category_lens_id = cl.id 
+         WHERE lcat.lens_id = l.id AND lcat.deleted_at IS NULL AND cl.deleted_at IS NULL 
+         LIMIT 1) as categoryLensDescription,
         MIN(lv.price) as basePrice
       FROM lens l
       LEFT JOIN brand_lens bl ON l.brand_lens_id = bl.id AND bl.deleted_at IS NULL
-      LEFT JOIN lens_category lcat ON l.id = lcat.lens_id AND lcat.deleted_at IS NULL
-      LEFT JOIN category_lens cl ON lcat.category_lens_id = cl.id AND cl.deleted_at IS NULL
       LEFT JOIN lens_variant lv ON l.id = lv.lens_id AND lv.deleted_at IS NULL
       WHERE l.deleted_at IS NULL
     `;
@@ -71,7 +78,12 @@ export class LensService {
     }
 
     if (categoryLensIds && categoryLensIds.length > 0) {
-      query += ` AND cl.id IN (${categoryLensIds.map(() => '?').join(',')})`;
+      query += ` AND l.id IN (
+        SELECT lcat.lens_id FROM lens_category lcat 
+        JOIN category_lens cl ON lcat.category_lens_id = cl.id 
+        WHERE cl.id IN (${categoryLensIds.map(() => '?').join(',')}) 
+        AND lcat.deleted_at IS NULL AND cl.deleted_at IS NULL
+      )`;
       params.push(...categoryLensIds);
     }
 
@@ -80,7 +92,7 @@ export class LensService {
       params.push(...lensTypes);
     }
 
-    query += ` GROUP BY l.id, l.name, l.description, l.lens_type, l.origin, bl.id, bl.name, bl.description, cl.id, cl.name, cl.description`;
+    query += ` GROUP BY l.id, l.name, l.description, l.lens_type, l.origin, bl.id, bl.name, bl.description`;
 
     if (minPrice !== undefined || maxPrice !== undefined) {
       query += ` HAVING 1=1`;
@@ -109,13 +121,23 @@ export class LensService {
 
     const lenses = await this.lensRepository.query(query, params);
 
+    // Debug: Check for duplicate lens IDs
+    const lensIds = lenses.map((lens: any) => lens.id);
+    const duplicateIds = lensIds.filter(
+      (id: any, index: number) => lensIds.indexOf(id) !== index,
+    );
+    if (duplicateIds.length > 0) {
+      console.log('Duplicate lens IDs found in query result:', duplicateIds);
+      console.log('Query:', query);
+      console.log('Params:', params);
+      console.log('Full result:', lenses);
+    }
+
     // Count total
     let countQuery = `
       SELECT COUNT(DISTINCT l.id) as total
       FROM lens l
       LEFT JOIN brand_lens bl ON l.brand_lens_id = bl.id AND bl.deleted_at IS NULL
-      LEFT JOIN lens_category lcat ON l.id = lcat.lens_id AND lcat.deleted_at IS NULL
-      LEFT JOIN category_lens cl ON lcat.category_lens_id = cl.id AND cl.deleted_at IS NULL
       LEFT JOIN lens_variant lv ON l.id = lv.lens_id AND lv.deleted_at IS NULL
       WHERE l.deleted_at IS NULL
     `;
@@ -133,7 +155,12 @@ export class LensService {
     }
 
     if (categoryLensIds && categoryLensIds.length > 0) {
-      countQuery += ` AND cl.id IN (${categoryLensIds.map(() => '?').join(',')})`;
+      countQuery += ` AND l.id IN (
+        SELECT lcat.lens_id FROM lens_category lcat 
+        JOIN category_lens cl ON lcat.category_lens_id = cl.id 
+        WHERE cl.id IN (${categoryLensIds.map(() => '?').join(',')}) 
+        AND lcat.deleted_at IS NULL AND cl.deleted_at IS NULL
+      )`;
       countParams.push(...categoryLensIds);
     }
 
