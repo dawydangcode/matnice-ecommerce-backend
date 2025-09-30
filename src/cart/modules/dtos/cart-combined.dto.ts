@@ -217,6 +217,8 @@ export interface CartItemSummary {
       };
       pdLeft: number | undefined;
       pdRight: number | undefined;
+      addLeft: number | undefined;
+      addRight: number | undefined;
     };
   };
 }

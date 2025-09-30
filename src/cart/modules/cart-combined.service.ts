@@ -510,13 +510,26 @@ export class CartCombinedService {
                   })()
                 : null;
 
+              // Calculate actual total upgrades price from coatings and tint color
+              let calculatedUpgradesPrice = 0;
+
+              // Add coating prices
+              selectedCoatings.forEach((coating) => {
+                calculatedUpgradesPrice += coating.price;
+              });
+
+              // Add tint color price
+              if (selectedTintColor?.price) {
+                calculatedUpgradesPrice += selectedTintColor.price;
+              }
+
               return {
                 id: lensDetail.id,
                 lensId: lensDetail.lensId ?? undefined,
                 lensType: lensDetail.lensType ?? undefined,
                 lensQuality: lensDetail.lensQuality,
                 lensPrice: lensDetail.lensPrice,
-                totalUpgradesPrice: lensDetail.totalUpgradesPrice,
+                totalUpgradesPrice: calculatedUpgradesPrice, // Use calculated price instead of database value
                 selectedCoatings:
                   selectedCoatings.length > 0 ? selectedCoatings : undefined,
                 selectedTintColor,
@@ -533,6 +546,8 @@ export class CartCombinedService {
                   },
                   pdLeft: lensDetail.pdLeft ?? undefined,
                   pdRight: lensDetail.pdRight ?? undefined,
+                  addLeft: lensDetail.addLeft ?? undefined,
+                  addRight: lensDetail.addRight ?? undefined,
                 },
               };
             })()
@@ -580,10 +595,14 @@ export class CartCombinedService {
       (sum, frame) => sum + frame.framePrice * frame.quantity,
       0,
     );
-    const totalLensPrice = lensDetails.reduce(
-      (sum, detail) => sum + detail.lensPrice + (detail.totalUpgradesPrice || 0),
-      0,
-    );
+
+    // Calculate total lens price by summing up actual lens prices and upgrades from items
+    const totalLensPrice = items.reduce((sum, item) => {
+      const lensPrice = item.lensDetail?.lensPrice || 0;
+      const upgradesPrice = item.lensDetail?.totalUpgradesPrice || 0;
+      return sum + lensPrice + upgradesPrice;
+    }, 0);
+
     const totalDiscount = frames.reduce(
       (sum, frame) => sum + frame.discount * frame.quantity,
       0,
