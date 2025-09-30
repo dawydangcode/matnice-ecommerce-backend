@@ -23,13 +23,13 @@ export class LensRefractionRangeEntity {
   @Column({ name: 'refraction_type' })
   refractionType!: LensRefractionType; // SPH, CYL, ADD, AXIS
 
-  @Column({ name: 'min_value', type: 'decimal', precision: 4, scale: 2 })
+  @Column({ name: 'min_value', type: 'decimal', precision: 6, scale: 2 })
   minValue!: number;
 
-  @Column({ name: 'max_value', type: 'decimal', precision: 4, scale: 2 })
+  @Column({ name: 'max_value', type: 'decimal', precision: 6, scale: 2 })
   maxValue!: number;
 
-  @Column({ name: 'step_value', type: 'decimal', precision: 4, scale: 2 })
+  @Column({ name: 'step_value', type: 'decimal', precision: 6, scale: 2 })
   stepValue!: number;
 
   @Column({ name: 'created_at', type: 'timestamp' })

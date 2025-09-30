@@ -379,6 +379,7 @@ export class LensImageService {
       lensImageEntity.imageUrl = imageUrl;
       lensImageEntity.imageOrder = imageOrder;
       lensImageEntity.isThumbnail = false;
+      lensImageEntity.createdAt = new Date();
       lensImageEntity.createdBy = userId || 1; // Default to 1 if userId not provided
       lensImageEntity.updatedBy = userId || 1;
 
