@@ -18,6 +18,7 @@ import { PayOSService } from '../services/payos.service';
 import { PaymentService } from '../payment.service';
 import { CartCombinedService } from 'src/cart/modules/cart-combined.service';
 import { CartService } from 'src/cart/cart.service';
+import { OrderService } from 'src/order/order.service';
 import {
   CreatePaymentLinkDto,
   PaymentLinkResponseDto,
@@ -37,6 +38,7 @@ export class PayOSController {
     private readonly paymentService: PaymentService,
     private readonly cartCombinedService: CartCombinedService,
     private readonly cartService: CartService,
+    private readonly orderService: OrderService,
   ) {}
 
   @Post('create-payment-link')
@@ -296,28 +298,82 @@ export class PayOSController {
         const orderCode = webhookData.data.orderCode.toString();
 
         try {
-          // Find payment by transaction ID (order code)
-          // Note: You might need to add a method to find payment by transaction ID
-          // For now, we'll update payment status
+          console.log(
+            `🔍 Processing successful payment for order code: ${orderCode}`,
+          );
 
-          // Update payment status to completed
-          // This is a simplified implementation - you should find the payment by orderCode
-          console.log(`Payment successful for order code: ${orderCode}`);
+          // 1. Find payment by transaction ID (order code)
+          const payment =
+            await this.paymentService.getPaymentByTransactionId(orderCode);
+          console.log(`💰 Found payment:`, payment);
 
-          // TODO:
-          // 1. Find payment by orderCode
-          // 2. Update payment status to COMPLETED
-          // 3. Create order from cart
-          // 4. Clear cart
-          // 5. Send confirmation email
+          if (payment.status === PaymentStatus.COMPLETED) {
+            console.log(
+              `⚠️ Payment already completed for order code: ${orderCode}`,
+            );
+            return res.status(HttpStatus.OK).json({
+              statusCode: HttpStatus.OK,
+              message: 'Payment already processed',
+            });
+          }
+
+          // 2. Update payment status to completed
+          await this.paymentService.updatePaymentStatus(
+            payment.id,
+            PaymentStatus.COMPLETED,
+            1, // System user ID
+            orderCode,
+          );
+          console.log(`✅ Payment status updated to COMPLETED`);
+
+          // 3. For embedded payments (cart payments), create order
+          if (!payment.orderId) {
+            console.log(`🛒 Creating order from cart for embedded payment...`);
+
+            // Find cart by checking payment data or user
+            // Since we don't have direct cart reference in payment, we'll need to
+            // get the cart by the amount or other matching criteria
+            // For now, we'll create a simplified approach
+
+            // TODO: Add cartId to payment record for better tracking
+            // For now, we'll skip automatic order creation and handle it in frontend
+            console.log(
+              `⚠️ Cannot create order automatically - cart reference not found in payment`,
+            );
+          } else {
+            console.log(`📦 Order already exists with ID: ${payment.orderId}`);
+          }
+
+          console.log(
+            `🎉 Successfully processed payment for order code: ${orderCode}`,
+          );
         } catch (error) {
-          console.error('Error processing successful payment:', error);
+          console.error('❌ Error processing successful payment:', error);
+
+          // Don't fail the webhook if payment processing fails
+          // PayOS expects 200 response
         }
       } else {
         // Payment failed or cancelled
-        console.log(
-          `Payment failed/cancelled for order code: ${webhookData.data.orderCode}`,
-        );
+        const orderCode = webhookData.data?.orderCode;
+        console.log(`❌ Payment failed/cancelled for order code: ${orderCode}`);
+
+        if (orderCode) {
+          try {
+            // Update payment status to failed
+            const payment = await this.paymentService.getPaymentByTransactionId(
+              orderCode.toString(),
+            );
+            await this.paymentService.updatePaymentStatus(
+              payment.id,
+              PaymentStatus.FAILED,
+              1, // System user ID
+            );
+            console.log(`❌ Payment status updated to FAILED`);
+          } catch (error) {
+            console.error('Error updating failed payment status:', error);
+          }
+        }
       }
 
       // Return 200 status to confirm webhook received
@@ -330,6 +386,207 @@ export class PayOSController {
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Webhook processing failed',
+      });
+    }
+  }
+
+  @Post('create-order-from-payment')
+  @UseGuards(JwtAuthGuard)
+  @Roles(RoleType.Admin, RoleType.User, RoleType.Employee)
+  @ApiOperation({ summary: 'Create order from successful PayOS payment' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        transactionId: {
+          type: 'string',
+          description: 'PayOS transaction ID (order code)',
+        },
+        customerInfo: {
+          type: 'object',
+          properties: {
+            fullName: { type: 'string' },
+            phone: { type: 'string' },
+            email: { type: 'string' },
+            province: { type: 'string' },
+            district: { type: 'string' },
+            ward: { type: 'string' },
+            addressDetail: { type: 'string' },
+            notes: { type: 'string' },
+          },
+        },
+      },
+      required: ['transactionId', 'customerInfo'],
+    },
+  })
+  async createOrderFromPayment(
+    @Body()
+    body: {
+      transactionId: string;
+      customerInfo: {
+        fullName: string;
+        phone: string;
+        email: string;
+        province: string;
+        district: string;
+        ward: string;
+        addressDetail: string;
+        notes?: string;
+      };
+    },
+    @Req() req: RequestModel,
+    @Res() res: Response,
+  ) {
+    try {
+      const userId = req.user.userId;
+      const { transactionId, customerInfo } = body;
+
+      console.log(
+        `🛒 Creating order from payment - Transaction ID: ${transactionId}`,
+      );
+      console.log('Customer info:', JSON.stringify(customerInfo, null, 2));
+
+      // 1. Find payment by transaction ID
+      let payment;
+      try {
+        payment =
+          await this.paymentService.getPaymentByTransactionId(transactionId);
+        console.log('💰 Found payment:', JSON.stringify(payment, null, 2));
+      } catch (error) {
+        console.error('❌ Payment not found:', error);
+        return res.status(HttpStatus.BAD_REQUEST).json({
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: 'Payment not found with this transaction ID',
+          error: error instanceof Error ? error.message : 'Unknown error',
+        });
+      }
+
+      if (payment.status !== PaymentStatus.COMPLETED) {
+        console.log(
+          `⚠️ Payment status is ${payment.status}, expected COMPLETED`,
+        );
+        return res.status(HttpStatus.BAD_REQUEST).json({
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: 'Payment is not completed',
+          currentStatus: payment.status,
+        });
+      }
+
+      if (payment.orderId) {
+        console.log(`⚠️ Order already exists: ${payment.orderId}`);
+        return res.status(HttpStatus.BAD_REQUEST).json({
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: 'Order already created for this payment',
+          data: { orderId: payment.orderId },
+        });
+      }
+
+      // 2. Get user's cart
+      let userCart;
+      try {
+        userCart = await this.cartService.getCartByUserId(userId);
+        console.log('🛒 Found user cart:', userCart.id);
+      } catch (error) {
+        console.error('❌ Error getting user cart:', error);
+        return res.status(HttpStatus.BAD_REQUEST).json({
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: 'User cart not found',
+          error: error instanceof Error ? error.message : 'Unknown error',
+        });
+      }
+
+      // 3. Calculate shipping cost (free if has lenses, 30k if frame only)
+      let cartItems;
+      try {
+        cartItems = await this.cartCombinedService.getCartItemsWithFullDetails(
+          userCart.id,
+        );
+        console.log(`📦 Found ${cartItems.length} cart items`);
+      } catch (error) {
+        console.error('❌ Error getting cart items:', error);
+        return res.status(HttpStatus.BAD_REQUEST).json({
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: 'Error getting cart items',
+          error: error instanceof Error ? error.message : 'Unknown error',
+        });
+      }
+
+      const hasLenses = cartItems.some((item) => item.lensDetail);
+      const shippingCost = hasLenses ? 0 : 30000;
+      console.log(
+        `🚚 Shipping cost: ${shippingCost} (hasLenses: ${hasLenses})`,
+      );
+
+      // 4. Create order
+      let order;
+      try {
+        order = await this.orderService.createOrder(
+          {
+            subtotal: payment.amount,
+            shippingCost: shippingCost,
+            totalPrice: payment.amount + shippingCost,
+            paymentMethod: payment.paymentMethod,
+            fullName: customerInfo.fullName,
+            phone: customerInfo.phone,
+            email: customerInfo.email,
+            province: customerInfo.province,
+            district: customerInfo.district,
+            ward: customerInfo.ward,
+            addressDetail: customerInfo.addressDetail,
+            notes: customerInfo.notes,
+          },
+          userId,
+        );
+        console.log(`📋 Order created with ID: ${order.id}`);
+      } catch (error) {
+        console.error('❌ Error creating order:', error);
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: 'Error creating order',
+          error: error instanceof Error ? error.message : 'Unknown error',
+        });
+      }
+
+      // 5. Update payment with order ID using raw repository update
+      try {
+        await this.paymentService['paymentRepository'].update(payment.id, {
+          orderId: order.id,
+          updatedBy: userId,
+        });
+        console.log(`💰 Payment updated with order ID: ${order.id}`);
+      } catch (error) {
+        console.error('❌ Error updating payment:', error);
+        // Continue with cart clearing even if payment update fails
+      }
+
+      // 6. Clear cart
+      try {
+        await this.cartCombinedService.clearCart(userCart.id, userId);
+        console.log('🧹 Cart cleared successfully');
+      } catch (error) {
+        console.error('❌ Error clearing cart:', error);
+        // Don't fail the whole process if cart clearing fails
+      }
+
+      console.log(`✅ Order created successfully - Order ID: ${order.id}`);
+
+      return res.status(HttpStatus.CREATED).json({
+        statusCode: HttpStatus.CREATED,
+        message: 'Order created successfully from payment',
+        data: {
+          orderId: order.id,
+          paymentId: payment.id,
+          transactionId: transactionId,
+        },
+      });
+    } catch (error) {
+      console.error('❌ Error creating order from payment:', error);
+
+      // Return proper error response instead of throwing
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Internal server error while creating order',
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }

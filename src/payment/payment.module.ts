@@ -7,12 +7,14 @@ import { PaymentEntity } from './entities/payment.entity';
 import { PayOSController } from './controllers/payos.controller';
 import { PayOSService } from './services/payos.service';
 import { CartModule } from '../cart/cart.module';
+import { OrderModule } from '../order/order.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([PaymentEntity]),
     ConfigModule,
     CartModule,
+    OrderModule,
   ],
   controllers: [PaymentController, PayOSController],
   providers: [PaymentService, PayOSService],

@@ -145,6 +145,30 @@ export class PaymentService {
     }
   }
 
+  async getPaymentByTransactionId(
+    transactionId: string,
+  ): Promise<PaymentModel> {
+    try {
+      const payment = await this.paymentRepository.findOne({
+        where: { transactionId, deletedAt: IsNull() },
+      });
+
+      if (!payment) {
+        throw new HttpException('Payment not found', HttpStatus.NOT_FOUND);
+      }
+
+      return payment.toModel();
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new HttpException(
+        'Failed to get payment by transaction ID',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   async updatePayment(
     id: number,
     updatePaymentDto: UpdatePaymentDto,
