@@ -117,9 +117,17 @@ export class OrderService {
               `[OrderService] Creating lens detail for order item ${orderItem.id}`,
             );
 
+            // Validate that we have a valid lens variant ID
+            if (!cartItem.lensDetail.lensVariantId) {
+              console.warn(
+                `[OrderService] No lens variant ID found for cart item lens detail. Skipping lens detail creation.`,
+              );
+              continue;
+            }
+
             const lensDetailDto = {
               orderItemId: orderItem.id,
-              lensVariantId: cartItem.lensDetail.lensId || 1, // Default lens variant ID
+              lensVariantId: cartItem.lensDetail.lensVariantId, // Use correct field name
               rightEyeSphere: cartItem.lensDetail.rightEyeSphere || 0,
               rightEyeCylinder: cartItem.lensDetail.rightEyeCylinder || 0,
               rightEyeAxis: cartItem.lensDetail.rightEyeAxis || 0,
@@ -129,6 +137,10 @@ export class OrderService {
               pdLeft: cartItem.lensDetail.pdLeft || 31.5,
               pdRight: cartItem.lensDetail.pdRight || 31.5,
               lensPrice: cartItem.lensDetail.lensPrice || 0,
+              selectedCoatingIds:
+                cartItem.lensDetail.selectedCoatingIds || undefined,
+              selectedTintColorId:
+                cartItem.lensDetail.selectedTintColorId || undefined,
               prescriptionNotes: cartItem.lensDetail.prescriptionNotes || '',
               lensNotes: cartItem.lensDetail.lensNotes || '',
               addLeft: cartItem.lensDetail.addLeft,
@@ -215,6 +227,76 @@ export class OrderService {
     } catch (error) {
       throw new HttpException(
         'Failed to get orders',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getOrdersWithFullDetails(
+    params: GetOrdersQueryDto,
+  ): Promise<PageList<any>> {
+    try {
+      const pagination = new PaginationParamsModel(params.page, params.limit);
+      const queryBuilder = this.orderRepository
+        .createQueryBuilder('order')
+        .where('order.deletedAt IS NULL');
+
+      // Add filters
+      if (params.status) {
+        queryBuilder.andWhere('order.status = :status', {
+          status: params.status,
+        });
+      }
+
+      if (params.paymentStatus) {
+        queryBuilder.andWhere('order.paymentStatus = :paymentStatus', {
+          paymentStatus: params.paymentStatus,
+        });
+      }
+
+      if (params.userId) {
+        queryBuilder.andWhere('order.userId = :userId', {
+          userId: params.userId,
+        });
+      }
+
+      if (params.search) {
+        queryBuilder.andWhere(
+          '(order.trackingNumber LIKE :search OR order.fullName LIKE :search OR order.phone LIKE :search OR order.addressDetail LIKE :search)',
+          { search: `%${params.search}%` },
+        );
+      }
+
+      // Add pagination
+      if (pagination) {
+        const paginationQuery = pagination.toQuery();
+        queryBuilder.skip(paginationQuery.skip).take(paginationQuery.take);
+      }
+
+      // Order by created date descending
+      queryBuilder.orderBy('order.createdAt', 'DESC');
+
+      const [orders, total] = await queryBuilder.getManyAndCount();
+
+      // Enrich each order with detailed item and lens information
+      const enrichedOrders = await Promise.all(
+        orders.map(async (order) => {
+          const orderModel = order.toModel();
+          const orderItemsWithDetails =
+            await this.orderItemService.getOrderItemsWithFullDetails(order.id);
+
+          return {
+            ...orderModel,
+            orderItems: orderItemsWithDetails,
+          };
+        }),
+      );
+
+      return new PageList<any>(total, enrichedOrders);
+    } catch (error) {
+      console.error('Error getting orders with full details:', error);
+      throw new HttpException(
+        'Failed to get orders with full details',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -376,6 +458,187 @@ export class OrderService {
     } catch (error) {
       throw new HttpException(
         'Failed to update payment status',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getOrderWithDetails(id: number): Promise<OrderModel> {
+    try {
+      const order = await this.getOrderById(id);
+
+      // Get order items with full details including product and lens information
+      const orderItemsWithDetails =
+        await this.orderItemService.getOrderItemsWithFullDetails(id);
+
+      // Create new OrderModel with enriched orderItems
+      return new OrderModel(
+        order.id,
+        order.userId,
+        order.cartId,
+        order.orderDate,
+        order.subtotal,
+        order.shippingCost,
+        order.totalPrice,
+        order.paymentMethod,
+        order.paymentStatus,
+        order.trackingNumber,
+        order.deliveryDate,
+        order.fullName,
+        order.phone,
+        order.email,
+        order.province,
+        order.district,
+        order.ward,
+        order.addressDetail,
+        order.notes,
+        order.status,
+        order.createdAt,
+        order.createdBy,
+        order.updatedAt,
+        order.updatedBy,
+        order.deletedAt,
+        order.deletedBy,
+        orderItemsWithDetails,
+      );
+    } catch (error) {
+      console.error('Error getting order with details:', error);
+      throw new HttpException(
+        'Failed to get order details',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async updateTrackingInfo(
+    id: number,
+    trackingInfo: { trackingNumber?: string; deliveryDate?: string },
+    userId: number,
+  ): Promise<OrderModel> {
+    try {
+      const updateData: any = {
+        updatedBy: userId,
+      };
+
+      if (trackingInfo.trackingNumber !== undefined) {
+        updateData.trackingNumber = trackingInfo.trackingNumber;
+      }
+
+      if (trackingInfo.deliveryDate !== undefined) {
+        updateData.deliveryDate = trackingInfo.deliveryDate;
+      }
+
+      await this.orderRepository.update(
+        { id, deletedAt: IsNull() },
+        updateData,
+      );
+
+      return await this.getOrderById(id);
+    } catch (error) {
+      throw new HttpException(
+        'Failed to update tracking information',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async exportOrdersToPDF(params: GetOrdersQueryDto): Promise<Buffer> {
+    try {
+      // For now, return a placeholder. You'll need to implement PDF generation
+      // using libraries like puppeteer, jsPDF, or similar
+      throw new HttpException(
+        'PDF export not implemented yet',
+        HttpStatus.NOT_IMPLEMENTED,
+      );
+    } catch (error) {
+      throw new HttpException(
+        'Failed to export orders to PDF',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async exportOrdersToExcel(params: GetOrdersQueryDto): Promise<Buffer> {
+    try {
+      // For now, return a placeholder. You'll need to implement Excel generation
+      // using libraries like exceljs, xlsx, or similar
+      throw new HttpException(
+        'Excel export not implemented yet',
+        HttpStatus.NOT_IMPLEMENTED,
+      );
+    } catch (error) {
+      throw new HttpException(
+        'Failed to export orders to Excel',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getOrderReports(startDate: string, endDate: string): Promise<any> {
+    try {
+      // Basic reports implementation
+      const orders = await this.orderRepository.find({
+        where: {
+          deletedAt: IsNull(),
+          orderDate: {
+            // You may need to adjust this based on your TypeORM version
+            // This is a simplified implementation
+          } as any,
+        },
+      });
+
+      const totalOrders = orders.length;
+      const totalRevenue = orders.reduce(
+        (sum, order) => sum + order.totalPrice,
+        0,
+      );
+
+      const ordersByStatus = orders.reduce(
+        (acc, order) => {
+          acc[order.status] = (acc[order.status] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
+
+      return {
+        totalOrders,
+        totalRevenue,
+        ordersByStatus,
+        ordersByDate: [], // Implement date grouping as needed
+      };
+    } catch (error) {
+      throw new HttpException(
+        'Failed to get order reports',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async sendOrderNotification(
+    orderId: number,
+    type: 'status_update' | 'tracking_update',
+    userId: number,
+  ): Promise<void> {
+    try {
+      // For now, just log the notification. You'll need to implement
+      // email service integration here
+      console.log(
+        `Sending ${type} notification for order ${orderId} by user ${userId}`,
+      );
+
+      // TODO: Implement email notification service
+      // - Get order details
+      // - Get customer email
+      // - Send appropriate email template
+
+      throw new HttpException(
+        'Email notification service not implemented yet',
+        HttpStatus.NOT_IMPLEMENTED,
+      );
+    } catch (error) {
+      throw new HttpException(
+        'Failed to send notification',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

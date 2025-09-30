@@ -149,6 +149,180 @@ export class OrderItemService {
     }
   }
 
+  async getOrderItemsWithFullDetails(orderId: number): Promise<any[]> {
+    try {
+      // First get basic order items with lens details
+      const orderItems = await this.orderItemRepository.find({
+        where: { orderId, deletedAt: IsNull() },
+        relations: ['lensDetails'],
+        order: { createdAt: 'DESC' },
+      });
+
+      // Get detailed information for each order item
+      const enrichedOrderItems = await Promise.all(
+        orderItems.map(async (orderItem) => {
+          // Get product information
+          const productQuery = `
+            SELECT 
+              p.product_name as productName,
+              p.price as productPrice,
+              p.description as productDescription,
+              b.name as brandName,
+              pc.color_name as colorName,
+              pc.product_variant_name as productVariantName,
+              pc.product_number as productNumber
+            FROM product p
+            LEFT JOIN brand b ON b.id = p.brand_id
+            LEFT JOIN product_color pc ON pc.id = ?
+            WHERE p.id = ? AND p.deleted_at IS NULL
+          `;
+
+          const productResult = await this.orderItemRepository.query(
+            productQuery,
+            [orderItem.selectedColorId, orderItem.productId],
+          );
+
+          const productInfo = productResult[0] || {};
+
+          // Get lens details with full information
+          const lensDetailsWithInfo = await Promise.all(
+            orderItem.lensDetails?.map(async (lensDetail) => {
+              if (!lensDetail.lensVariantId) {
+                return {
+                  ...lensDetail.toModel(),
+                  lensInfo: null,
+                };
+              }
+
+              console.log(
+                `[OrderItemService] Getting lens info for variant ID: ${lensDetail.lensVariantId}`,
+              );
+
+              // Get lens variant and related information
+              const lensQuery = `
+                SELECT 
+                  lv.design,
+                  lv.material,
+                  lv.price as variantPrice,
+                  l.name as lensName,
+                  l.lens_type as lensType,
+                  l.description as lensDescription,
+                  bl.name as brandLensName,
+                  lt.name as thicknessName,
+                  lt.index_value as indexValue,
+                  lt.price as thicknessPrice,
+                  lt.description as thicknessDescription
+                FROM lens_variant lv
+                LEFT JOIN lens l ON l.id = lv.lens_id
+                LEFT JOIN brand_lens bl ON bl.id = l.brand_lens_id
+                LEFT JOIN lens_thickness lt ON lt.id = lv.lens_thickness_id
+                WHERE lv.id = ? AND lv.deleted_at IS NULL
+              `;
+
+              const lensResult = await this.orderItemRepository.query(
+                lensQuery,
+                [lensDetail.lensVariantId],
+              );
+
+              console.log(
+                `[OrderItemService] Lens query result for ID ${lensDetail.lensVariantId}:`,
+                lensResult,
+              );
+
+              const lensInfo = lensResult[0] || {};
+
+              // Get lens coatings if selected
+              let coatings = [];
+              if (lensDetail.selectedCoatingIds) {
+                try {
+                  const coatingIds = JSON.parse(lensDetail.selectedCoatingIds);
+                  if (Array.isArray(coatingIds) && coatingIds.length > 0) {
+                    const coatingQuery = `
+                      SELECT name, price, description
+                      FROM lens_coating 
+                      WHERE id IN (${coatingIds.map(() => '?').join(',')})
+                      AND deleted_at IS NULL
+                    `;
+                    coatings = await this.orderItemRepository.query(
+                      coatingQuery,
+                      coatingIds,
+                    );
+                  }
+                } catch (e) {
+                  console.error('Error parsing coating IDs:', e);
+                }
+              }
+
+              // Get tint color if selected
+              let tintColor = null;
+              if (lensDetail.selectedTintColorId) {
+                const tintQuery = `
+                  SELECT name, color_code as colorCode
+                  FROM lens_tint_color 
+                  WHERE id = ? AND deleted_at IS NULL
+                `;
+                const tintResult = await this.orderItemRepository.query(
+                  tintQuery,
+                  [lensDetail.selectedTintColorId],
+                );
+                tintColor = tintResult[0] || null;
+              }
+
+              return {
+                ...lensDetail.toModel(),
+                lensInfo: {
+                  lensName: lensInfo.lensName,
+                  lensType: lensInfo.lensType,
+                  lensDescription: lensInfo.lensDescription,
+                  brandLens: lensInfo.brandLensName,
+                  lensVariant: {
+                    design: lensInfo.design,
+                    material: lensInfo.material,
+                    price: lensInfo.variantPrice,
+                  },
+                  lensThickness: lensInfo.thicknessName
+                    ? {
+                        name: lensInfo.thicknessName,
+                        indexValue: lensInfo.indexValue,
+                        price: lensInfo.thicknessPrice,
+                        description: lensInfo.thicknessDescription,
+                      }
+                    : null,
+                  lensCoatings: coatings,
+                  tintColor: tintColor,
+                },
+              };
+            }) || [],
+          );
+
+          return {
+            ...orderItem.toModel(),
+            productInfo: {
+              productName: productInfo.productName,
+              productPrice: productInfo.productPrice,
+              productDescription: productInfo.productDescription,
+              brandName: productInfo.brandName,
+              colorInfo: {
+                colorName: productInfo.colorName,
+                productVariantName: productInfo.productVariantName,
+                productNumber: productInfo.productNumber,
+              },
+            },
+            lensDetails: lensDetailsWithInfo,
+          };
+        }),
+      );
+
+      return enrichedOrderItems;
+    } catch (error) {
+      console.error('Error getting order items with full details:', error);
+      throw new HttpException(
+        'Failed to get order items with full details',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   async updateOrderItem(
     id: number,
     updateOrderItemDto: UpdateOrderItemDto,

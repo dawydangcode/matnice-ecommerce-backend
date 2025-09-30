@@ -95,6 +95,38 @@ export class OrderController {
     }
   }
 
+  @Get('detailed')
+  @Roles(RoleType.Admin)
+  @ApiOperation({
+    summary: 'Get list of orders with detailed product and lens information',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Orders with detailed information retrieved successfully',
+  })
+  async getOrdersWithFullDetails(
+    @Query() params: GetOrdersQueryDto,
+    @Response() res: ExpressResponse,
+  ) {
+    try {
+      const result = await this.orderService.getOrdersWithFullDetails(params);
+
+      return res.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Orders with detailed information retrieved successfully',
+        data: result.data,
+        total: result.total,
+        pagination: {
+          page: params.page || 1,
+          limit: params.limit || 10,
+          total: result.total,
+        },
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
   @Get('my-orders')
   @ApiOperation({ summary: 'Get current user orders' })
   @ApiResponse({
@@ -146,6 +178,44 @@ export class OrderController {
       return res.status(HttpStatus.OK).json({
         statusCode: HttpStatus.OK,
         message: 'Order retrieved successfully',
+        data: result,
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get(':id/details')
+  @ApiOperation({
+    summary: 'Get detailed order information including items and lens details',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Order details retrieved successfully',
+    type: OrderResponseDto,
+  })
+  async getOrderDetails(
+    @Param() params: GetOrderByIdParamsDto,
+    @Request() req: any,
+    @Response() res: ExpressResponse,
+  ) {
+    try {
+      const result = await this.orderService.getOrderWithDetails(params.id);
+
+      // Check if user can access this order (admin or order owner)
+      const userId = req.user?.id || req.user?.userId;
+      const userRole = req.user?.role;
+
+      if (userRole !== RoleType.Admin && result.userId !== userId) {
+        return res.status(HttpStatus.FORBIDDEN).json({
+          statusCode: HttpStatus.FORBIDDEN,
+          message: 'Access denied',
+        });
+      }
+
+      return res.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Order details retrieved successfully',
         data: result,
       });
     } catch (error) {
@@ -267,6 +337,173 @@ export class OrderController {
         statusCode: HttpStatus.OK,
         message: 'Payment status updated successfully',
         data: result,
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Put(':id/tracking')
+  @Roles(RoleType.Admin)
+  @ApiOperation({ summary: 'Update tracking information' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        trackingNumber: {
+          type: 'string',
+          nullable: true,
+        },
+        deliveryDate: {
+          type: 'string',
+          format: 'date',
+          nullable: true,
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Tracking information updated successfully',
+    type: OrderResponseDto,
+  })
+  async updateTrackingInfo(
+    @Param() params: UpdateOrderParamsDto,
+    @Body() trackingInfo: { trackingNumber?: string; deliveryDate?: string },
+    @Request() req: any,
+    @Response() res: ExpressResponse,
+  ) {
+    try {
+      const userId = req.user?.id || req.user?.userId;
+      const result = await this.orderService.updateTrackingInfo(
+        params.id,
+        trackingInfo,
+        userId,
+      );
+
+      return res.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Tracking information updated successfully',
+        data: result,
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get('export/pdf')
+  @Roles(RoleType.Admin)
+  @ApiOperation({ summary: 'Export orders to PDF' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Orders exported to PDF successfully',
+  })
+  async exportOrdersPDF(
+    @Query() params: GetOrdersQueryDto,
+    @Response() res: ExpressResponse,
+  ) {
+    try {
+      const buffer = await this.orderService.exportOrdersToPDF(params);
+
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename=orders_${new Date().toISOString().split('T')[0]}.pdf`,
+        'Content-Length': buffer.length,
+      });
+
+      return res.send(buffer);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get('export/excel')
+  @Roles(RoleType.Admin)
+  @ApiOperation({ summary: 'Export orders to Excel' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Orders exported to Excel successfully',
+  })
+  async exportOrdersExcel(
+    @Query() params: GetOrdersQueryDto,
+    @Response() res: ExpressResponse,
+  ) {
+    try {
+      const buffer = await this.orderService.exportOrdersToExcel(params);
+
+      res.set({
+        'Content-Type':
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Content-Disposition': `attachment; filename=orders_${new Date().toISOString().split('T')[0]}.xlsx`,
+        'Content-Length': buffer.length,
+      });
+
+      return res.send(buffer);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get('reports')
+  @Roles(RoleType.Admin)
+  @ApiOperation({ summary: 'Get order reports and statistics' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Order reports retrieved successfully',
+  })
+  async getOrderReports(
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+    @Response() res: ExpressResponse,
+  ) {
+    try {
+      const result = await this.orderService.getOrderReports(
+        startDate,
+        endDate,
+      );
+
+      return res.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Order reports retrieved successfully',
+        data: result,
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Post(':id/notifications')
+  @Roles(RoleType.Admin)
+  @ApiOperation({ summary: 'Send order notification to customer' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        type: {
+          type: 'string',
+          enum: ['status_update', 'tracking_update'],
+        },
+      },
+      required: ['type'],
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Notification sent successfully',
+  })
+  async sendOrderNotification(
+    @Param() params: UpdateOrderParamsDto,
+    @Body('type') type: 'status_update' | 'tracking_update',
+    @Request() req: any,
+    @Response() res: ExpressResponse,
+  ) {
+    try {
+      const userId = req.user?.id || req.user?.userId;
+      await this.orderService.sendOrderNotification(params.id, type, userId);
+
+      return res.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Notification sent successfully',
       });
     } catch (error) {
       throw error;

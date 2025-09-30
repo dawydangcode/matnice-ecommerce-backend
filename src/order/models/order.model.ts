@@ -27,6 +27,7 @@ export class OrderModel {
   public readonly updatedBy: number;
   public readonly deletedAt?: Date;
   public readonly deletedBy?: number;
+  public readonly orderItems?: any[]; // Will be populated in getOrderWithDetails
 
   constructor(
     id: number,
@@ -55,6 +56,7 @@ export class OrderModel {
     updatedBy: number,
     deletedAt: Date | undefined,
     deletedBy: number | undefined,
+    orderItems?: any[],
   ) {
     this.id = id;
     this.userId = userId;
@@ -82,5 +84,6 @@ export class OrderModel {
     this.updatedBy = updatedBy;
     this.deletedAt = deletedAt;
     this.deletedBy = deletedBy;
+    this.orderItems = orderItems;
   }
 }
