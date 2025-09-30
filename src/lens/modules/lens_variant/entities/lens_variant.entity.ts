@@ -79,6 +79,7 @@ export class LensVariantEntity {
       this.updatedBy,
       this.deletedAt,
       this.deletedBy,
+      this.lensThickness, // Pass lens thickness relation
     );
   }
 }

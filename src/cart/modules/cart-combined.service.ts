@@ -207,22 +207,31 @@ export class CartCombinedService {
         (variant): variant is NonNullable<typeof variant> =>
           variant !== null && variant.lensId !== undefined,
       )
-      .map((variant) => variant.lensId)
-      .filter((id): id is number => typeof id === 'number');
+      .map((variant) =>
+        typeof variant.lensId === 'string'
+          ? parseInt(variant.lensId)
+          : variant.lensId,
+      )
+      .filter((id): id is number => typeof id === 'number' && !isNaN(id));
     const uniqueLensIds = [...new Set(lensIds)];
+
+    console.log('Unique lens IDs:', uniqueLensIds);
+
+    console.log('Lens variants found:', lensVariants.length);
+    console.log('Unique lens IDs:', uniqueLensIds);
 
     const lenses = await Promise.all(
       uniqueLensIds.map(async (lensId) => {
         try {
-          return await this.lensService.getLensById(lensId);
+          const lens = await this.lensService.getLensById(lensId);
+          console.log(`Loaded lens ${lensId}:`, lens?.name);
+          return lens;
         } catch (error) {
           console.error(`Failed to get lens ${lensId}:`, error);
           return null;
         }
       }),
-    );
-
-    // Get lens images for lenses (imageorder = 'a')
+    ); // Get lens images for lenses (imageorder = 'a')
     const lensImages = await Promise.all(
       uniqueLensIds.map(async (lensId) => {
         try {
@@ -249,7 +258,10 @@ export class CartCombinedService {
 
     lenses.forEach((lens, index) => {
       if (lens) {
-        lensMap.set(uniqueLensIds[index], lens);
+        // Store both string and number version of lens id for mapping
+        const lensId = uniqueLensIds[index];
+        lensMap.set(lensId, lens);
+        lensMap.set(lensId.toString(), lens);
       }
     });
 
@@ -377,25 +389,17 @@ export class CartCombinedService {
                 pdLeft: lensDetail.pdLeft ?? undefined,
                 pdRight: lensDetail.pdRight ?? undefined,
               },
-              upgrades: {
-                hardCoating: false, // TODO: Implement upgrade logic
-                antiReflection: false, // TODO: Implement upgrade logic
-                uvProtection: false, // TODO: Implement upgrade logic
-                blueLight: false, // TODO: Implement upgrade logic
-                lotusEffect: false, // TODO: Implement upgrade logic
-                smartFocus: false, // TODO: Implement upgrade logic
-                transition: false, // TODO: Implement upgrade logic
-                progressive: false, // TODO: Implement upgrade logic
-              },
             }
           : undefined,
         lensInfo: lensDetail?.lensVariantId
           ? (() => {
               const lensVariant = lensVariantMap.get(lensDetail.lensVariantId);
               const lens = lensVariant?.lensId
-                ? lensMap.get(lensVariant.lensId)
+                ? lensMap.get(lensVariant.lensId) // lensVariant.lensId is string
                 : null;
-              const lensImage = lens?.id ? lensImageMap.get(lens.id) : null;
+              const lensImage = lens?.id
+                ? lensImageMap.get(parseInt(lens.id))
+                : null;
               return lens
                 ? {
                     id: lens.id,
@@ -403,7 +407,6 @@ export class CartCombinedService {
                     lensType: lens.lensType,
                     description: lens.description,
                     origin: lens.origin,
-                    status: lens.status,
                     image: lensImage,
                   }
                 : null;
@@ -418,7 +421,7 @@ export class CartCombinedService {
                     design: lensVariant.design,
                     material: lensVariant.material,
                     price: lensVariant.price,
-                    stock: lensVariant.stock,
+                    lensThickness: lensVariant.lensThickness,
                   }
                 : null;
             })()

@@ -182,7 +182,6 @@ export interface CartItemSummary {
       lensType: string;
       description?: string;
       origin?: string;
-      status?: string;
       image?: string;
     };
     lensVariantInfo?: {
@@ -190,7 +189,7 @@ export interface CartItemSummary {
       design: string;
       material: string;
       price: number;
-      stock: number;
+      lensThickness?: any;
     };
     prescription: {
       rightEye: {
@@ -205,16 +204,6 @@ export interface CartItemSummary {
       };
       pdLeft: number | undefined;
       pdRight: number | undefined;
-    };
-    upgrades: {
-      hardCoating: boolean;
-      antiReflection: boolean;
-      uvProtection: boolean;
-      blueLight: boolean;
-      lotusEffect: boolean;
-      smartFocus: boolean;
-      transition: boolean;
-      progressive: boolean;
     };
   };
 }

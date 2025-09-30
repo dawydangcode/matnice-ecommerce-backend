@@ -9,6 +9,7 @@ export class LensVariantModel {
   public readonly material: LensMaterialsType;
   public readonly price: number;
   public readonly stock: number;
+  public readonly lensThickness?: any; // Add lens thickness object
   public readonly createdAt: Date | undefined;
   public readonly createdBy: number | undefined;
   public readonly updatedAt: Date | undefined;
@@ -30,6 +31,7 @@ export class LensVariantModel {
     updatedBy: number | undefined,
     deletedAt: Date | undefined,
     deletedBy: number | undefined,
+    lensThickness?: any, // Add lens thickness parameter
   ) {
     this.id = id;
     this.lensId = lensId;
@@ -38,6 +40,7 @@ export class LensVariantModel {
     this.material = material;
     this.price = price;
     this.stock = stock;
+    this.lensThickness = lensThickness; // Assign lens thickness
     this.createdAt = createdAt;
     this.createdBy = createdBy;
     this.updatedAt = updatedAt;
