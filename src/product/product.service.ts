@@ -257,6 +257,7 @@ export class ProductService {
     style?: string[],
     frameWidthMin?: number,
     frameWidthMax?: number,
+    productType?: ProductType,
   ): Promise<PageList<any>> {
     const queryBuilder = this.productRepository
       .createQueryBuilder('product')
@@ -302,6 +303,13 @@ export class ProductService {
     if (productTypeIds && productTypeIds.length > 0) {
       queryBuilder.andWhere('product.productType IN (:...productTypes)', {
         productTypes: productTypeIds,
+      });
+    }
+
+    // Add productType filter (string-based)
+    if (productType) {
+      queryBuilder.andWhere('product.productType = :productType', {
+        productType: productType,
       });
     }
 

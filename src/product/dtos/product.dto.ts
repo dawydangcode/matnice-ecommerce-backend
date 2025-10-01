@@ -8,6 +8,7 @@ import {
   IsArray,
   IsOptional,
   IsDate,
+  IsEnum,
 } from 'class-validator';
 import { ProductGenderType, ProductType } from '../enum/product.type';
 
@@ -117,6 +118,11 @@ export class GetProductsForCardQueryDto {
     Array.isArray(value) ? value : value ? [value] : [],
   )
   productTypeIds?: number[];
+
+  @ApiProperty({ enum: ProductType, required: false })
+  @IsOptional()
+  @IsEnum(ProductType)
+  productType?: ProductType;
 
   @ApiProperty()
   @IsOptional()

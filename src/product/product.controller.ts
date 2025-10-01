@@ -73,6 +73,7 @@ export class ProductController {
       query.style,
       query.frameWidthMin,
       query.frameWidthMax,
+      query.productType,
     );
   }
 
