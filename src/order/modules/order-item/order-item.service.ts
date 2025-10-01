@@ -232,7 +232,7 @@ export class OrderItemService {
               const lensInfo = lensResult[0] || {};
 
               // Get lens coatings if selected
-              let coatings = [];
+              let coatings = null;
               if (lensDetail.selectedCoatingIds) {
                 try {
                   const coatingIds = JSON.parse(lensDetail.selectedCoatingIds);
@@ -243,10 +243,12 @@ export class OrderItemService {
                       WHERE id IN (${coatingIds.map(() => '?').join(',')})
                       AND deleted_at IS NULL
                     `;
-                    coatings = await this.orderItemRepository.query(
+                    const coatingResults = await this.orderItemRepository.query(
                       coatingQuery,
                       coatingIds,
                     );
+                    coatings =
+                      coatingResults.length > 0 ? coatingResults : null;
                   }
                 } catch (e) {
                   console.error('Error parsing coating IDs:', e);
