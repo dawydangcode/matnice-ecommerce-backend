@@ -4,7 +4,7 @@ export enum PaymentMethod {
   DEBIT_CARD = 'debit_card',
   BANK_TRANSFER = 'bank_transfer',
   PAYPAL = 'paypal',
-  VNPAY = 'vnpay',
+  PAYOS = 'payos',
   MOMO = 'momo',
 }
 

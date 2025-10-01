@@ -69,7 +69,7 @@ export class PayOSController {
       const payment = await this.paymentService.createPayment(
         {
           orderId: createPaymentLinkDto.orderId,
-          paymentMethod: PaymentMethod.VNPAY, // PayOS uses VNPay gateway
+          paymentMethod: PaymentMethod.PAYOS, // PayOS payment gateway
           amount: createPaymentLinkDto.amount,
           transactionId: orderCode.toString(),
         },
@@ -168,7 +168,7 @@ export class PayOSController {
       const payment = await this.paymentService.createPayment(
         {
           orderId: undefined, // Will be updated when order is created after successful payment
-          paymentMethod: PaymentMethod.VNPAY,
+          paymentMethod: PaymentMethod.PAYOS,
           amount: totalAmount,
           transactionId: orderCode.toString(),
         },
