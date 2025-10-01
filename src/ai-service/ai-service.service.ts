@@ -29,7 +29,8 @@ export class AIServiceService {
   private readonly pythonPath =
     process.env.PYTHON_PATH ||
     '/home/dawy/KLTN/matnice-ecommerce-backend/.venv/bin/python';
-  private readonly aiModelsPath = path.join(__dirname, '../../ai-models');
+  // Point to the ai-models folder in the project root, not in dist
+  private readonly aiModelsPath = path.resolve(process.cwd(), 'ai-models');
 
   constructor(
     @InjectRepository(FaceAnalysisEntity)
