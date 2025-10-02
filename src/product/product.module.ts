@@ -10,6 +10,7 @@ import { ProductCategoryModule } from './modules/product-category/product-catego
 import { ProductThicknessCompatibilityModule } from './modules/product-thickness-compatibility/product-thickness-compatibility.module';
 import { Product3dModelModule } from './modules/product-3d-model/product-3d-model.module';
 import { Model3dConfigModule } from './modules/model-3d-config/model-3d-config.module';
+import { ColorSkinRecommendationModule } from './modules/color-skin-recommendation/color-skin-recommendation.module';
 import { ProductSchedulerService } from './services/product-scheduler.service';
 
 @Module({
@@ -21,6 +22,7 @@ import { ProductSchedulerService } from './services/product-scheduler.service';
     ProductThicknessCompatibilityModule,
     Product3dModelModule,
     Model3dConfigModule,
+    ColorSkinRecommendationModule,
     forwardRef(() => ProductImageModule),
   ],
   controllers: [ProductController],
@@ -34,6 +36,7 @@ import { ProductSchedulerService } from './services/product-scheduler.service';
     ProductThicknessCompatibilityModule,
     Product3dModelModule,
     Model3dConfigModule,
+    ColorSkinRecommendationModule,
   ],
 })
 export class ProductModule {}
