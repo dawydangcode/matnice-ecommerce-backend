@@ -14,6 +14,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import { GenderDetectedType } from '../enum/detected-gender.type';
 import { SkinColorDetectedType } from '../enum/detect-skin-color.type';
+import { FaceShapeType } from '../enum/detect-face-shape.type';
 import { AnalysisStatusType } from '../enum/analysis-status.type';
 
 // Request DTOs
@@ -122,6 +123,21 @@ export class SkinColorAnalysisDto {
   confidence!: number;
 }
 
+export class FaceShapeAnalysisDto {
+  @ApiProperty({
+    enum: ['oval', 'round', 'square', 'heart', 'oblong'],
+    description: 'Detected face shape',
+    example: 'oval',
+  })
+  detected!: FaceShapeType;
+
+  @ApiProperty({
+    description: 'Confidence score for face shape detection (0-1)',
+    example: 0.8123,
+  })
+  confidence!: number;
+}
+
 export class OverallAnalysisDto {
   @ApiProperty({
     description: 'Overall confidence score (average of all analyses)',
@@ -176,6 +192,7 @@ export class FaceAnalysisResultDto {
   analysis!: {
     gender: GenderAnalysisDto;
     SkinColor: SkinColorAnalysisDto;
+    faceShape: FaceShapeAnalysisDto;
     overall: OverallAnalysisDto;
   };
 

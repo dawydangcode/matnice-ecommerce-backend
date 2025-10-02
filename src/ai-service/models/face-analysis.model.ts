@@ -1,6 +1,7 @@
 import { AnalysisStatusType } from '../enum/analysis-status.type';
 import { SkinColorDetectedType } from '../enum/detect-skin-color.type';
 import { GenderDetectedType } from '../enum/detected-gender.type';
+import { FaceShapeType } from '../enum/detect-face-shape.type';
 
 export class FaceAnalysisModel {
   public readonly id: number;
@@ -16,6 +17,10 @@ export class FaceAnalysisModel {
   // Skin Tone Analysis Results
   public readonly detectedSkinColor: SkinColorDetectedType;
   public readonly SkinColorConfidence: number;
+
+  // Face Shape Analysis Results
+  public readonly detectedFaceShape: FaceShapeType;
+  public readonly faceShapeConfidence: number;
 
   // Processing Status
   public readonly analysisStatus: AnalysisStatusType;
@@ -39,6 +44,8 @@ export class FaceAnalysisModel {
     genderConfidence: number,
     detectedSkinColor: SkinColorDetectedType,
     SkinColorConfidence: number,
+    detectedFaceShape: FaceShapeType,
+    faceShapeConfidence: number,
     analysisStatus: AnalysisStatusType,
     errorMessage: string | undefined,
     processingTimeMs: number | undefined,
@@ -58,6 +65,8 @@ export class FaceAnalysisModel {
     this.genderConfidence = genderConfidence;
     this.detectedSkinColor = detectedSkinColor;
     this.SkinColorConfidence = SkinColorConfidence;
+    this.detectedFaceShape = detectedFaceShape;
+    this.faceShapeConfidence = faceShapeConfidence;
     this.analysisStatus = analysisStatus;
     this.errorMessage = errorMessage;
     this.processingTimeMs = processingTimeMs;
@@ -78,6 +87,7 @@ export class FaceAnalysisModel {
     modelVersions?: {
       genderModel?: string;
       SkinColorModel?: string;
+      faceShapeModel?: string;
     };
   };
 
@@ -93,6 +103,8 @@ export class FaceAnalysisModel {
       entity.genderConfidence,
       entity.detectedSkinColor,
       entity.SkinColorConfidence,
+      entity.detectedFaceShape,
+      entity.faceShapeConfidence,
       entity.AnalysisStatusType,
       entity.errorMessage,
       entity.processingTimeMs,
@@ -126,13 +138,19 @@ export class FaceAnalysisModel {
     return (
       this.isProcessingComplete() &&
       this.detectedGender !== GenderDetectedType.UNKNOWN &&
-      this.detectedSkinColor !== SkinColorDetectedType.UNKNOWN
+      this.detectedSkinColor !== SkinColorDetectedType.UNKNOWN &&
+      this.detectedFaceShape !== FaceShapeType.OVAL // Assuming OVAL is not the default/unknown
     );
   }
 
   getOverallConfidence(): number {
     if (!this.hasValidResults()) return 0;
-    return (this.genderConfidence + this.SkinColorConfidence) / 2;
+    return (
+      (this.genderConfidence +
+        this.SkinColorConfidence +
+        this.faceShapeConfidence) /
+      3
+    );
   }
 
   // Format cho API response (public facing) - match với DTO structure
@@ -148,6 +166,10 @@ export class FaceAnalysisModel {
         SkinColor: {
           detected: this.detectedSkinColor,
           confidence: this.SkinColorConfidence,
+        },
+        faceShape: {
+          detected: this.detectedFaceShape,
+          confidence: this.faceShapeConfidence,
         },
         overall: {
           confidence: this.getOverallConfidence(),
@@ -177,6 +199,10 @@ export class FaceAnalysisModel {
           detected: this.detectedSkinColor,
           confidence: this.SkinColorConfidence,
         },
+        faceShape: {
+          detected: this.detectedFaceShape,
+          confidence: this.faceShapeConfidence,
+        },
         overall: {
           confidence: this.getOverallConfidence(),
           status: this.analysisStatus,
@@ -205,6 +231,8 @@ export class FaceAnalysisModel {
       genderConfidence: this.genderConfidence,
       detectedSkinColor: this.detectedSkinColor,
       SkinColorConfidence: this.SkinColorConfidence,
+      detectedFaceShape: this.detectedFaceShape,
+      faceShapeConfidence: this.faceShapeConfidence,
       analysisStatus: this.analysisStatus,
       processingTimeMs: this.processingTimeMs,
       createdAt: this.createdAt,

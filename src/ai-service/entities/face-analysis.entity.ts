@@ -8,6 +8,7 @@ import {
 import { AnalysisStatusType } from '../enum/analysis-status.type';
 import { GenderDetectedType } from '../enum/detected-gender.type';
 import { SkinColorDetectedType } from '../enum/detect-skin-color.type';
+import { FaceShapeType } from '../enum/detect-face-shape.type';
 import { FaceAnalysisModel } from '../models/face-analysis.model';
 
 @Entity('face_analysis')
@@ -44,6 +45,13 @@ export class FaceAnalysisEntity {
   @Column({ name: 'skin_color_confidence', type: 'double' })
   SkinColorConfidence!: number;
 
+  // Face Shape Analysis Results
+  @Column({ name: 'detected_face_shape_type' })
+  detectedFaceShape!: FaceShapeType;
+
+  @Column({ name: 'face_shape_confidence', type: 'double' })
+  faceShapeConfidence!: number;
+
   // Processing Status
   @Column({ name: 'analysis_status' })
   AnalysisStatusType!: AnalysisStatusType;
@@ -65,6 +73,7 @@ export class FaceAnalysisEntity {
     modelVersions?: {
       genderModel?: string;
       SkinColorModel?: string;
+      faceShapeModel?: string;
     };
   };
 
@@ -97,6 +106,8 @@ export class FaceAnalysisEntity {
       this.genderConfidence,
       this.detectedSkinColor,
       this.SkinColorConfidence,
+      this.detectedFaceShape,
+      this.faceShapeConfidence,
       this.AnalysisStatusType,
       undefined, // errorMessage - temporarily disabled
       this.processingTimeMs,

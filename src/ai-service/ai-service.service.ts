@@ -22,6 +22,7 @@ import {
 import { AnalysisStatusType } from './enum/analysis-status.type';
 import { GenderDetectedType } from './enum/detected-gender.type';
 import { SkinColorDetectedType } from './enum/detect-skin-color.type';
+import { FaceShapeType } from './enum/detect-face-shape.type';
 
 @Injectable()
 export class AIServiceService {
@@ -194,21 +195,28 @@ export class AIServiceService {
       );
 
       // Run AI analysis
-      const [genderResult, skinToneResult] = await Promise.all([
-        this.analyzeGender(imageUrl),
-        this.analyzeSkinTone(imageUrl),
-      ]);
+      const [genderResult, skinToneResult, faceShapeResult] = await Promise.all(
+        [
+          this.analyzeGender(imageUrl),
+          this.analyzeSkinTone(imageUrl),
+          this.analyzeFaceShape(imageUrl),
+        ],
+      );
 
       const processingTime = Date.now() - startTime;
 
       // Debug logging
       this.logger.debug(`Gender result: ${JSON.stringify(genderResult)}`);
       this.logger.debug(`Skin tone result: ${JSON.stringify(skinToneResult)}`);
+      this.logger.debug(
+        `Face shape result: ${JSON.stringify(faceShapeResult)}`,
+      );
 
       // Update with results
       await this.updateAnalysisResults(analysisId, {
         genderResult,
         skinToneResult,
+        faceShapeResult,
         processingTime,
         status: AnalysisStatusType.COMPLETED,
       });
@@ -358,6 +366,98 @@ export class AIServiceService {
   }
 
   /**
+   * Analyze face shape using AI model
+   */
+  private async analyzeFaceShape(imageUrl: string): Promise<{
+    faceShape: FaceShapeType;
+    confidence: number;
+  }> {
+    return new Promise((resolve, reject) => {
+      const scriptPath = path.join(
+        this.aiModelsPath,
+        'faceshape-ai-package',
+        'faceshape_classifier.py',
+      );
+
+      // Use same approach as gender analysis - pass model path and use --image parameter
+      const modelPath = path.join(
+        this.aiModelsPath,
+        'faceshape-ai-package/faceshape_best.pt',
+      );
+      const command = `${this.pythonPath} "${scriptPath}" --image "${imageUrl}" --model "${modelPath}" --confidence 0.5 --json 2>/dev/null`;
+      const process = spawn('bash', ['-c', command]);
+
+      let output = '';
+      let error = '';
+
+      process.stdout.on('data', (data) => {
+        output += data.toString();
+      });
+
+      process.stderr.on('data', (data) => {
+        error += data.toString();
+      });
+
+      process.on('close', (code) => {
+        if (code === 0) {
+          try {
+            // Parse only the last line as JSON (ignore log messages)
+            const lines = output.trim().split('\n');
+            const jsonLine = lines[lines.length - 1];
+            const result = JSON.parse(jsonLine);
+            if (result.error) {
+              reject(new Error(`Face shape analysis error: ${result.error}`));
+              return;
+            }
+
+            // Map the predicted class to FaceShapeType enum
+            let faceShape: FaceShapeType;
+            const predictedClass = result.predicted_class?.toLowerCase();
+            switch (predictedClass) {
+              case 'heart':
+                faceShape = FaceShapeType.HEART;
+                break;
+              case 'oblong':
+                faceShape = FaceShapeType.OBLONG;
+                break;
+              case 'oval':
+                faceShape = FaceShapeType.OVAL;
+                break;
+              case 'round':
+                faceShape = FaceShapeType.ROUND;
+                break;
+              case 'square':
+                faceShape = FaceShapeType.SQUARE;
+                break;
+              default:
+                faceShape = FaceShapeType.OVAL; // Default fallback
+            }
+
+            resolve({
+              faceShape,
+              confidence: result.confidence || 0,
+            });
+          } catch (e) {
+            reject(
+              new Error(
+                `Failed to parse face shape analysis result: ${output}`,
+              ),
+            );
+          }
+        } else {
+          reject(new Error(`Face shape analysis process failed: ${error}`));
+        }
+      });
+
+      // Set timeout for analysis
+      setTimeout(() => {
+        process.kill();
+        reject(new Error('Face shape analysis timeout'));
+      }, 30000); // 30 seconds timeout
+    });
+  }
+
+  /**
    * Validate uploaded image
    */
   private async validateImage(imageBuffer: Buffer): Promise<{
@@ -450,6 +550,7 @@ export class AIServiceService {
     data: {
       genderResult?: { gender: string; confidence: number };
       skinToneResult?: { skinTone: string; confidence: number };
+      faceShapeResult?: { faceShape: string; confidence: number };
       processingTime?: number;
       status?: string;
       // errorMessage?: string;
@@ -465,6 +566,11 @@ export class AIServiceService {
     if (data.skinToneResult) {
       updateData.detectedSkinColor = data.skinToneResult.skinTone;
       updateData.SkinColorConfidence = data.skinToneResult.confidence;
+    }
+
+    if (data.faceShapeResult) {
+      updateData.detectedFaceShape = data.faceShapeResult.faceShape;
+      updateData.faceShapeConfidence = data.faceShapeResult.confidence;
     }
 
     if (data.processingTime) {
