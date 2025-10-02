@@ -23,9 +23,10 @@ import {
   UpdateColorSkinRecommendationParamsDto,
 } from './dtos/color-skin-recommendation.dto';
 import { RequestModel } from '../../../common/models/request.model';
-import { RoleType } from '../../../role/enum/role.enum';
-import { Roles } from '../../../role/decorators/roles.decorator';
 import { SkinColorType } from './enum/skin-color.type';
+import { RoleType } from 'src/role/enum/role.enum';
+import { Public } from 'src/common/decorators/public.decorator';
+import { Roles } from 'src/role/decorators/roles.decorator';
 
 @Controller('api/v1/')
 @ApiTags('Color Skin Recommendation')
@@ -57,7 +58,6 @@ export class ColorSkinRecommendationController {
   }
 
   @Get('product-color/:productColorId/skin-recommendations')
-  @Roles()
   async getRecommendationsByProductColor(
     @Param() params: GetRecommendationsByProductColorParamsDto,
   ) {
@@ -67,7 +67,7 @@ export class ColorSkinRecommendationController {
   }
 
   @Get('skin-color/:skinColorType/color-recommendations')
-  @Roles()
+  @Public()
   async getRecommendationsBySkinColor(
     @Param() params: GetRecommendationsBySkinColorParamsDto,
   ) {
@@ -77,7 +77,7 @@ export class ColorSkinRecommendationController {
   }
 
   @Get('skin-color/:skinColorType/recommended-product-colors')
-  @Roles()
+  @Public()
   async getProductColorIdsBySkinColor(
     @Param() params: GetRecommendationsBySkinColorParamsDto,
   ) {
