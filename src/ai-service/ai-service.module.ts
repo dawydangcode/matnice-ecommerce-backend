@@ -12,6 +12,8 @@ import { ProductRecommendationService } from './services/product-recommendation.
 import { ProductEntity } from '../product/entities/product.entity';
 import { ProductColorEntity } from '../product/modules/product-color/entities/product-color.entity';
 import { ColorSkinRecommendationEntity } from '../product/modules/color-skin-recommendation/entities/color-skin-recommendation.entity';
+import { ProductImageEntity } from '../product/modules/product-image/entities/product-image.entity';
+import { ProductDetailEntity } from '../product/modules/product-detail/entities/product-detail.entity';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { ColorSkinRecommendationEntity } from '../product/modules/color-skin-rec
       ProductEntity,
       ProductColorEntity,
       ColorSkinRecommendationEntity,
+      ProductImageEntity,
+      ProductDetailEntity,
     ]),
     ConfigModule,
   ],

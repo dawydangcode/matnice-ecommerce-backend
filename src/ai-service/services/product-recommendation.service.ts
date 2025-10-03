@@ -189,7 +189,11 @@ export class ProductRecommendationService {
     const queryBuilder = this.productRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.productColors', 'productColor')
-      .leftJoinAndSelect('product.brand', 'brand')
+      .leftJoinAndSelect(
+        'productColor.productImage',
+        'productImage',
+        "productImage.imageOrder = 'a'",
+      )
       .leftJoinAndSelect('product.productDetail', 'productDetail')
       .where('product.deletedAt IS NULL');
 
@@ -255,7 +259,11 @@ export class ProductRecommendationService {
     const queryBuilder = this.productRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.productColors', 'productColor')
-      .leftJoinAndSelect('product.brand', 'brand')
+      .leftJoinAndSelect(
+        'productColor.productImage',
+        'productImage',
+        "productImage.imageOrder = 'a'",
+      )
       .leftJoinAndSelect('product.productDetail', 'productDetail')
       .where('product.deletedAt IS NULL');
 
