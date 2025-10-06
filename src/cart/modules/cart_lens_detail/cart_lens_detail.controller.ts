@@ -78,7 +78,6 @@ export class CartLensDetailController {
       body.pdLeft,
       body.pdRight,
       body.lensType,
-      body.lensQuality,
       body.lensPrice,
       body.lensMaterial,
       body.prescriptionNotes,

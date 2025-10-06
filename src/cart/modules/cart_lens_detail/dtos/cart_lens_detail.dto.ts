@@ -77,11 +77,6 @@ export class CreateCartLensDetailDto {
   lensType!: string;
 
   @ApiProperty({ required: false, default: 'Standard' })
-  @IsOptional()
-  @IsString()
-  @IsIn(['Standard', 'Premium', 'Ultra'])
-  lensQuality!: string;
-
   @ApiProperty({ required: false })
   @IsOptional()
   @IsNumber()
@@ -196,7 +191,6 @@ export class UpdateCartLensDetailDto extends PickType(CreateCartLensDetailDto, [
   'pdLeft',
   'pdRight',
   'lensType',
-  'lensQuality',
   'lensThicknessId',
   'lensUpgradeDetailId',
   'tintId',

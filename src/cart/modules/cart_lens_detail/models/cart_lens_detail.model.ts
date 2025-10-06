@@ -11,7 +11,6 @@ export class CartLensDetailModel {
   public readonly pdLeft: number | undefined;
   public readonly pdRight: number | undefined;
   public readonly lensType: string | undefined;
-  public readonly lensQuality: string;
   public readonly lensThicknessId: number | undefined;
   public readonly lensUpgradeDetailId: number | undefined;
   public readonly totalUpgradesPrice: number;
@@ -48,7 +47,6 @@ export class CartLensDetailModel {
     pdLeft: number | undefined,
     pdRight: number | undefined,
     lensType: string | undefined,
-    lensQuality: string,
     lensThicknessId: number | undefined,
     lensUpgradeDetailId: number | undefined,
     totalUpgradesPrice: number,
@@ -83,7 +81,6 @@ export class CartLensDetailModel {
     this.pdLeft = pdLeft;
     this.pdRight = pdRight;
     this.lensType = lensType;
-    this.lensQuality = lensQuality;
     this.lensThicknessId = lensThicknessId;
     this.lensUpgradeDetailId = lensUpgradeDetailId;
     this.totalUpgradesPrice = totalUpgradesPrice;

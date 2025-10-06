@@ -173,7 +173,6 @@ export interface CartItemSummary {
     id: number;
     lensId: number | undefined;
     lensType: string | undefined;
-    lensQuality: string;
     lensPrice: number;
     totalUpgradesPrice: number;
     selectedCoatings?: {

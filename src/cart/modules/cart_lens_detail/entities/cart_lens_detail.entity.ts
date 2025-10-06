@@ -174,7 +174,6 @@ export class CartLensDetailEntity {
         ? parseFloat(this.pdRight)
         : this.pdRight,
       undefined, // lensType removed
-      'Standard', // lensQuality default
       undefined, // lensThicknessId removed
       undefined, // lensUpgradeDetailId removed
       0, // totalUpgradesPrice default

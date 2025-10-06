@@ -70,7 +70,6 @@ export class CartCombinedService {
         data.lensDetail.pdLeft,
         data.lensDetail.pdRight,
         data.lensDetail.lensType,
-        data.lensDetail.lensQuality,
         data.lensDetail.lensPrice,
         data.lensDetail.lensMaterial,
         data.lensDetail.prescriptionNotes,
@@ -527,7 +526,6 @@ export class CartCombinedService {
                 id: lensDetail.id,
                 lensId: lensDetail.lensId ?? undefined,
                 lensType: lensDetail.lensType ?? undefined,
-                lensQuality: lensDetail.lensQuality,
                 lensPrice: lensDetail.lensPrice,
                 totalUpgradesPrice: calculatedUpgradesPrice, // Use calculated price instead of database value
                 selectedCoatings:

@@ -68,7 +68,6 @@ export class CartLensDetailService {
     pdLeft: number,
     pdRight: number,
     lensType: string,
-    lensQuality: string,
     lensPrice: number,
     lensMaterial: string,
     prescriptionNotes: string,
@@ -222,16 +221,6 @@ export class CartLensDetailService {
   async calculateLensPrice(lensDetail: CartLensDetailModel): Promise<number> {
     // Base lens price calculation logic
     let basePrice = 50.0; // Default base price
-
-    // Quality pricing
-    switch (lensDetail.lensQuality) {
-      case 'Premium':
-        basePrice += 30.0;
-        break;
-      case 'Ultra':
-        basePrice += 60.0;
-        break;
-    }
 
     // Return base price, additional pricing will come from referenced tables
     return basePrice;
