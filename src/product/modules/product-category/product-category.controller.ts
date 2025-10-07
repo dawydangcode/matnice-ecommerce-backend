@@ -24,7 +24,6 @@ import { Public } from 'src/middlewares/guards/jwt-auth.guard';
 
 @ApiTags('Product Category')
 @Controller('api/v1/product-category')
-@Roles(RoleType.Admin)
 export class ProductCategoryController {
   @Get('product/:productId/categories/details')
   @Public()
@@ -70,6 +69,7 @@ export class ProductCategoryController {
   }
 
   @Post('create')
+  @Roles(RoleType.Admin)
   async createProductCategory(
     @Req() req: RequestModel,
     @Body() body: CreateProductCategoryDto,
