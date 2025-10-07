@@ -39,6 +39,7 @@ import { PageList } from 'src/common/models/page-list.model';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
 import { Roles } from 'src/role/decorators/roles.decorator';
 import { RoleType } from 'src/role/enum/role.enum';
+import { Public } from 'src/middlewares/guards/jwt-auth.guard';
 
 @Controller('api/v1')
 @ApiTags('Product / Product Image')
@@ -47,6 +48,7 @@ export class ProductImageController {
   constructor(private readonly productImageService: ProductImageService) {}
 
   @Get('product-image/list')
+  @Roles(RoleType.Admin, RoleType.Employee)
   async getProductImages(
     @Query() query: GetProductImagesQueryDto,
   ): Promise<PageList<ProductImageModel>> {
@@ -60,6 +62,7 @@ export class ProductImageController {
   }
 
   @Get('product/:productId/product-image/list')
+  @Public()
   async getProductImagesByProductId(
     @Param() params: GetProductImagesByProductIdParamsDto,
     @Query() query: GetProductImagesQueryDto,
@@ -71,6 +74,7 @@ export class ProductImageController {
   }
 
   @Get('product-image/:productImageId/detail')
+  @Public()
   async getProductImageById(
     @Param() params: GetProductImageParamsDto,
   ): Promise<ProductImageModel> {
@@ -80,6 +84,7 @@ export class ProductImageController {
   }
 
   @Post('product-image/create')
+  @Roles(RoleType.Admin)
   @ApiOperation({ summary: 'Create new product image' })
   @ApiCreatedResponse({
     description: 'Product image created successfully',
@@ -96,6 +101,7 @@ export class ProductImageController {
   }
 
   @Post('product-image/upload-temporary')
+  @Roles(RoleType.Admin)
   @UseInterceptors(FilesInterceptor('images', 10)) // Support multiple files with field name 'images'
   @ApiOperation({ summary: 'Upload temporary product image files' })
   @ApiConsumes('multipart/form-data')
@@ -147,6 +153,7 @@ export class ProductImageController {
   }
 
   @Post('product-image/upload-temporary-multiple')
+  @Roles(RoleType.Admin)
   @UseInterceptors(FilesInterceptor('images', 10)) // Allow up to 10 files with field name 'images'
   @ApiOperation({ summary: 'Upload multiple temporary product image files' })
   @ApiConsumes('multipart/form-data')
@@ -198,6 +205,7 @@ export class ProductImageController {
   }
 
   @Post('product/:productId/image/upload')
+  @Roles(RoleType.Admin)
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Upload product image file' })
   @ApiConsumes('multipart/form-data')
@@ -244,6 +252,7 @@ export class ProductImageController {
   }
 
   @Put('product-image/:productImageId/update')
+  @Roles(RoleType.Admin)
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Update product image' })
   @ApiConsumes('multipart/form-data')
@@ -267,6 +276,7 @@ export class ProductImageController {
   }
 
   @Delete('product-image/:productImageId/delete')
+  @Roles(RoleType.Admin)
   async deleteProductImage(
     @Param() params: DeleteProductImageParamsDto,
     @Req() req: RequestModel,
@@ -282,6 +292,7 @@ export class ProductImageController {
   }
 
   @Delete('product/:productId/product-image/delete-all')
+  @Roles(RoleType.Admin)
   async deleteProductImagesByProductId(
     @Param() params: GetProductImagesByProductIdParamsDto,
     @Req() req: RequestModel,
@@ -295,6 +306,7 @@ export class ProductImageController {
   // ========== PRODUCT COLOR IMAGE ENDPOINTS ==========
 
   @Post('product/:productId/color/:colorId/image/upload')
+  @Roles(RoleType.Admin)
   @ApiOperation({ summary: 'Upload single product color image' })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
@@ -372,6 +384,7 @@ export class ProductImageController {
   }
 
   @Delete('product/:productId/color/:colorId/image/:imageOrder')
+  @Roles(RoleType.Admin)
   @ApiOperation({ summary: 'Delete product color image by order' })
   async deleteProductColorImage(
     @Param('productId') productId: number,
@@ -388,6 +401,7 @@ export class ProductImageController {
   }
 
   @Delete('product/:productId/color/:colorId/images')
+  @Roles(RoleType.Admin)
   @ApiOperation({ summary: 'Delete all images for a product color' })
   async deleteProductColorImages(
     @Param('productId') productId: number,

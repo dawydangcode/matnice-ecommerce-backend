@@ -20,12 +20,14 @@ import {
 } from './dtos/product-category.dto';
 import { RoleType } from 'src/role/enum/role.enum';
 import { Roles } from 'src/role/decorators/roles.decorator';
+import { Public } from 'src/middlewares/guards/jwt-auth.guard';
 
 @ApiTags('Product Category')
 @Controller('api/v1/product-category')
 @Roles(RoleType.Admin)
 export class ProductCategoryController {
   @Get('product/:productId/categories/details')
+  @Public()
   async getCategoriesWithDetailsByProduct(
     @Param('productId') productId: number,
   ): Promise<any[]> {
@@ -38,6 +40,7 @@ export class ProductCategoryController {
   ) {}
 
   @Get('list')
+  @Public()
   async getProductCategories(
     @Query() query: ProductCategoryQueryDto,
   ): Promise<ProductCategoryModel[]> {
@@ -48,6 +51,7 @@ export class ProductCategoryController {
   }
 
   @Get('product/:productId/categories')
+  @Public()
   async getCategoriesByProduct(
     @Param('productId') productId: number,
   ): Promise<number[]> {

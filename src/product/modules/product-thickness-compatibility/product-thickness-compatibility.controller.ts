@@ -20,6 +20,7 @@ import {
 } from './dtos/product-thickness-compatibility.dto';
 import { RoleType } from 'src/role/enum/role.enum';
 import { Roles } from 'src/role/decorators/roles.decorator';
+import { Public } from 'src/middlewares/guards/jwt-auth.guard';
 
 @ApiTags('Product Thickness Compatibility')
 @Controller('api/v1/product-thickness-compatibility')
@@ -30,6 +31,7 @@ export class ProductThicknessCompatibilityController {
   ) {}
 
   @Get('/list')
+  @Public()
   async getCompatibilities(
     @Query() query: ProductThicknessCompatibilityQueryDto,
   ): Promise<ProductThicknessCompatibilityModel[]> {
@@ -40,6 +42,7 @@ export class ProductThicknessCompatibilityController {
   }
 
   @Get('product/:productId/thickness-ids')
+  @Public()
   @ApiOperation({ summary: 'Get compatible lens thickness IDs for a product' })
   @ApiResponse({
     status: 200,
@@ -55,6 +58,7 @@ export class ProductThicknessCompatibilityController {
   }
 
   @Get('thickness/:thicknessId/product-ids')
+  @Public()
   @ApiOperation({ summary: 'Get compatible product IDs for a lens thickness' })
   @ApiResponse({
     status: 200,
@@ -70,6 +74,7 @@ export class ProductThicknessCompatibilityController {
   }
 
   @Get('check/:productId/:thicknessId')
+  @Public()
   @ApiOperation({
     summary: 'Check if product and lens thickness are compatible',
   })
@@ -90,6 +95,7 @@ export class ProductThicknessCompatibilityController {
   }
 
   @Post('create')
+  @Roles(RoleType.Admin)
   @ApiOperation({ summary: 'Create a new product thickness compatibility' })
   @ApiResponse({
     status: 201,
@@ -108,6 +114,7 @@ export class ProductThicknessCompatibilityController {
   }
 
   @Put('product/:productId/compatibilities')
+  @Roles(RoleType.Admin)
   @ApiOperation({ summary: 'Update all compatibilities for a product' })
   @ApiResponse({
     status: 200,
@@ -127,6 +134,7 @@ export class ProductThicknessCompatibilityController {
   }
 
   @Delete(':productId/:thicknessId')
+  @Roles(RoleType.Admin)
   @ApiOperation({
     summary: 'Delete a specific product thickness compatibility',
   })
@@ -149,6 +157,7 @@ export class ProductThicknessCompatibilityController {
   }
 
   @Delete('product/:productId/all')
+  @Roles(RoleType.Admin)
   @ApiOperation({ summary: 'Delete all compatibilities for a product' })
   @ApiResponse({
     status: 200,

@@ -12,10 +12,12 @@ Hệ thống sử dụng 4 loại quyền chính:
 ## 🎯 Nguyên tắc Phân quyền
 
 ### Decorator `@Public()`
+
 - Cho phép truy cập mà **không cần đăng nhập**
 - Sử dụng cho: xem sản phẩm, danh mục, đăng ký/đăng nhập
 
 ### Decorator `@Roles(RoleType.X)`
+
 - Yêu cầu **phải đăng nhập** và có role X
 - Role cao hơn thường có thể truy cập endpoint của role thấp hơn
 
@@ -37,7 +39,7 @@ Trước tiên, tạo các tài khoản test:
 ```bash
 # Test các endpoint Public - PHẢI THÀNH CÔNG
 curl -X GET "http://localhost:3000/api/v1/products/cards"
-curl -X GET "http://localhost:3000/api/v1/lens/cards" 
+curl -X GET "http://localhost:3000/api/v1/lens/cards"
 curl -X GET "http://localhost:3000/api/v1/categories/cards"
 curl -X GET "http://localhost:3000/api/v1/brands/cards"
 curl -X GET "http://localhost:3000/api/v1/lens/filter-by-prescription?sphereLeft=-2.0"
@@ -88,27 +90,27 @@ curl -X POST "http://localhost:3000/api/v1/lens/create" -H "Authorization: Beare
 
 ## 📊 Bảng Phân quyền Chi tiết
 
-| Chức năng | Endpoint | Guest | User | Employee | Admin |
-|-----------|----------|-------|------|----------|-------|
-| **👀 Xem sản phẩm** |
-| Danh sách sản phẩm (public) | `GET /products/cards` | ✅ | ✅ | ✅ | ✅ |
-| Chi tiết sản phẩm | `GET /product/:id/detail` | ✅ | ✅ | ✅ | ✅ |
-| Danh sách sản phẩm (admin) | `GET /products/list` | ❌ | ❌ | ✅ | ✅ |
-| **🛒 Giỏ hàng** |
-| Xem giỏ hàng của tôi | `GET /carts/my-cart` | ❌ | ✅ | ✅ | ✅ |
-| Thêm vào giỏ hàng | `POST /cart-item` | ❌ | ✅ | ✅ | ✅ |
-| **👓 Lens** |
-| Danh sách lens (public) | `GET /lens/cards` | ✅ | ✅ | ✅ | ✅ |
-| Lọc lens theo toa | `GET /lens/filter-by-prescription` | ✅ | ✅ | ✅ | ✅ |
-| Danh sách lens (admin) | `GET /lens/list` | ❌ | ❌ | ✅ | ✅ |
-| Tạo lens | `POST /lens/create` | ❌ | ❌ | ❌ | ✅ |
+| Chức năng                     | Endpoint                           | Guest | User | Employee | Admin |
+| ----------------------------- | ---------------------------------- | ----- | ---- | -------- | ----- |
+| **👀 Xem sản phẩm**           |
+| Danh sách sản phẩm (public)   | `GET /products/cards`              | ✅    | ✅   | ✅       | ✅    |
+| Chi tiết sản phẩm             | `GET /product/:id/detail`          | ✅    | ✅   | ✅       | ✅    |
+| Danh sách sản phẩm (admin)    | `GET /products/list`               | ❌    | ❌   | ✅       | ✅    |
+| **🛒 Giỏ hàng**               |
+| Xem giỏ hàng của tôi          | `GET /carts/my-cart`               | ❌    | ✅   | ✅       | ✅    |
+| Thêm vào giỏ hàng             | `POST /cart-item`                  | ❌    | ✅   | ✅       | ✅    |
+| **👓 Lens**                   |
+| Danh sách lens (public)       | `GET /lens/cards`                  | ✅    | ✅   | ✅       | ✅    |
+| Lọc lens theo toa             | `GET /lens/filter-by-prescription` | ✅    | ✅   | ✅       | ✅    |
+| Danh sách lens (admin)        | `GET /lens/list`                   | ❌    | ❌   | ✅       | ✅    |
+| Tạo lens                      | `POST /lens/create`                | ❌    | ❌   | ❌       | ✅    |
 | **🏷️ Danh mục & Thương hiệu** |
-| Xem danh mục | `GET /categories/cards` | ✅ | ✅ | ✅ | ✅ |
-| Xem thương hiệu | `GET /brands/cards` | ✅ | ✅ | ✅ | ✅ |
-| Quản lý danh mục | `POST/PUT/DELETE /category/*` | ❌ | ❌ | ❌ | ✅ |
-| **🤖 AI Services** |
-| Phân tích khuôn mặt | `POST /ai/analyze-face` | ✅ | ✅ | ✅ | ✅ |
-| Xem kết quả | `GET /ai/analysis/:id/result` | ✅ | ✅ | ✅ | ✅ |
+| Xem danh mục                  | `GET /categories/cards`            | ✅    | ✅   | ✅       | ✅    |
+| Xem thương hiệu               | `GET /brands/cards`                | ✅    | ✅   | ✅       | ✅    |
+| Quản lý danh mục              | `POST/PUT/DELETE /category/*`      | ❌    | ❌   | ❌       | ✅    |
+| **🤖 AI Services**            |
+| Phân tích khuôn mặt           | `POST /ai/analyze-face`            | ✅    | ✅   | ✅       | ✅    |
+| Xem kết quả                   | `GET /ai/analysis/:id/result`      | ✅    | ✅   | ✅       | ✅    |
 
 ---
 
@@ -131,13 +133,13 @@ test_endpoint() {
     local token=$3
     local description=$4
     local should_work=$5
-    
+
     if [ -z "$token" ]; then
         response=$(curl -s -w "%{http_code}" -X $method "$BASE_URL$endpoint" -o /dev/null)
     else
         response=$(curl -s -w "%{http_code}" -X $method "$BASE_URL$endpoint" -H "Authorization: Bearer $token" -o /dev/null)
     fi
-    
+
     if [ "$should_work" = "true" ]; then
         if [ "$response" = "200" ] || [ "$response" = "201" ]; then
             echo "✅ $description: PASS ($response)"
@@ -181,6 +183,7 @@ echo -e "\n🎉 Test completed!"
 ```
 
 Sử dụng:
+
 ```bash
 chmod +x test-all-permissions.sh
 
@@ -196,6 +199,7 @@ export ADMIN_TOKEN="your_admin_token"
 ## 🔍 Checklist Kiểm tra
 
 ### ✅ GUEST (Không đăng nhập)
+
 - [ ] Xem danh sách sản phẩm (`/products/cards`)
 - [ ] Xem chi tiết sản phẩm (`/product/:id/detail`)
 - [ ] Xem danh sách lens (`/lens/cards`)
@@ -206,6 +210,7 @@ export ADMIN_TOKEN="your_admin_token"
 - [ ] **KHÔNG** truy cập được admin endpoints
 
 ### ✅ USER (Đã đăng nhập)
+
 - [ ] Tất cả quyền của Guest
 - [ ] Xem và quản lý giỏ hàng cá nhân
 - [ ] Thêm/sửa/xóa items trong giỏ hàng
@@ -214,6 +219,7 @@ export ADMIN_TOKEN="your_admin_token"
 - [ ] **KHÔNG** xem được dữ liệu của user khác
 
 ### ✅ ADMIN (Quản trị viên)
+
 - [ ] Tất cả quyền của User
 - [ ] Xem danh sách quản lý (`/products/list`, `/lens/list`)
 - [ ] Tạo/sửa/xóa sản phẩm và lens
@@ -226,14 +232,17 @@ export ADMIN_TOKEN="your_admin_token"
 ## 🐛 Troubleshooting
 
 ### Lỗi 401 Unauthorized
+
 - **Nguyên nhân**: Token không hợp lệ hoặc đã hết hạn
 - **Giải pháp**: Đăng nhập lại để lấy token mới
 
-### Lỗi 403 Forbidden  
+### Lỗi 403 Forbidden
+
 - **Nguyên nhân**: User không có quyền truy cập endpoint này
 - **Giải pháp**: Kiểm tra role của user và phân quyền endpoint
 
 ### Lỗi 404 Not Found
+
 - **Nguyên nhân**: Endpoint không tồn tại hoặc server không chạy
 - **Giải pháp**: Kiểm tra URL và trạng thái server
 
@@ -252,6 +261,7 @@ export ADMIN_TOKEN="your_admin_token"
 ## 📞 Test Endpoints Quan trọng
 
 ### 🔐 Authentication
+
 ```bash
 POST /api/v1/auth/register
 POST /api/v1/auth/login
@@ -259,6 +269,7 @@ POST /api/v1/auth/refresh
 ```
 
 ### 🌍 Public Endpoints
+
 ```bash
 GET /api/v1/products/cards
 GET /api/v1/lens/cards
@@ -268,6 +279,7 @@ GET /api/v1/lens/filter-by-prescription
 ```
 
 ### 👤 User Endpoints
+
 ```bash
 GET /api/v1/carts/my-cart
 POST /api/v1/cart-item
@@ -276,6 +288,7 @@ DELETE /api/v1/cart-item/:id
 ```
 
 ### 👑 Admin Endpoints
+
 ```bash
 GET /api/v1/products/list
 GET /api/v1/lens/list

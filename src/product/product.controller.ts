@@ -111,6 +111,7 @@ export class ProductController {
   }
 
   @Put('product/:productId/update')
+  @Roles(RoleType.Admin)
   async updateProduct(
     @Req() req: RequestModel,
     @Param() params: UpdateProductParamsDto,

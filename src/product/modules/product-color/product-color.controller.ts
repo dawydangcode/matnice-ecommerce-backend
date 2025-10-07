@@ -21,12 +21,16 @@ import {
   UpdateProductColorParamsDto,
 } from './dtos/product-color.dto';
 import { DeleteProductDetailParamsDto } from '../product-detail/dtos/product-detail.dto';
+import { Roles } from 'src/role/decorators/roles.decorator';
+import { RoleType } from 'src/role/enum/role.enum';
+import { Public } from 'src/middlewares/guards/jwt-auth.guard';
 
 @Controller('api/v1/')
 export class ProductColorController {
   constructor(private readonly productColorService: ProductColorService) {}
 
   @Get('product-color/list')
+  @Public()
   async getProductColors(
     @Param('productId') productId: number,
     @Query() pagination: PaginationParamsModel,
@@ -38,6 +42,7 @@ export class ProductColorController {
   }
 
   @Get('/product-color/:colorId/detail')
+  @Public()
   async getProductColor(@Param() params: GetProductColorByIdParamsDto) {
     return await this.productColorService.getProductColorById(
       params.productColorId,
@@ -45,6 +50,7 @@ export class ProductColorController {
   }
 
   @Post('product-color/create')
+  @Roles(RoleType.Admin)
   async createProductColor(
     @Body() body: CreateProductColorBodyDto,
     @Req() req: RequestModel,
@@ -61,6 +67,7 @@ export class ProductColorController {
   }
 
   @Put('product-color/:productColorId/update')
+  @Roles(RoleType.Admin)
   async updateProductColor(
     @Param() params: UpdateProductColorParamsDto,
     @Body() body: UpdateProductColorBodyDto,
@@ -82,6 +89,7 @@ export class ProductColorController {
   }
 
   @Delete('product-color/:productColorId/delete')
+  @Roles(RoleType.Admin)
   async deleteProductColor(
     @Param() params: DeleteProductColorParamsDto,
     @Req() req: RequestModel,
@@ -97,6 +105,7 @@ export class ProductColorController {
   }
 
   @Get('product-color/:productId/product')
+  @Public()
   async getProductColorByProductId(@Param('productId') productId: number) {
     return await this.productColorService.getProductColorByProductId(productId);
   }

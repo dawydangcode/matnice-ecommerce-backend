@@ -33,6 +33,8 @@ import {
   JwtAuthGuard,
   Public,
 } from '../../../middlewares/guards/jwt-auth.guard';
+import { Roles } from '../../../role/decorators/roles.decorator';
+import { RoleType } from '../../../role/enum/role.enum';
 import { AwsS3Service } from '../../../common/services/aws-s3.service';
 import { Request, Response } from 'express';
 
@@ -45,7 +47,7 @@ export class Product3dModelController {
   ) {}
 
   @Post('upload')
-  @UseGuards(JwtAuthGuard)
+  @Roles(RoleType.Admin)
   @ApiOperation({ summary: 'Upload 3D model files to S3' })
   @ApiConsumes('multipart/form-data')
   @ApiResponse({

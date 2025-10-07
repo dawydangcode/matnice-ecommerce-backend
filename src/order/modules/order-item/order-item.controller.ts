@@ -35,6 +35,7 @@ export class OrderItemController {
   constructor(private readonly orderItemService: OrderItemService) {}
 
   @Post()
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   @ApiOperation({ summary: 'Create a new order item' })
   @ApiResponse({
     status: HttpStatus.CREATED,
@@ -95,6 +96,7 @@ export class OrderItemController {
   }
 
   @Get('order/:orderId')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   @ApiOperation({ summary: 'Get order items for a specific order' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -121,6 +123,7 @@ export class OrderItemController {
   }
 
   @Get(':id')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   @ApiOperation({ summary: 'Get an order item by ID' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -145,6 +148,7 @@ export class OrderItemController {
   }
 
   @Put(':id')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   @ApiOperation({ summary: 'Update an order item' })
   @ApiResponse({
     status: HttpStatus.OK,

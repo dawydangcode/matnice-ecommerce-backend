@@ -13,6 +13,9 @@ import { ApiTags } from '@nestjs/swagger';
 import { Model3dConfigService } from './model-3d-config.service';
 import { Request } from 'express';
 import { RequestModel } from 'src/common/models/request.model';
+import { RoleType } from 'src/role/enum/role.enum';
+import { Roles } from 'src/role/decorators/roles.decorator';
+import { Public } from 'src/middlewares/guards/jwt-auth.guard';
 import {
   CreateModel3dConfigBodyDto,
   DeleteModel3dConfigParamsDto,
@@ -28,11 +31,13 @@ export class Model3dConfigController {
   constructor(private readonly model3dConfigService: Model3dConfigService) {}
 
   @Get('model-3d-config/list')
+  @Roles(RoleType.Admin, RoleType.Employee)
   async getModel3dConfigs() {
     return await this.model3dConfigService.getModel3dConfigs();
   }
 
   @Get('model-3d-config/:model3dConfigId/detail')
+  @Public()
   async getByModel3dConfigId(@Param() params: GetModel3dConfigByIdParamsDto) {
     return await this.model3dConfigService.getModel3dConfigById(
       params.model3dConfigId,
@@ -40,6 +45,7 @@ export class Model3dConfigController {
   }
 
   @Get('model-3d-config/:modelId/model/')
+  @Public()
   async getByModelId(@Param() params: GetModel3dConfigByModelIdParamsDto) {
     return await this.model3dConfigService.getModel3dConfigByModelId(
       params.modelId,
@@ -47,6 +53,7 @@ export class Model3dConfigController {
   }
 
   @Post('/model-3d-config/create')
+  @Roles(RoleType.Admin)
   async createModel3dConfig(
     @Body() body: CreateModel3dConfigBodyDto,
     @Req() req: RequestModel,
@@ -67,6 +74,7 @@ export class Model3dConfigController {
   }
 
   @Put('model-3d-config/:model3dConfigId/update')
+  @Roles(RoleType.Admin)
   async updateModel3dConfig(
     @Param() params: UpdateModel3dConfigParamsDto,
     @Body() body: UpdateModel3dConfigBodyDto,
@@ -91,6 +99,7 @@ export class Model3dConfigController {
   }
 
   @Delete('model-3d-config/:model3dConfigId/delete')
+  @Roles(RoleType.Admin)
   async remove(
     @Param() params: DeleteModel3dConfigParamsDto,
     @Req() req: RequestModel,

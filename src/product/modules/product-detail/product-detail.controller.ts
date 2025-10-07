@@ -18,12 +18,16 @@ import {
   UpdateProductDetailParamsDto,
 } from './dtos/product-detail.dto';
 import { RequestModel } from 'src/common/models/request.model';
+import { Roles } from 'src/role/decorators/roles.decorator';
+import { RoleType } from 'src/role/enum/role.enum';
+import { Public } from 'src/middlewares/guards/jwt-auth.guard';
 
 @Controller('api/v1/')
 export class ProductDetailController {
   constructor(private readonly productDetailService: ProductDetailService) {}
 
   @Get('products-detail/:productDetailId/details')
+  @Public()
   async getProductDetail(@Param() params: GetProductDetailByIdParamsDto) {
     return await this.productDetailService.getProductDetailById(
       params.productDetailId,
@@ -31,6 +35,7 @@ export class ProductDetailController {
   }
 
   @Post('product-detail/create')
+  @Roles(RoleType.Admin)
   async createProductDetail(
     @Body() body: CreateProductDetailBodyDto,
     @Req() req: RequestModel,
@@ -55,6 +60,7 @@ export class ProductDetailController {
   }
 
   @Put('product-detail/:productDetailId/update')
+  @Roles(RoleType.Admin)
   async updateProductDetail(
     @Param() params: UpdateProductDetailParamsDto,
     @Body() body: UpdateProductDetailBodyDto,
@@ -85,6 +91,7 @@ export class ProductDetailController {
   }
 
   @Delete('product-detail/:productDetailId/delete')
+  @Roles(RoleType.Admin)
   async deleteProductDetail(
     @Param() params: DeleteProductDetailParamsDto,
     @Req() req: RequestModel,

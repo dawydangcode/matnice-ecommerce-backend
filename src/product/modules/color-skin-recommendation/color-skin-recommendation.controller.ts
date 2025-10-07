@@ -30,13 +30,13 @@ import { Roles } from 'src/role/decorators/roles.decorator';
 
 @Controller('api/v1/')
 @ApiTags('Color Skin Recommendation')
-@Roles(RoleType.Admin)
 export class ColorSkinRecommendationController {
   constructor(
     private readonly colorSkinRecommendationService: ColorSkinRecommendationService,
   ) {}
 
   @Get('color-skin-recommendations/list')
+  @Roles(RoleType.Admin, RoleType.Employee)
   async getColorSkinRecommendations(
     @Query() query: GetColorSkinRecommendationsQueryDto,
   ) {
@@ -49,6 +49,7 @@ export class ColorSkinRecommendationController {
   }
 
   @Get('color-skin-recommendation/:id/detail')
+  @Public()
   async getColorSkinRecommendationById(
     @Param() params: GetColorSkinRecommendationByIdParamsDto,
   ) {
@@ -58,6 +59,7 @@ export class ColorSkinRecommendationController {
   }
 
   @Get('product-color/:productColorId/skin-recommendations')
+  @Public()
   async getRecommendationsByProductColor(
     @Param() params: GetRecommendationsByProductColorParamsDto,
   ) {
@@ -93,6 +95,7 @@ export class ColorSkinRecommendationController {
   }
 
   @Post('color-skin-recommendation/create')
+  @Roles(RoleType.Admin)
   async createColorSkinRecommendation(
     @Req() req: RequestModel,
     @Body() body: CreateColorSkinRecommendationBodyDto,
@@ -105,6 +108,7 @@ export class ColorSkinRecommendationController {
   }
 
   @Post('product-color/:productColorId/bulk-recommendations')
+  @Roles(RoleType.Admin)
   async bulkCreateRecommendations(
     @Req() req: RequestModel,
     @Param() params: GetRecommendationsByProductColorParamsDto,
@@ -118,6 +122,7 @@ export class ColorSkinRecommendationController {
   }
 
   @Put('color-skin-recommendation/:id/update')
+  @Roles(RoleType.Admin)
   async updateColorSkinRecommendation(
     @Req() req: RequestModel,
     @Param() params: UpdateColorSkinRecommendationParamsDto,
@@ -136,6 +141,7 @@ export class ColorSkinRecommendationController {
   }
 
   @Delete('color-skin-recommendation/:id/delete')
+  @Roles(RoleType.Admin)
   async deleteColorSkinRecommendation(
     @Req() req: RequestModel,
     @Param() params: DeleteColorSkinRecommendationParamsDto,

@@ -35,7 +35,7 @@ export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   @ApiOperation({ summary: 'Create a new order' })
   @ApiResponse({
     status: HttpStatus.CREATED,
@@ -128,6 +128,7 @@ export class OrderController {
   }
 
   @Get('my-orders')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   @ApiOperation({ summary: 'Get current user orders' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -150,6 +151,7 @@ export class OrderController {
   }
 
   @Get(':id')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   @ApiOperation({ summary: 'Get an order by ID' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -186,6 +188,7 @@ export class OrderController {
   }
 
   @Get(':id/details')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   @ApiOperation({
     summary: 'Get detailed order information including items and lens details',
   })

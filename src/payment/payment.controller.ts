@@ -36,6 +36,7 @@ export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
   @Post()
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   @ApiOperation({ summary: 'Create a new payment' })
   @ApiResponse({
     status: HttpStatus.CREATED,
@@ -96,6 +97,7 @@ export class PaymentController {
   }
 
   @Get('order/:orderId')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   @ApiOperation({ summary: 'Get payments for a specific order' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -121,6 +123,7 @@ export class PaymentController {
   }
 
   @Get(':id')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   @ApiOperation({ summary: 'Get a payment by ID' })
   @ApiResponse({
     status: HttpStatus.OK,

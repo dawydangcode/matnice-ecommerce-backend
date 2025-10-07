@@ -33,7 +33,7 @@ import {
 @ApiTags('Order Lens Details')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Controller('order-lens-details')
+@Controller('api/v1/order-lens-details')
 export class OrderLensDetailController {
   constructor(
     private readonly orderLensDetailService: OrderLensDetailService,
