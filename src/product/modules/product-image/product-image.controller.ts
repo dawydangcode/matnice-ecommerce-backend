@@ -43,12 +43,11 @@ import { Public } from 'src/middlewares/guards/jwt-auth.guard';
 
 @Controller('api/v1')
 @ApiTags('Product / Product Image')
-@Roles(RoleType.Admin, RoleType.Employee)
 export class ProductImageController {
   constructor(private readonly productImageService: ProductImageService) {}
 
   @Get('product-image/list')
-  @Roles(RoleType.Admin, RoleType.Employee)
+  @Public()
   async getProductImages(
     @Query() query: GetProductImagesQueryDto,
   ): Promise<PageList<ProductImageModel>> {

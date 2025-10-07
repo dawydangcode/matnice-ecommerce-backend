@@ -20,6 +20,9 @@ import {
   UpdateUserAddressParamsDto,
 } from './dto/user-address.dto';
 import { RequestModel } from 'src/common/models/request.model';
+import { Roles } from 'src/role/decorators/roles.decorator';
+import { RoleType } from 'src/role/enum/role.enum';
+import { Public } from 'src/middlewares/guards/jwt-auth.guard';
 
 @ApiTags('User Addresses')
 @Controller('api/v1')
@@ -27,16 +30,19 @@ export class UserAddressController {
   constructor(private readonly userAddressService: UserAddressService) {}
 
   @Get('user-address/list')
+  @Roles(RoleType.Admin)
   async getUserAddresses() {
     return await this.userAddressService.getUserAddresses();
   }
 
   @Get('user-address/:userId/user')
+  @Roles(RoleType.User, RoleType.Admin)
   async getUserAddressByUserId(@Param('userId', ParseIntPipe) userId: number) {
     return await this.userAddressService.getUserAddressByUserId(userId);
   }
 
   @Get('user-address/:userAddressId/detail')
+  @Roles(RoleType.User, RoleType.Admin)
   async findOne(@Param() params: GetUserAddressByIdParamsDto) {
     return await this.userAddressService.getUserAddressById(
       params.userAddressId,
@@ -44,6 +50,7 @@ export class UserAddressController {
   }
 
   @Post('/user-address/create')
+  @Roles(RoleType.User, RoleType.Admin)
   async createUserAddress(
     @Query('userId', ParseIntPipe) userId: number,
     @Body() body: CreateUserAddressBodyDto,
@@ -61,6 +68,7 @@ export class UserAddressController {
   }
 
   @Put('/user-address/:userAddressId/update')
+  @Roles(RoleType.User, RoleType.Admin)
   async updateUserAddress(
     @Param() params: UpdateUserAddressParamsDto,
     @Body() body: UpdateUserAddressBodyDto,
@@ -81,6 +89,7 @@ export class UserAddressController {
   }
 
   @Delete('user-address/:userAddressId/delete')
+  @Roles(RoleType.User, RoleType.Admin)
   async remove(
     @Param() params: DeleteUserAddressParamsDto,
     @Req() req: RequestModel,
@@ -96,6 +105,7 @@ export class UserAddressController {
   }
 
   @Put('user-address/:userAddressId/set-default')
+  @Roles(RoleType.User, RoleType.Admin)
   async setDefault(@Param('id', ParseIntPipe) id: number) {
     return await this.userAddressService.setDefault(id);
   }

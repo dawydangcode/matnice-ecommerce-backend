@@ -31,7 +31,7 @@ export class Model3dConfigController {
   constructor(private readonly model3dConfigService: Model3dConfigService) {}
 
   @Get('model-3d-config/list')
-  @Roles(RoleType.Admin, RoleType.Employee)
+  @Public()
   async getModel3dConfigs() {
     return await this.model3dConfigService.getModel3dConfigs();
   }

@@ -23,6 +23,7 @@ export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 
   @Get('role/list')
+  @Public()
   async getAllRole(): Promise<RoleModel[]> {
     return await this.roleService.getRoles();
   }

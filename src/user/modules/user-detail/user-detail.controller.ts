@@ -22,6 +22,8 @@ import {
   UpdateUserDetailBodyDto,
   UpdateUserDetailParamsDto,
 } from './dtos/user-detail.dto';
+import { Roles } from 'src/role/decorators/roles.decorator';
+import { RoleType } from 'src/role/enum/role.enum';
 
 @ApiTags('User / User Detail')
 @Controller('/api/v1/')
@@ -29,6 +31,7 @@ export class UserDetailController {
   constructor(private readonly userDetailService: UserDetailService) {}
 
   @Get('user-detail/list')
+  @Roles(RoleType.Admin)
   async getUserDetails(@Query() query: GetUserDetailsQueryDto) {
     return await this.userDetailService.getUserDetails(
       undefined,
@@ -40,6 +43,7 @@ export class UserDetailController {
   }
 
   @Get('user-detail/:userDetailId/detail')
+  @Roles(RoleType.User, RoleType.Admin)
   async getUserDetail(
     @Param() params: GetUserDetailParamsDto,
   ): Promise<UserDetailModel> {
@@ -47,6 +51,7 @@ export class UserDetailController {
   }
 
   @Post('user-detail/create')
+  @Roles(RoleType.User, RoleType.Admin)
   async createUserDetail(
     @Req() req: RequestModel,
     @Body() body: CreateUserDetailBodyDto,
@@ -61,6 +66,7 @@ export class UserDetailController {
   }
 
   @Put('user-detail/:userDetailId/update')
+  @Roles(RoleType.User, RoleType.Admin)
   async updateUserDetail(
     @Req() req: RequestModel,
     @Param() params: UpdateUserDetailParamsDto,
@@ -81,6 +87,7 @@ export class UserDetailController {
   }
 
   @Delete('user-detail/:userDetailId/delete')
+  @Roles(RoleType.User, RoleType.Admin)
   async deleteUserDetail(
     @Param() params: DeleteUserDetailParamsDto,
   ): Promise<boolean> {
@@ -94,6 +101,7 @@ export class UserDetailController {
   }
 
   @Get('user/:userId/user-detail')
+  @Roles(RoleType.User, RoleType.Admin)
   async getUserDetailByUserId(@Param() params: any): Promise<UserDetailModel> {
     return await this.userDetailService.getUserDetailByUserId(params.userId);
   }

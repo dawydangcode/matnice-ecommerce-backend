@@ -165,6 +165,7 @@ export class Product3dModelController {
   }
 
   @Get(':productId/active')
+  @Public()
   @ApiOperation({ summary: 'Get active 3D model for product' })
   @ApiResponse({
     status: HttpStatus.OK,
