@@ -26,17 +26,18 @@ import {
 import { RequestModel } from '../../../common/models/request.model';
 import { RoleType } from 'src/role/enum/role.enum';
 import { Roles } from 'src/role/decorators/roles.decorator';
+import { Public } from 'src/middlewares/guards/jwt-auth.guard';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
 
 @ApiTags('Lens Variant Coating')
 @Controller('api/v1/')
-@Roles(RoleType.Admin)
 export class LensVariantCoatingController {
   constructor(
     private readonly lensVariantCoatingService: LensVariantCoatingService,
   ) {}
 
   @Get('lens-variant-coating/list')
+  @Roles(RoleType.Admin, RoleType.Employee)
   async findAll(@Query() query: GetLensVariantCoatingsQueryDto) {
     return await this.lensVariantCoatingService.getLensVariantCoatings(
       undefined,
@@ -48,6 +49,7 @@ export class LensVariantCoatingController {
   }
 
   @Get('lens-variant-coating/:lensVariantCoatingId')
+  @Public()
   async findOne(
     @Param() params: GetLensVariantCoatingParamsDto,
   ): Promise<LensVariantCoatingModel> {
@@ -57,6 +59,7 @@ export class LensVariantCoatingController {
   }
 
   @Get('lens-variant/:lensVariantId/coatings')
+  @Public()
   async getCoatingsByLensVariant(
     @Param('lensVariantId') lensVariantId: number,
   ): Promise<LensVariantCoatingModel[]> {
@@ -66,6 +69,7 @@ export class LensVariantCoatingController {
   }
 
   @Get('lens-coating/:lensCoatingId/variants')
+  @Public()
   async getLensVariantsByCoating(
     @Param('lensCoatingId') lensCoatingId: number,
   ): Promise<LensVariantCoatingModel[]> {
@@ -75,6 +79,7 @@ export class LensVariantCoatingController {
   }
 
   @Post('lens-variant-coating')
+  @Roles(RoleType.Admin)
   async create(
     @Body() body: CreateLensVariantCoatingBodyDto,
     @Req() req: RequestModel,
@@ -87,6 +92,7 @@ export class LensVariantCoatingController {
   }
 
   @Put('lens-variant-coating/:lensVariantCoatingId')
+  @Roles(RoleType.Admin)
   async update(
     @Param() params: UpdateLensVariantCoatingParamsDto,
     @Body() body: UpdateLensVariantCoatingBodyDto,
@@ -106,6 +112,7 @@ export class LensVariantCoatingController {
   }
 
   @Delete('lens-variant-coating/:lensVariantCoatingId')
+  @Roles(RoleType.Admin)
   async remove(
     @Param() params: DeleteLensVariantCoatingParamsDto,
     @Req() req: RequestModel,

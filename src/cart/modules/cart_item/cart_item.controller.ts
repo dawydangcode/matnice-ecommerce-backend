@@ -24,11 +24,11 @@ import { Roles } from 'src/role/decorators/roles.decorator';
 
 @ApiTags('Cart / Cart Item')
 @Controller('api/v1/cart-item')
-@Roles(RoleType.Admin, RoleType.User, RoleType.Employee, RoleType.Guest)
 export class CartItemController {
   constructor(private readonly cartItemService: CartItemService) {}
 
   @Get('list')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   async getCartItems(
     @Query() query: CartItemQueryDto,
   ): Promise<CartItemModel[]> {
@@ -39,6 +39,7 @@ export class CartItemController {
   }
 
   @Get(':cartItemId/detail')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   async getCartItemById(
     @Param() params: GetCartItemParamsDto,
   ): Promise<CartItemModel> {
@@ -46,6 +47,7 @@ export class CartItemController {
   }
 
   @Post('create')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   async createCartItem(
     @Req() req: RequestModel,
     @Body() body: CreateCartItemBodyDto,
@@ -76,6 +78,7 @@ export class CartItemController {
   }
 
   @Put(':cartItemId/update')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   async updateCartItem(
     @Req() req: RequestModel,
     @Param() params: GetCartItemParamsDto,
@@ -92,6 +95,7 @@ export class CartItemController {
   }
 
   @Delete(':cartItemId/delete')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   async deleteCartItem(
     @Req() req: RequestModel,
     @Param() params: GetCartItemParamsDto,
@@ -103,6 +107,7 @@ export class CartItemController {
   }
 
   @Get('cart/:cartId/summary')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   async getCartSummary(@Param('cartId') cartId: number): Promise<{
     totalItems: number;
     totalAmount: number;
@@ -112,6 +117,7 @@ export class CartItemController {
   }
 
   @Get('cart/:cartId/with-details')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   async getCartItemsWithDetails(
     @Param('cartId') cartId: number,
   ): Promise<CartItemModel[]> {
@@ -119,11 +125,13 @@ export class CartItemController {
   }
 
   @Get('cart/:cartId/count')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   async countCartItems(@Param('cartId') cartId: number): Promise<number> {
     return await this.cartItemService.countCartItems(cartId);
   }
 
   @Delete('cart/:cartId/clear')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   async clearCartItems(
     @Req() req: RequestModel,
     @Param('cartId') cartId: number,

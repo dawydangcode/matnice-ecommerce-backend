@@ -23,17 +23,18 @@ import {
 import { RequestModel } from '../../../common/models/request.model';
 import { RoleType } from 'src/role/enum/role.enum';
 import { Roles } from 'src/role/decorators/roles.decorator';
+import { Public } from 'src/middlewares/guards/jwt-auth.guard';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
 
 @ApiTags('Lens Refraction Range')
 @Controller('api/v1/')
-@Roles(RoleType.Admin)
 export class LensRefractionRangeController {
   constructor(
     private readonly lensRefractionRangeService: LensRefractionRangeService,
   ) {}
 
   @Get('lens-refraction-range/list')
+  @Public()
   async findAll(@Query() query: GetLensRefractionRangesQueryDto) {
     return await this.lensRefractionRangeService.getLensRefractionRanges(
       undefined,
@@ -46,6 +47,7 @@ export class LensRefractionRangeController {
   }
 
   @Get('lens-refraction-range/:lensRefractionRangeId')
+  @Public()
   async findOne(
     @Param() params: GetLensRefractionRangeParamsDto,
   ): Promise<LensRefractionRangeModel> {
@@ -55,6 +57,7 @@ export class LensRefractionRangeController {
   }
 
   @Post('lens-refraction-range')
+  @Roles(RoleType.Admin)
   async create(
     @Body() body: CreateLensRefractionRangeBodyDto,
     @Req() req: RequestModel,
@@ -70,6 +73,7 @@ export class LensRefractionRangeController {
   }
 
   @Put('lens-refraction-range/:lensRefractionRangeId')
+  @Roles(RoleType.Admin)
   async update(
     @Param() params: UpdateLensRefractionRangeParamsDto,
     @Body() body: UpdateLensRefractionRangeBodyDto,
@@ -92,6 +96,7 @@ export class LensRefractionRangeController {
   }
 
   @Delete('lens-refraction-range/:lensRefractionRangeId')
+  @Roles(RoleType.Admin)
   async remove(
     @Param() params: DeleteLensRefractionRangeParamsDto,
     @Req() req: RequestModel,

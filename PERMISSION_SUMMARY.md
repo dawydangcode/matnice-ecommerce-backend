@@ -1,32 +1,96 @@
-# Phân quyền Endpoint - Tổng kết
+# 📋 Tóm Tắt Phân Quyền Hệ Thống - ĐÃ CẬP NHẬT
 
-## Nguyên tắc phân quyền:
+## 🔐 Các Loại Quyền Truy Cập
 
-### 1. **GUEST (Public - không cần đăng nhập)**
-- Xem sản phẩm, danh mục, thương hiệu
-- Phân tích AI 
-- Đăng ký, đăng nhập
+### 1. **@Public()** - Khách (Guest)
+- Không cần đăng nhập
+- Có thể xem thông tin cơ bản về sản phẩm, lens, màu sắc, độ dày kính
+- Có thể lọc lens theo prescription
 
-### 2. **USER (Người dùng đã đăng nhập)**
+### 2. **@Roles(RoleType.User)** - Người dùng
+- Phải đăng nhập với role "user"
+- Có thể quản lý giỏ hàng và đơn hàng cá nhân
 - Tất cả quyền của Guest
-- Quản lý giỏ hàng
-- Tạo đơn hàng
-- Xem lịch sử đơn hàng của mình
 
-### 3. **EMPLOYEE (Nhân viên)**  
+### 3. **@Roles(RoleType.Employee)** - Nhân viên
+- Có quyền xem danh sách quản lý (admin view)
+- Không thể tạo/sửa/xóa dữ liệu
 - Tất cả quyền của User
-- Xem danh sách sản phẩm, danh mục (admin view)
-- Xem báo cáo
 
-### 4. **ADMIN (Quản trị viên)**
-- Tất cả quyền
-- Tạo/sửa/xóa sản phẩm, danh mục, thương hiệu
-- Quản lý người dùng
-- Xem tất cả đơn hàng
+### 4. **@Roles(RoleType.Admin)** - Quản trị viên
+- Có quyền tạo, sửa, xóa tất cả dữ liệu
+- Quản lý toàn bộ hệ thống
+- Tất cả quyền của Employee
+
+---
+
+## 📊 Phân Quyền Chi Tiết - LENS MODULE (ĐÃ SỬA)
+
+### 🔍 **Lens Controller**
+| Endpoint | Method | Guest | User | Employee | Admin | Mô tả |
+|----------|--------|-------|------|----------|-------|--------|
+| `/lens/cards` | GET | ✅ | ✅ | ✅ | ✅ | Xem danh sách lens (public) |
+| `/lens/filter-by-prescription` | GET | ✅ | ✅ | ✅ | ✅ | Lọc lens theo prescription |
+| `/lens/:id/detail` | GET | ✅ | ✅ | ✅ | ✅ | Xem chi tiết lens |
+| `/lens/:id/full-details` | GET | ✅ | ✅ | ✅ | ✅ | Xem thông tin đầy đủ |
+| `/lens/list` | GET | ❌ | ❌ | ✅ | ✅ | Danh sách quản lý |
+| `/lens/create` | POST | ❌ | ❌ | ❌ | ✅ | Tạo lens mới |
+| `/lens/:id/update` | PUT | ❌ | ❌ | ❌ | ✅ | Cập nhật lens |
+| `/lens/:id/delete` | DELETE | ❌ | ❌ | ❌ | ✅ | Xóa lens |
+
+### 🎯 **Lens Variant Controller** ⚠️ **ĐÃ SỬA**
+| Endpoint | Method | Guest | User | Employee | Admin | Mô tả |
+|----------|--------|-------|------|----------|-------|--------|
+| `/lens-variants/by-lens/:id` | GET | ✅ | ✅ | ✅ | ✅ | Xem variants của lens |
+| `/lens-variant/:id` | GET | ✅ | ✅ | ✅ | ✅ | Chi tiết variant |
+| `/lens-variants/list` | GET | ❌ | ❌ | ✅ | ✅ | Danh sách quản lý |
+| `/lens-variant/create` | POST | ❌ | ❌ | ❌ | ✅ | Tạo variant |
+| `/lens-variant/:id/update` | PUT | ❌ | ❌ | ❌ | ✅ | Cập nhật variant |
+| `/lens-variant/:id/delete` | DELETE | ❌ | ❌ | ❌ | ✅ | Xóa variant |
+
+### 🎨 **Lens Tint Color Controller** ⚠️ **ĐÃ SỬA**
+| Endpoint | Method | Guest | User | Employee | Admin | Mô tả |
+|----------|--------|-------|------|----------|-------|--------|
+| `/lens-tint-colors/list` | GET | ✅ | ✅ | ✅ | ✅ | Xem danh sách màu |
+| `/lens-tint-color/:id` | GET | ✅ | ✅ | ✅ | ✅ | Chi tiết màu |
+| `/lens-tint-color` | POST | ❌ | ❌ | ❌ | ✅ | Tạo màu mới |
+| `/lens-tint-color/:id` | PUT | ❌ | ❌ | ❌ | ✅ | Cập nhật màu |
+| `/lens-tint-color/:id` | DELETE | ❌ | ❌ | ❌ | ✅ | Xóa màu |
+| `/lens-tint-color/upload-image` | POST | ❌ | ❌ | ❌ | ✅ | Upload ảnh màu |
+
+### 📏 **Lens Thickness Controller** ⚠️ **ĐÃ SỬA**  
+| Endpoint | Method | Guest | User | Employee | Admin | Mô tả |
+|----------|--------|-------|------|----------|-------|--------|
+| `/lens-thickness/list` | GET | ✅ | ✅ | ✅ | ✅ | Xem độ dày kính |
+| `/lens-thickness/:id` | GET | ✅ | ✅ | ✅ | ✅ | Chi tiết độ dày |
+| `/lens-thickness` | POST | ❌ | ❌ | ❌ | ✅ | Tạo độ dày mới |
+| `/lens-thickness/:id` | PUT | ❌ | ❌ | ❌ | ✅ | Cập nhật độ dày |
+| `/lens-thickness/:id` | DELETE | ❌ | ❌ | ❌ | ✅ | Xóa độ dày |
+
+### 📐 **Lens Refraction Range Controller** ⚠️ **ĐÃ SỬA**
+| Endpoint | Method | Guest | User | Employee | Admin | Mô tả |
+|----------|--------|-------|------|----------|-------|--------|
+| `/lens-refraction-range/list` | GET | ✅ | ✅ | ✅ | ✅ | Xem range khúc xạ |
+| `/lens-refraction-range/:id` | GET | ✅ | ✅ | ✅ | ✅ | Chi tiết range |
+| `/lens-refraction-range` | POST | ❌ | ❌ | ❌ | ✅ | Tạo range mới |
+| `/lens-refraction-range/:id` | PUT | ❌ | ❌ | ❌ | ✅ | Cập nhật range |
+| `/lens-refraction-range/:id` | DELETE | ❌ | ❌ | ❌ | ✅ | Xóa range |
+
+### 🎨 **Lens Variant Coating Controller** ⚠️ **ĐÃ SỬA**
+| Endpoint | Method | Guest | User | Employee | Admin | Mô tả |
+|----------|--------|-------|------|----------|-------|--------|
+| `/lens-variant/:id/coatings` | GET | ✅ | ✅ | ✅ | ✅ | Xem coating của variant |
+| `/lens-coating/:id/variants` | GET | ✅ | ✅ | ✅ | ✅ | Xem variant của coating |
+| `/lens-variant-coating/:id` | GET | ✅ | ✅ | ✅ | ✅ | Chi tiết coating |
+| `/lens-variant-coating/list` | GET | ❌ | ❌ | ✅ | ✅ | Danh sách quản lý |
+| `/lens-variant-coating` | POST | ❌ | ❌ | ❌ | ✅ | Tạo coating |
+| `/lens-variant-coating/:id` | PUT | ❌ | ❌ | ❌ | ✅ | Cập nhật coating |
+| `/lens-variant-coating/:id` | DELETE | ❌ | ❌ | ❌ | ✅ | Xóa coating |
 
 ## Phân quyền theo Controller:
 
 ### Brand Controller
+
 - `GET /brand/list` → **Admin + Employee** (danh sách quản lý)
 - `GET /brand/:id/detail` → **Public** (chi tiết cho frontend)
 - `POST /brand/create` → **Admin only**
@@ -35,6 +99,7 @@
 - `GET /brand/getBrandsForFilter` → **Public** (filter dropdown)
 
 ### Product Controller
+
 - `GET /products/list` → **Admin + Employee** (danh sách quản lý)
 - `GET /products/cards` → **Public** (hiển thị sản phẩm)
 - `GET /product/:id/detail` → **Public** (chi tiết sản phẩm)
@@ -44,6 +109,7 @@
 - `DELETE /product/:id/delete` → **Admin only**
 
 ### Category Controller
+
 - `GET /category/list` → **Admin + Employee** (danh sách quản lý)
 - `GET /category/:id/details` → **Public** (chi tiết cho frontend)
 - `POST /category/create` → **Admin only**
@@ -51,24 +117,28 @@
 - `DELETE /category/:id/delete` → **Admin only**
 
 ### Cart Controller
+
 - `GET /my-cart/*` → **User + Admin + Employee** (giỏ hàng cá nhân)
 - `POST /create` → **User + Admin + Employee** (tạo giỏ hàng)
 - `GET /:cartId/*` → **Admin + Employee** (xem giỏ hàng bất kỳ)
 - `GET /debug/*` → **Admin only** (debug)
 
 ### Cart Frame Controller
+
 - `GET /list` → **User + Admin + Employee** (xem frame trong giỏ)
 - `POST /create` → **User + Admin + Employee** (thêm frame)
 - `PUT /:id/update` → **User + Admin + Employee** (cập nhật frame)
 - `DELETE /:id/delete` → **User + Admin + Employee** (xóa frame)
 
 ### AI Service Controller
+
 - `POST /analyze-face` → **Public** (phân tích khuôn mặt)
 - `GET /analysis/:id/result` → **Public** (kết quả phân tích)
 - `GET /analysis/history` → **Authenticated** (lịch sử phân tích)
 - `POST /analysis/cleanup` → **Admin only** (dọn dẹp dữ liệu)
 
 ### Brand Lens Controller
+
 - `GET /brand-lens/list` → **Admin only**
 - `GET /brand-lens/:id/detail` → **Admin only**
 - `POST /brand-lens/create` → **Admin only**
@@ -78,6 +148,7 @@
 - `GET /brand-lens` → **Public** (navigation dropdown)
 
 ### Category Lens Controller
+
 - `GET /category-lens/list` → **Admin only**
 - `GET /category-lens/:id/details` → **Admin only**
 - `POST /category-lens/create` → **Admin only**
@@ -88,15 +159,17 @@
 ## Các endpoint cần bổ sung phân quyền:
 
 ### 1. Còn thiếu trong Product Controller:
+
 ```typescript
 @Put('product/:productId/update')
 @Roles(RoleType.Admin)
 
-@Delete('product/:productId/delete')  
+@Delete('product/:productId/delete')
 @Roles(RoleType.Admin)
 ```
 
 ### 2. Còn thiếu trong Cart Frame Controller:
+
 ```typescript
 @Get(':cartFrameId/detail')
 @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
@@ -120,7 +193,7 @@
 ## Cách test:
 
 1. **Test Guest**: Không token → chỉ truy cập được Public endpoints
-2. **Test User**: Token user → truy cập được User + Public endpoints  
+2. **Test User**: Token user → truy cập được User + Public endpoints
 3. **Test Admin**: Token admin → truy cập được tất cả endpoints
 4. **Test Employee**: Token employee → truy cập được Employee + User + Public
 

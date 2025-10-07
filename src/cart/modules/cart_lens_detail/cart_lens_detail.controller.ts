@@ -24,11 +24,11 @@ import { Roles } from 'src/role/decorators/roles.decorator';
 
 @ApiTags('Cart / Cart Lens Detail')
 @Controller('api/v1/cart-lens-detail')
-@Roles(RoleType.Admin, RoleType.User, RoleType.Employee, RoleType.Guest)
 export class CartLensDetailController {
   constructor(private readonly cartLensDetailService: CartLensDetailService) {}
 
   @Get(':cartLensDetailId/detail')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   async getCartLensDetailById(
     @Param() params: GetCartLensDetailParamsDto,
   ): Promise<CartLensDetailModel> {
@@ -38,6 +38,7 @@ export class CartLensDetailController {
   }
 
   @Get('cart-frame/:cartFrameId')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   async getCartLensDetailByCartFrameId(
     @Param('cartFrameId') cartFrameId: number,
   ): Promise<CartLensDetailModel | undefined> {
@@ -47,6 +48,7 @@ export class CartLensDetailController {
   }
 
   @Post('create')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   async createCartLensDetail(
     @Req() req: RequestModel,
     @Body() body: CreateCartLensDetailDto,
@@ -94,6 +96,7 @@ export class CartLensDetailController {
   }
 
   @Put(':cartLensDetailId/update')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   async updateCartLensDetail(
     @Req() req: RequestModel,
     @Param() params: GetCartLensDetailParamsDto,
@@ -111,6 +114,7 @@ export class CartLensDetailController {
   }
 
   @Delete(':cartLensDetailId/delete')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   async deleteCartLensDetail(
     @Req() req: RequestModel,
     @Param() params: GetCartLensDetailParamsDto,
@@ -125,6 +129,7 @@ export class CartLensDetailController {
   }
 
   @Delete('cart-frame/:cartFrameId/delete')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   async deleteCartLensDetailByCartFrameId(
     @Req() req: RequestModel,
     @Param('cartFrameId') cartFrameId: number,
@@ -136,6 +141,7 @@ export class CartLensDetailController {
   }
 
   @Get(':cartLensDetailId/calculate-price')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   async calculateLensPrice(
     @Param() params: GetCartLensDetailParamsDto,
   ): Promise<{ calculatedPrice: number }> {

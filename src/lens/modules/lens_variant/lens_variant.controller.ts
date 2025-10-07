@@ -23,15 +23,16 @@ import {
 import { RequestModel } from '../../../common/models/request.model';
 import { RoleType } from 'src/role/enum/role.enum';
 import { Roles } from 'src/role/decorators/roles.decorator';
+import { Public } from 'src/middlewares/guards/jwt-auth.guard';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
 
 @ApiTags('Lens Variant')
 @Controller('api/v1/')
-@Roles(RoleType.Admin)
 export class LensVariantController {
   constructor(private readonly lensVariantService: LensVariantService) {}
 
   @Get('lens-variants/list')
+  @Roles(RoleType.Admin, RoleType.Employee)
   async getLensVariant(@Query() query: GetLensVariantsQueryDto) {
     return await this.lensVariantService.getLensVariants(
       undefined,
@@ -44,6 +45,7 @@ export class LensVariantController {
   }
 
   @Get('lens-variants/by-lens/:lensId')
+  @Public()
   async findByLensId(
     @Param('lensId') lensId: number,
   ): Promise<LensVariantModel[]> {
@@ -51,6 +53,7 @@ export class LensVariantController {
   }
 
   @Get('lens-variant/:lensVariantId')
+  @Public()
   async getLensVariantById(
     @Param() params: GetLensVariantByIdParamsDto,
   ): Promise<LensVariantModel> {
@@ -58,6 +61,7 @@ export class LensVariantController {
   }
 
   @Post('lens-variant/create')
+  @Roles(RoleType.Admin)
   async createLensVariant(
     @Body() body: CreateLensVariantBodyDto,
     @Req() req: RequestModel,
@@ -74,6 +78,7 @@ export class LensVariantController {
   }
 
   @Put('lens-variant/:lensVariantId/update')
+  @Roles(RoleType.Admin)
   async update(
     @Param() params: UpdateLensVariantParamsDto,
     @Body() body: UpdateLensVariantBodyDto,
@@ -96,6 +101,7 @@ export class LensVariantController {
   }
 
   @Delete('lens-variant/:lensVariantId/delete')
+  @Roles(RoleType.Admin)
   async deleteLensVariant(
     @Param() params: DeleteLensVariantParamsDto,
     @Req() req: RequestModel,

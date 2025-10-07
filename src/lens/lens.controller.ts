@@ -31,6 +31,8 @@ import { RequestModel } from '../common/models/request.model';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Public } from 'src/middlewares/guards/jwt-auth.guard';
+import { Roles } from 'src/role/decorators/roles.decorator';
+import { RoleType } from 'src/role/enum/role.enum';
 
 @Controller('api/v1')
 @ApiTags('Lens')
@@ -38,6 +40,7 @@ export class LensController {
   constructor(private readonly lensService: LensService) {}
 
   @Get('lens/list')
+  @Roles(RoleType.Admin, RoleType.Employee)
   async getLenses(@Query() query: GetLensesQueryDto) {
     return this.lensService.getLenses(
       undefined,
@@ -140,6 +143,7 @@ export class LensController {
   }
 
   @Post('lens/create')
+  @Roles(RoleType.Admin)
   async createLens(@Body() body: CreateLensBodyDto, @Req() req: RequestModel) {
     return this.lensService.createLens(
       body.name,
@@ -153,6 +157,7 @@ export class LensController {
   }
 
   @Put('lens/:lensId/update')
+  @Roles(RoleType.Admin)
   async updateLens(
     @Param() params: UpdateLensParamsDto,
     @Body() body: UpdateLensBodyDto,
@@ -172,6 +177,7 @@ export class LensController {
   }
 
   @Delete('lens/:lensId/delete')
+  @Roles(RoleType.Admin)
   async deleteLens(
     @Param() params: DeleteLensParamsDto,
     @Req() req: RequestModel,

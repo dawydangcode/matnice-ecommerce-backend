@@ -23,15 +23,16 @@ import {
 import { RequestModel } from '../../../common/models/request.model';
 import { RoleType } from 'src/role/enum/role.enum';
 import { Roles } from 'src/role/decorators/roles.decorator';
+import { Public } from 'src/middlewares/guards/jwt-auth.guard';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
 
 @ApiTags('Lens Thickness')
 @Controller('api/v1/')
-@Roles(RoleType.Admin)
 export class LensThicknessController {
   constructor(private readonly lensThicknessService: LensThicknessService) {}
 
   @Get('lens-thickness/list')
+  @Public()
   async findAll(@Query() query: GetLensThicknessesQueryDto) {
     return await this.lensThicknessService.getLensThicknesses(
       undefined,
@@ -43,6 +44,7 @@ export class LensThicknessController {
   }
 
   @Get('lens-thickness/:lensThicknessId')
+  @Public()
   async findOne(
     @Param() params: GetLensThicknessParamsDto,
   ): Promise<LensThicknessModel> {
@@ -52,6 +54,7 @@ export class LensThicknessController {
   }
 
   @Post('lens-thickness')
+  @Roles(RoleType.Admin)
   async create(
     @Body() body: CreateLensThicknessBodyDto,
     @Req() req: RequestModel,
@@ -65,6 +68,7 @@ export class LensThicknessController {
   }
 
   @Put('lens-thickness/:lensThicknessId')
+  @Roles(RoleType.Admin)
   async update(
     @Param() params: UpdateLensThicknessParamsDto,
     @Body() body: UpdateLensThicknessBodyDto,
@@ -84,6 +88,7 @@ export class LensThicknessController {
   }
 
   @Delete('lens-thickness/:lensThicknessId')
+  @Roles(RoleType.Admin)
   async remove(
     @Param() params: DeleteLensThicknessParamsDto,
     @Req() req: RequestModel,

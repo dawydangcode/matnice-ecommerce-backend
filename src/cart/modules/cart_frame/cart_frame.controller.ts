@@ -39,6 +39,7 @@ export class CartFrameController {
   }
 
   @Get(':cartFrameId/detail')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   async getCartFrameById(
     @Param() params: GetCartFrameParamsDto,
   ): Promise<CartFrameModel> {
@@ -79,6 +80,7 @@ export class CartFrameController {
   }
 
   @Put(':cartFrameId/update')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   async updateCartFrame(
     @Req() req: RequestModel,
     @Param() params: GetCartFrameParamsDto,
@@ -121,6 +123,7 @@ export class CartFrameController {
   }
 
   @Delete(':cartFrameId/delete')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   async deleteCartFrame(
     @Req() req: RequestModel,
     @Param() params: GetCartFrameParamsDto,

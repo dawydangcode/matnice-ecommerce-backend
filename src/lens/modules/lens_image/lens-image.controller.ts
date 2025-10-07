@@ -24,6 +24,9 @@ import {
 } from '@nestjs/swagger';
 import { Response as ExpressResponse } from 'express';
 import { JwtAuthGuard } from 'src/middlewares/guards/jwt-auth.guard';
+import { Roles } from 'src/role/decorators/roles.decorator';
+import { RoleType } from 'src/role/enum/role.enum';
+import { Public } from 'src/middlewares/guards/jwt-auth.guard';
 import { LensImageService } from './lens-image.service';
 import {
   CreateLensImageDto,
@@ -34,7 +37,6 @@ import {
 
 @ApiTags('Lens Images')
 @Controller('api/v1/lens-images')
-@UseGuards(JwtAuthGuard)
 export class LensImageController {
   constructor(private readonly lensImageService: LensImageService) {}
 

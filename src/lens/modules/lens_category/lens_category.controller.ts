@@ -37,7 +37,7 @@ export class LensCategoryController {
   constructor(private readonly lensCategoryService: LensCategoryService) {}
 
   @Get('lens-category/list')
-  @Roles(RoleType.Admin)
+  @Roles(RoleType.Admin, RoleType.Employee)
   async getLensCategories(@Query() query: GetCategoriesQueryDto) {
     return this.lensCategoryService.getLensCategories(
       undefined,
@@ -55,7 +55,7 @@ export class LensCategoryController {
   }
 
   @Get('lens/:lensId')
-  @Roles(RoleType.Admin)
+  @Roles(RoleType.Admin, RoleType.Employee)
   async getLenCategoryByLensId(
     @Param() params: GetLensCategoryByLensIdParamsDto,
   ) {

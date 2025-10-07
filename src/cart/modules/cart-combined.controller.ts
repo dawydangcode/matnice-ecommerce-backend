@@ -22,17 +22,18 @@ import { Roles } from 'src/role/decorators/roles.decorator';
 
 @ApiTags('Cart / Combined Operations')
 @Controller('api/v1/cart-combined')
-@Roles(RoleType.Admin, RoleType.User, RoleType.Employee, RoleType.Guest)
 export class CartCombinedController {
   constructor(private readonly cartCombinedService: CartCombinedService) {}
 
   @Get('test')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   async testEndpoint() {
     console.log('[CartCombinedController] Test endpoint called');
     return { message: 'Cart Combined Controller is working!' };
   }
 
   @Post('item/create-complete')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   async createCartItemComplete(
     @Req() req: RequestModel,
     @Body() body: CreateCartItemCompleteDto,

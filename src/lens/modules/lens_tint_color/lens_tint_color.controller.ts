@@ -27,15 +27,16 @@ import {
 import { RequestModel } from '../../../common/models/request.model';
 import { RoleType } from 'src/role/enum/role.enum';
 import { Roles } from 'src/role/decorators/roles.decorator';
+import { Public } from 'src/middlewares/guards/jwt-auth.guard';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
 
 @ApiTags('Lens Tint Color')
 @Controller('api/v1/')
-@Roles(RoleType.Admin)
 export class LensTintColorController {
   constructor(private readonly lensTintColorService: LensTintColorService) {}
 
   @Get('lens-tint-colors/list')
+  @Public()
   async findAll(@Query() query: GetLensTintColorsQueryDto) {
     return await this.lensTintColorService.getLensTintColors(
       undefined,
@@ -48,6 +49,7 @@ export class LensTintColorController {
   }
 
   @Get('lens-tint-color/:lensTintColorId')
+  @Public()
   async findOne(
     @Param() params: GetLensTintColorParamsDto,
   ): Promise<LensTintColorModel> {
@@ -57,6 +59,7 @@ export class LensTintColorController {
   }
 
   @Post('lens-tint-color')
+  @Roles(RoleType.Admin)
   @UseInterceptors(FileInterceptor('image'))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -88,6 +91,7 @@ export class LensTintColorController {
   }
 
   @Put('lens-tint-color/:lensTintColorId')
+  @Roles(RoleType.Admin)
   @UseInterceptors(FileInterceptor('image'))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -123,6 +127,7 @@ export class LensTintColorController {
   }
 
   @Delete('lens-tint-color/:lensTintColorId')
+  @Roles(RoleType.Admin)
   async remove(
     @Param() params: DeleteLensTintColorParamsDto,
     @Req() req: RequestModel,
@@ -138,6 +143,7 @@ export class LensTintColorController {
   }
 
   @Post('lens-tint-color/upload-image')
+  @Roles(RoleType.Admin)
   @UseInterceptors(FileInterceptor('image'))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
