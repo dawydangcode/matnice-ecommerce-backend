@@ -29,7 +29,6 @@ import { Public } from 'src/middlewares/guards/jwt-auth.guard';
 
 @Controller('api/v1/')
 @ApiTags('Product')
-@Roles(RoleType.Admin)
 export class ProductController {
   constructor(
     private readonly productService: ProductService,
@@ -37,6 +36,7 @@ export class ProductController {
   ) {}
 
   @Get('products/list')
+  @Roles(RoleType.Admin, RoleType.Employee)
   async getProducts(@Query() query: GetProductsQueryDto) {
     return await this.productService.getProducts(
       undefined,
@@ -48,7 +48,7 @@ export class ProductController {
   }
 
   @Get('products/cards')
-  @Roles()
+  @Public()
   async getProductsForCardDisplay(@Query() query: GetProductsForCardQueryDto) {
     const pagination = new PaginationParamsModel(query.page, query.limit);
     const priceRange =
@@ -78,16 +78,19 @@ export class ProductController {
   }
 
   @Get('product/:productId/detail')
+  @Public()
   async getProductById(@Param() params: GetProductByIdParamsDto) {
     return await this.productService.getProductById(params.productId);
   }
 
   @Get('product/:productId/with-categories')
+  @Public()
   async getProductWithCategories(@Param() params: GetProductByIdParamsDto) {
     return await this.productService.getProductWithCategories(params.productId);
   }
 
   @Post('product/create')
+  @Roles(RoleType.Admin)
   async createProduct(
     @Req() req: RequestModel,
     @Body() body: CreateProductBodyDto,

@@ -9,7 +9,6 @@ import { RequestModel } from 'src/common/models/request.model';
 
 @ApiTags('cart')
 @Controller('/api/v1/cart')
-@Roles(RoleType.Admin, RoleType.User, RoleType.Employee, RoleType.Guest)
 export class CartController {
   constructor(
     private readonly cartCombinedService: CartCombinedService,
@@ -17,6 +16,7 @@ export class CartController {
   ) {}
 
   @Get('my-cart/id')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   @ApiOperation({ summary: 'Get current user cart ID' })
   @ApiResponse({
     status: 200,
@@ -36,6 +36,7 @@ export class CartController {
   }
 
   @Post('create')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   @ApiOperation({ summary: 'Create new cart for current user' })
   @ApiResponse({
     status: 201,
@@ -51,6 +52,7 @@ export class CartController {
   }
 
   @Get('my-cart/items-with-details')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   @ApiOperation({ summary: 'Get current user cart items with details' })
   @ApiResponse({
     status: 200,
@@ -81,6 +83,7 @@ export class CartController {
   }
 
   @Get('my-cart/summary')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   @ApiOperation({ summary: 'Get current user cart summary' })
   @ApiResponse({
     status: 200,
@@ -110,6 +113,7 @@ export class CartController {
   }
 
   @Get(':cartId/items-with-details')
+  @Roles(RoleType.Admin, RoleType.Employee)
   async getCartItemsWithDetails(@Param('cartId') cartId: number) {
     const cartIdNum = Number(cartId);
     console.log(
@@ -131,6 +135,7 @@ export class CartController {
   }
 
   @Get(':cartId/summary')
+  @Roles(RoleType.Admin, RoleType.Employee)
   @ApiOperation({ summary: 'Get cart summary' })
   @ApiResponse({
     status: 200,
@@ -155,6 +160,7 @@ export class CartController {
   }
 
   @Get('debug/create-cart')
+  @Roles(RoleType.Admin)
   @ApiOperation({ summary: 'Debug: Create a test cart' })
   async debugCreateCart(@Req() req: RequestModel) {
     try {

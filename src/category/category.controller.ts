@@ -13,6 +13,7 @@ import { CategoryService } from './category.service';
 import { ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/role/decorators/roles.decorator';
 import { RoleType } from 'src/role/enum/role.enum';
+import { Public } from 'src/middlewares/guards/jwt-auth.guard';
 import {
   CategoryCreateBodyDto,
   GetCategoriesQueryDto,
@@ -23,11 +24,11 @@ import { RequestModel } from 'src/common/models/request.model';
 
 @Controller('api/v1/')
 @ApiTags('Category')
-@Roles(RoleType.Admin)
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Get('category/list')
+  @Roles(RoleType.Admin, RoleType.Employee)
   async getCategoryList(@Query() query: GetCategoriesQueryDto) {
     return await this.categoryService.getCategories(
       undefined,
@@ -39,11 +40,13 @@ export class CategoryController {
   }
 
   @Get('category/:categoryId/details')
+  @Public()
   async getCategoryById(@Param() params: GetCategoryByIdParamsDto) {
     return await this.categoryService.getCategoryById(params.categoryId);
   }
 
   @Post('category/create')
+  @Roles(RoleType.Admin)
   async createCategory(
     @Req() req: RequestModel,
     @Body() body: CategoryCreateBodyDto,
@@ -56,6 +59,7 @@ export class CategoryController {
   }
 
   @Put('category/:categoryId/update')
+  @Roles(RoleType.Admin)
   async updateCategory(
     @Param() params: GetCategoryByIdParamsDto,
     @Body() body: CategoryCreateBodyDto,
@@ -74,6 +78,7 @@ export class CategoryController {
   }
 
   @Delete('category/:categoryId/delete')
+  @Roles(RoleType.Admin)
   async deleteCategory(
     @Param() params: GetCategoryByIdParamsDto,
     @Req() req: RequestModel,

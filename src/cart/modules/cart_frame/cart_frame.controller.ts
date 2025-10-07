@@ -24,11 +24,11 @@ import { Roles } from 'src/role/decorators/roles.decorator';
 
 @ApiTags('Cart / Cart Frame')
 @Controller('api/v1/cart-frame')
-@Roles(RoleType.Admin, RoleType.User, RoleType.Employee, RoleType.Guest)
 export class CartFrameController {
   constructor(private readonly cartFrameService: CartFrameService) {}
 
   @Get('list')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   async getCartFrames(
     @Query() query: CartFrameQueryDto,
   ): Promise<CartFrameModel[]> {
@@ -46,6 +46,7 @@ export class CartFrameController {
   }
 
   @Post('create')
+  @Roles(RoleType.User, RoleType.Admin, RoleType.Employee)
   async createCartFrame(
     @Req() req: RequestModel,
     @Body() body: CreateCartFrameDto,

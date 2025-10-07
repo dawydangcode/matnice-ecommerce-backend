@@ -31,7 +31,7 @@ export class BrandController {
   constructor(private readonly brandService: BrandService) {}
 
   @Get('brand/list')
-  @Roles(RoleType.Admin)
+  @Roles(RoleType.Admin, RoleType.Employee)
   async getBrands(@Query() query: GetBrandsQueryDto) {
     return await this.brandService.getBrands(
       undefined,
@@ -42,7 +42,7 @@ export class BrandController {
   }
 
   @Get('brand/:brandId/detail')
-  @Roles(RoleType.Admin)
+  @Public()
   async getBrandById(@Param() params: GetBrandByIdParamsDto) {
     return await this.brandService.getBrandById(params.brandId);
   }
