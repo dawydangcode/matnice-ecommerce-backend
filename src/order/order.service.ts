@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Like, Repository } from 'typeorm';
 import { OrderEntity } from './entities/order.entity';
@@ -16,9 +16,12 @@ import { CartService } from '../cart/cart.service';
 import { CartCombinedService } from '../cart/modules/cart-combined.service';
 import { OrderItemService } from './modules/order-item/order-item.service';
 import { OrderLensDetailService } from './modules/order-lens-detail/order-lens-detail.service';
+import { StockService } from '../stock/stock.service';
 
 @Injectable()
 export class OrderService {
+  private readonly logger = new Logger(OrderService.name);
+
   constructor(
     @InjectRepository(OrderEntity)
     private readonly orderRepository: Repository<OrderEntity>,
@@ -26,6 +29,7 @@ export class OrderService {
     private readonly cartCombinedService: CartCombinedService,
     private readonly orderItemService: OrderItemService,
     private readonly orderLensDetailService: OrderLensDetailService,
+    private readonly stockService: StockService,
   ) {}
 
   async createOrder(
@@ -165,6 +169,87 @@ export class OrderService {
       }
 
       console.log(`[OrderService] Successfully created all order items`);
+
+      // Check stock availability before reducing
+      try {
+        this.logger.log(
+          `Checking stock availability for order ${savedOrder.id}`,
+        );
+        const stockCheck = await this.stockService.checkOrderStockAvailability(
+          savedOrder.id,
+        );
+
+        if (!stockCheck.available) {
+          this.logger.error(
+            `Insufficient stock for order ${savedOrder.id}:`,
+            stockCheck.issues,
+          );
+          throw new HttpException(
+            `Insufficient stock: ${stockCheck.issues.join(', ')}`,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+
+        this.logger.log(`Stock check passed for order ${savedOrder.id}`);
+      } catch (stockCheckError) {
+        this.logger.error(
+          `Stock check failed for order ${savedOrder.id}:`,
+          stockCheckError,
+        );
+
+        if (stockCheckError instanceof HttpException) {
+          throw stockCheckError;
+        }
+
+        throw new HttpException(
+          'Could not verify stock availability',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+
+      // Reduce stock for the order
+      try {
+        this.logger.log(`Reducing stock for order ${savedOrder.id}`);
+        const stockResult = await this.stockService.reduceStockForOrder(
+          savedOrder.id,
+          userId,
+        );
+
+        if (stockResult.success) {
+          this.logger.log(
+            `Stock reduced successfully for order ${savedOrder.id}`,
+            stockResult.details,
+          );
+        } else {
+          this.logger.error(
+            `Failed to reduce stock for order ${savedOrder.id}: ${stockResult.message}`,
+          );
+          throw new HttpException(
+            `Order created but stock reduction failed: ${stockResult.message}`,
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+        }
+      } catch (stockError) {
+        this.logger.error(
+          `Stock reduction error for order ${savedOrder.id}:`,
+          stockError,
+        );
+
+        // Note: Order has been created but stock reduction failed
+        // In a production system, you might want to:
+        // 1. Mark the order as having stock issues
+        // 2. Send alert to admin
+        // 3. Or rollback the entire order creation
+
+        if (stockError instanceof HttpException) {
+          throw stockError;
+        }
+
+        throw new HttpException(
+          'Order created but stock could not be updated. Please contact support.',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
 
       return savedOrder.toModel();
     } catch (error) {
@@ -416,6 +501,10 @@ export class OrderService {
     userId: number,
   ): Promise<OrderModel> {
     try {
+      // Get current order to check previous status
+      const currentOrder = await this.getOrderById(id);
+      const previousStatus = currentOrder.status;
+
       const updateData: any = {
         status,
         updatedBy: userId,
@@ -430,6 +519,39 @@ export class OrderService {
         { id, deletedAt: IsNull() },
         updateData,
       );
+
+      // Handle stock restoration when order is cancelled
+      if (
+        status === OrderStatus.CANCELLED &&
+        previousStatus !== OrderStatus.CANCELLED
+      ) {
+        try {
+          this.logger.log(`Restoring stock for cancelled order ${id}`);
+          const stockResult = await this.stockService.restoreStockForOrder(
+            id,
+            userId,
+          );
+
+          if (stockResult.success) {
+            this.logger.log(
+              `Stock restored successfully for cancelled order ${id}`,
+              stockResult.details,
+            );
+          } else {
+            this.logger.error(
+              `Failed to restore stock for cancelled order ${id}: ${stockResult.message}`,
+            );
+            // Note: We don't throw here as the order cancellation should still proceed
+            // Admin should be notified to manually check stock
+          }
+        } catch (stockError) {
+          this.logger.error(
+            `Stock restoration error for cancelled order ${id}:`,
+            stockError,
+          );
+          // Log but don't throw - order cancellation should proceed
+        }
+      }
 
       return await this.getOrderById(id);
     } catch (error) {

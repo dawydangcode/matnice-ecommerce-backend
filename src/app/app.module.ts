@@ -22,6 +22,7 @@ import { CategoryLensModule } from 'src/category-lens/category-lens.module';
 import { BrandLensModule } from 'src/brand-lens/brand-lens.module';
 import { OrderModule } from 'src/order/order.module';
 import { PaymentModule } from 'src/payment/payment.module';
+import { StockModule } from 'src/stock/stock.module';
 import { TestModule } from 'src/test/test.module';
 
 @Module({
@@ -51,6 +52,7 @@ import { TestModule } from 'src/test/test.module';
     AIServiceModule,
     OrderModule,
     PaymentModule,
+    StockModule,
   ],
   controllers: [AppController],
   providers: [
