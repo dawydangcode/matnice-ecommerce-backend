@@ -24,6 +24,7 @@ import { OrderModule } from 'src/order/order.module';
 import { PaymentModule } from 'src/payment/payment.module';
 import { StockModule } from 'src/stock/stock.module';
 import { TestModule } from 'src/test/test.module';
+import { DashboardModule } from 'src/dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { TestModule } from 'src/test/test.module';
     OrderModule,
     PaymentModule,
     StockModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [
