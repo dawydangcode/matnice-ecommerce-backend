@@ -71,4 +71,80 @@ export class StockController {
     );
     return { message: 'Stock updated successfully' };
   }
+
+  @Post('lens-variants/:lensVariantId/update')
+  @ApiOperation({ summary: 'Manually update stock for a lens variant' })
+  @ApiResponse({ status: 200, description: 'Stock updated successfully' })
+  async updateLensVariantStock(
+    @Param('lensVariantId', ParseIntPipe) lensVariantId: number,
+    @Body() body: { stock: number; userId: number },
+  ): Promise<{ message: string }> {
+    await this.stockService.updateLensVariantStock(
+      lensVariantId,
+      body.stock,
+      body.userId || 1,
+    );
+    return { message: 'Stock updated successfully' };
+  }
+
+  @Get('items')
+  @ApiOperation({ summary: 'Get all stock items (products + lens variants)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Stock items retrieved successfully',
+  })
+  async getAllStockItems(): Promise<
+    Array<{
+      id: number;
+      name: string;
+      type: 'product' | 'lens-variant';
+      stock: number;
+      status: 'in-stock' | 'low-stock' | 'out-of-stock';
+      [key: string]: any;
+    }>
+  > {
+    return await this.stockService.getAllStockItems();
+  }
+
+  @Get('products')
+  @ApiOperation({ summary: 'Get all product color stock' })
+  @ApiResponse({
+    status: 200,
+    description: 'Product stock retrieved successfully',
+  })
+  async getAllProductColorStock(): Promise<
+    Array<{
+      id: number;
+      name: string;
+      type: 'product';
+      stock: number;
+      status: 'in-stock' | 'low-stock' | 'out-of-stock';
+      productName: string;
+      colorName: string;
+      productId: number;
+    }>
+  > {
+    return await this.stockService.getAllProductColorStock();
+  }
+
+  @Get('lens-variants')
+  @ApiOperation({ summary: 'Get all lens variant stock' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lens variant stock retrieved successfully',
+  })
+  async getAllLensVariantStock(): Promise<
+    Array<{
+      id: number;
+      name: string;
+      type: 'lens-variant';
+      stock: number;
+      status: 'in-stock' | 'low-stock' | 'out-of-stock';
+      material: string;
+      design: string;
+      lensId: number;
+    }>
+  > {
+    return await this.stockService.getAllLensVariantStock();
+  }
 }

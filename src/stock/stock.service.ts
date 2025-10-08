@@ -279,6 +279,39 @@ export class StockService {
   }
 
   /**
+   * Update stock for a lens variant
+   */
+  async updateLensVariantStock(
+    lensVariantId: number,
+    newStock: number,
+    userId: number,
+  ): Promise<void> {
+    const lensVariant = await this.lensVariantRepository.findOne({
+      where: { id: lensVariantId },
+    });
+
+    if (!lensVariant) {
+      throw new HttpException(
+        `Lens variant with ID ${lensVariantId} not found`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    await this.lensVariantRepository.update(
+      { id: lensVariantId },
+      {
+        stock: newStock,
+        updatedBy: userId,
+        updatedAt: new Date(),
+      },
+    );
+
+    console.log(
+      `Stock updated for lens variant ${lensVariantId}: ${lensVariant.stock} -> ${newStock}`,
+    );
+  }
+
+  /**
    * Kiểm tra stock có sẵn cho một màu cụ thể
    */
   async checkAvailableStock(productColorId: number): Promise<number> {
@@ -663,6 +696,135 @@ export class StockService {
       );
     } finally {
       await queryRunner.release();
+    }
+  }
+
+  /**
+   * Lấy danh sách tất cả product colors với stock
+   */
+  async getAllProductColorStock(): Promise<
+    Array<{
+      id: number;
+      name: string;
+      type: 'product';
+      stock: number;
+      status: 'in-stock' | 'low-stock' | 'out-of-stock';
+      productName: string;
+      colorName: string;
+      productId: number;
+    }>
+  > {
+    try {
+      const productColors = await this.productColorRepository.find({
+        relations: ['product'],
+      });
+
+      return productColors.map((pc) => {
+        let status: 'in-stock' | 'low-stock' | 'out-of-stock';
+        if (pc.stock === 0) {
+          status = 'out-of-stock';
+        } else if (pc.stock <= 5) {
+          status = 'low-stock';
+        } else {
+          status = 'in-stock';
+        }
+
+        return {
+          id: pc.id,
+          name: `${pc.product?.productName || 'Unknown'} - ${pc.colorName}`,
+          type: 'product' as const,
+          stock: pc.stock,
+          status,
+          productName: pc.product?.productName || 'Unknown',
+          colorName: pc.colorName,
+          productId: pc.productId,
+        };
+      });
+    } catch (error) {
+      this.logger.error('Failed to get product color stock:', error);
+      throw new HttpException(
+        'Failed to retrieve product stock',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * Lấy danh sách tất cả lens variants với stock
+   */
+  async getAllLensVariantStock(): Promise<
+    Array<{
+      id: number;
+      name: string;
+      type: 'lens-variant';
+      stock: number;
+      status: 'in-stock' | 'low-stock' | 'out-of-stock';
+      material: string;
+      design: string;
+      lensId: number;
+    }>
+  > {
+    try {
+      const lensVariants = await this.lensVariantRepository.find({
+        relations: ['lens'],
+      });
+
+      return lensVariants.map((lv) => {
+        let status: 'in-stock' | 'low-stock' | 'out-of-stock';
+        if (lv.stock === 0) {
+          status = 'out-of-stock';
+        } else if (lv.stock <= 5) {
+          status = 'low-stock';
+        } else {
+          status = 'in-stock';
+        }
+
+        return {
+          id: lv.id,
+          name: `Lens ${lv.material} - ${lv.design}`,
+          type: 'lens-variant' as const,
+          stock: lv.stock,
+          status,
+          material: lv.material,
+          design: lv.design,
+          lensId: lv.lensId,
+        };
+      });
+    } catch (error) {
+      this.logger.error('Failed to get lens variant stock:', error);
+      throw new HttpException(
+        'Failed to retrieve lens variant stock',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * Lấy tất cả stock items (products + lens variants)
+   */
+  async getAllStockItems(): Promise<
+    Array<{
+      id: number;
+      name: string;
+      type: 'product' | 'lens-variant';
+      stock: number;
+      status: 'in-stock' | 'low-stock' | 'out-of-stock';
+      [key: string]: any;
+    }>
+  > {
+    try {
+      const [productColors, lensVariants] = await Promise.all([
+        this.getAllProductColorStock(),
+        this.getAllLensVariantStock(),
+      ]);
+
+      return [...productColors, ...lensVariants];
+    } catch (error) {
+      this.logger.error('Failed to get all stock items:', error);
+      throw new HttpException(
+        'Failed to retrieve stock items',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }
