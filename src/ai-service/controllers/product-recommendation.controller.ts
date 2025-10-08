@@ -1,5 +1,6 @@
 import { Controller, Post, Body, Get, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Public } from '../../common/decorators/public.decorator';
 import {
   ProductRecommendationService,
   AIAnalysisResult,
@@ -14,6 +15,7 @@ export class ProductRecommendationController {
   ) {}
 
   @Post('ai-based')
+  @Public() // Allow anonymous access for AI-based recommendations
   @ApiOperation({ summary: 'Get product recommendations based on AI analysis' })
   @ApiResponse({
     status: 200,
@@ -47,6 +49,7 @@ export class ProductRecommendationController {
   }
 
   @Get('filter')
+  @Public() // Allow anonymous access for product filtering
   @ApiOperation({ summary: 'Get product recommendations with custom filters' })
   @ApiResponse({
     status: 200,
@@ -74,6 +77,7 @@ export class ProductRecommendationController {
   }
 
   @Post('test-sample')
+  @Public() // Allow anonymous access for testing
   @ApiOperation({ summary: 'Test with sample AI analysis data' })
   @ApiResponse({
     status: 200,
