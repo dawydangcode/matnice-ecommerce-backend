@@ -24,7 +24,6 @@ import { Public } from 'src/middlewares/guards/jwt-auth.guard';
 
 @ApiTags('Product Thickness Compatibility')
 @Controller('api/v1/product-thickness-compatibility')
-@Roles(RoleType.Admin)
 export class ProductThicknessCompatibilityController {
   constructor(
     private readonly compatibilityService: ProductThicknessCompatibilityService,
