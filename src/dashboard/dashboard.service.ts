@@ -206,17 +206,26 @@ export class DashboardService {
 
       switch (timeRange) {
         case 'week':
-          // Last 7 weeks
-          for (let i = 6; i >= 0; i--) {
-            const weekStart = new Date(now);
-            weekStart.setDate(now.getDate() - i * 7 - now.getDay());
-            const weekEnd = new Date(weekStart);
-            weekEnd.setDate(weekStart.getDate() + 6);
+          // Days of current week (Monday to Sunday)
+          const startOfWeek = new Date(now);
+          const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+          const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Calculate offset to Monday
+          startOfWeek.setDate(now.getDate() + mondayOffset);
+
+          for (let i = 0; i < 7; i++) {
+            const dayStart = new Date(startOfWeek);
+            dayStart.setDate(startOfWeek.getDate() + i);
+            dayStart.setHours(0, 0, 0, 0);
+
+            const dayEnd = new Date(dayStart);
+            dayEnd.setHours(23, 59, 59, 999);
+
+            const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
             periods.push({
-              start: weekStart,
-              end: weekEnd,
-              label: `Tuần ${weekStart.getDate()}/${weekStart.getMonth() + 1}`,
+              start: dayStart,
+              end: dayEnd,
+              label: dayNames[i],
             });
           }
           break;
@@ -230,9 +239,8 @@ export class DashboardService {
             periods.push({
               start: monthStart,
               end: monthEnd,
-              label: monthStart.toLocaleDateString('vi-VN', {
+              label: monthStart.toLocaleDateString('en-US', {
                 month: 'short',
-                year: 'numeric',
               }),
             });
           }
@@ -255,9 +263,8 @@ export class DashboardService {
             periods.push({
               start: monthStart,
               end: monthEnd,
-              label: monthStart.toLocaleDateString('vi-VN', {
+              label: monthStart.toLocaleDateString('en-US', {
                 month: 'short',
-                year: 'numeric',
               }),
             });
           }
@@ -297,9 +304,8 @@ export class DashboardService {
         const orders = await this.countOrders(monthStart, monthEnd);
 
         result.push({
-          month: monthStart.toLocaleDateString('vi-VN', {
+          month: monthStart.toLocaleDateString('en-US', {
             month: 'short',
-            year: 'numeric',
           }),
           revenue: revenue,
           orders: orders,
@@ -503,17 +509,17 @@ export class DashboardService {
     try {
       const query = `
         SELECT 
-          p.productId as id,
-          p.productName as name,
-          COALESCE(b.brandName, 'Unknown') as brand,
+          p.id as id,
+          p.product_name as name,
+          COALESCE(b.name, 'Unknown') as brand,
           COALESCE(SUM(oi.quantity), 0) as soldQuantity,
-          COALESCE(SUM(oi.quantity * oi.unitPrice), 0) as revenue
-        FROM products p
-        LEFT JOIN brands b ON p.brandId = b.brandId
-        LEFT JOIN order_items oi ON p.productId = oi.productId
-        LEFT JOIN orders o ON oi.orderId = o.orderId
+          COALESCE(SUM(oi.total_price), 0) as revenue
+        FROM product p
+        LEFT JOIN brand b ON p.brand_id = b.id
+        LEFT JOIN order_item oi ON p.id = oi.product_id
+        LEFT JOIN \`order\` o ON oi.order_id = o.id
         WHERE o.status IN ('completed', 'delivered')
-        GROUP BY p.productId, p.productName, b.brandName
+        GROUP BY p.id, p.product_name, b.name
         HAVING soldQuantity > 0
         ORDER BY soldQuantity DESC, revenue DESC
         LIMIT ?
