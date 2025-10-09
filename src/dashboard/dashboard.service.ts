@@ -162,7 +162,9 @@ export class DashboardService {
         itemCount: order.orderItems?.length || 0,
         totalAmount: order.totalPrice,
         status: this.getOrderStatusInVietnamese(order.status),
-        createdAt: order.createdAt.toISOString(),
+        createdAt: order.createdAt
+          ? order.createdAt.toISOString()
+          : new Date().toISOString(),
         customerName: order.fullName || order.email || 'Khách hàng',
       }));
     } catch (error) {
@@ -210,11 +212,33 @@ export class DashboardService {
     startDate: Date,
     endDate: Date,
   ): Promise<number> {
+    // Calculate total revenue (all orders except cancelled)
     const result = await this.orderRepository
       .createQueryBuilder('order')
       .select('SUM(order.totalPrice)', 'total')
-      .where('order.createdAt >= :startDate', { startDate })
-      .andWhere('order.createdAt <= :endDate', { endDate })
+      .where('order.orderDate >= :startDate', { startDate })
+      .andWhere('order.orderDate <= :endDate', { endDate })
+      .andWhere('order.status NOT IN (:...excludedStatuses)', {
+        excludedStatuses: ['cancelled', 'refunded'],
+      })
+      .andWhere('order.deletedAt IS NULL')
+      .getRawOne();
+
+    return parseFloat(result?.total || '0');
+  }
+
+  /**
+   * Calculate completed revenue only (for comparison)
+   */
+  private async calculateCompletedRevenue(
+    startDate: Date,
+    endDate: Date,
+  ): Promise<number> {
+    const result = await this.orderRepository
+      .createQueryBuilder('order')
+      .select('SUM(order.totalPrice)', 'total')
+      .where('order.orderDate >= :startDate', { startDate })
+      .andWhere('order.orderDate <= :endDate', { endDate })
       .andWhere('order.status IN (:...statuses)', {
         statuses: ['completed', 'shipped', 'delivered'],
       })
@@ -230,7 +254,7 @@ export class DashboardService {
   private async countOrders(startDate: Date, endDate: Date): Promise<number> {
     return await this.orderRepository.count({
       where: {
-        createdAt: Between(startDate, endDate),
+        orderDate: Between(startDate, endDate),
         deletedAt: IsNull(),
       },
     });
