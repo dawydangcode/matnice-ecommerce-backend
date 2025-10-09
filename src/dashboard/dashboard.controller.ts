@@ -14,8 +14,8 @@ export class DashboardController {
    * Get dashboard statistics
    */
   @Get('stats')
-  async getStats() {
-    return await this.dashboardService.getStats();
+  async getStats(@Query('timeRange') timeRange?: string) {
+    return await this.dashboardService.getStats(timeRange as any);
   }
 
   /**
@@ -28,11 +28,28 @@ export class DashboardController {
   }
 
   /**
+   * Get revenue data based on time range
+   */
+  @Get('revenue-data')
+  async getRevenueData(@Query('timeRange') timeRange?: string) {
+    return await this.dashboardService.getRevenueData(timeRange as any);
+  }
+
+  /**
    * Get monthly revenue data
    */
   @Get('monthly-revenue')
   async getMonthlyRevenue(@Query('months') months?: string) {
     const monthsCount = months ? parseInt(months, 10) : 12;
     return await this.dashboardService.getMonthlyRevenue(monthsCount);
+  }
+
+  /**
+   * Get top selling products
+   */
+  @Get('top-products')
+  async getTopProducts(@Query('limit') limit?: string) {
+    const limitCount = limit ? parseInt(limit, 10) : 5;
+    return await this.dashboardService.getTopProducts(limitCount);
   }
 }
