@@ -3,7 +3,7 @@ services:
     image: node:20-alpine
     restart: always
     ports:
-      - 3001:3000
+      - 3000:3000
     command: /bin/sh -c "cd /var/www && npm run start:dev"
     volumes:
       - ./:/var/www
