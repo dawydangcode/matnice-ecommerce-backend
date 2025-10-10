@@ -1,0 +1,85 @@
+services:
+  node:
+    image: node:20-alpine
+    restart: always
+    ports:
+      - 3001:3000
+    command: /bin/sh -c "cd /var/www && npm run start:dev"
+    volumes:
+      - ./:/var/www
+    depends_on:
+      - mysql
+    networks:
+      - elk-network
+
+  mysql:
+    image: mysql:8.0.42
+    restart: always
+    command: mysqld --default-authentication-plugin=mysql_native_password
+    ports:
+      - 3333:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+    volumes:
+      - mysql:/var/lib/mysql
+    networks:
+      - elk-network
+
+  # elasticsearch:
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:9.1.2
+  #   container_name: elasticsearch
+  #   restart: always
+  #   environment:
+  #     - discovery.type=single-node
+  #     - xpack.security.enabled=false
+  #     - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
+  #   ports:
+  #     - '9200:9200'
+  #     - '9300:9300'
+  #   volumes:
+  #     - es_data:/usr/share/elasticsearch/data
+  #   networks:
+  #     - elk-network
+
+  # logstash:
+  #   image: docker.elastic.co/logstash/logstash:9.1.2
+  #   container_name: logstash
+  #   volumes:
+  #     - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
+  #     - ./logstash/pipeline:/usr/share/logstash/pipeline
+  #     - ./logs:/var/www/logs
+  #   ports:
+  #     - '5044:5044'
+  #     - '9600:9600'
+  #   environment:
+  #     LS_JAVA_OPTS: -Xms256m -Xmx256m
+  #     DB_HOST: ${DB_HOST}
+  #     DB_PORT: ${DB_PORT}
+  #     DB_USER: ${DB_USER}
+  #     DB_PASSWORD: ${DB_PASSWORD}
+  #     DB_NAME: ${DB_NAME}
+  #   depends_on:
+  #     - elasticsearch
+  #   networks:
+  #     - elk-network
+
+  # kibana:
+  #   image: docker.elastic.co/kibana/kibana:9.1.2
+  #   container_name: kibana
+  #   environment:
+  #     - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+  #   ports:
+  #     - '5601:5601'
+  #   depends_on:
+  #     - elasticsearch
+  #   networks:
+  #     - elk-network
+
+volumes:
+  mysql:
+  es_data:
+
+networks:
+  elk-network:
+    driver: bridge
