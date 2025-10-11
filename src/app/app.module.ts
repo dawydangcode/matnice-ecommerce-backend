@@ -25,6 +25,7 @@ import { PaymentModule } from 'src/payment/payment.module';
 import { StockModule } from 'src/stock/stock.module';
 import { TestModule } from 'src/test/test.module';
 import { DashboardModule } from 'src/dashboard/dashboard.module';
+import { WishlistModule } from 'src/wishlist/wishlist.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { DashboardModule } from 'src/dashboard/dashboard.module';
     PaymentModule,
     StockModule,
     DashboardModule,
+    WishlistModule,
   ],
   controllers: [AppController],
   providers: [
