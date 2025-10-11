@@ -37,7 +37,7 @@ export class WishlistItemEntity {
   @Column({ name: 'selected_color_id', nullable: true })
   selectedColorId!: number | null;
 
-  @Column({ name: 'added_at', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({ name: 'added_at' })
   addedAt!: Date;
 
   @Column({ name: 'created_at' })
