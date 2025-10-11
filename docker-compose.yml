@@ -1,28 +1,10 @@
 services:
   node:
-    build:
-      context: .
-      dockerfile: Dockerfile # Đảm bảo có Dockerfile
+    image: node:20-alpine
     restart: always
     ports:
-      - "3000:3000"
-    command: npm run start:prod # Chuyển sang production
-    environment:
-      - APP_PORT=${APP_PORT}
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=${DB_NAME}
-      - JWT_ACCESS_TOKEN_SECRET_KEY=${JWT_ACCESS_TOKEN_SECRET_KEY}
-      - JWT_ACCESS_TOKEN_EXPIRES_IN=${JWT_ACCESS_TOKEN_EXPIRES_IN}
-      - JWT_REFRESH_TOKEN_SECRET_KEY=${JWT_REFRESH_TOKEN_SECRET_KEY}
-      - JWT_REFRESH_TOKEN_EXPIRES_IN=${JWT_REFRESH_TOKEN_EXPIRES_IN}
-      - JWT_VERIFICATION_TOKEN_SECRET_KEY=${JWT_VERIFICATION_TOKEN_SECRET_KEY}
-      - JWT_VERIFICATION_TOKEN_EXPIRES_IN=${JWT_VERIFICATION_TOKEN_EXPIRES_IN}
-      - PAYOS_CLIENT_ID=${PAYOS_CLIENT_ID}
-      - PAYOS_API_KEY=${PAYOS_API_KEY}
-      - PAYOS_CHECKSUM_KEY=${PAYOS_CHECKSUM_KEY}
+      - 3000:3000
+    command: /bin/sh -c "cd /var/www && npm run start:dev"
     volumes:
       - ./:/var/www
     depends_on:
