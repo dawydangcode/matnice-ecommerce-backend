@@ -18,7 +18,7 @@ export class WishlistItemEntity {
   @PrimaryGeneratedColumn({ name: 'id' })
   id!: number;
 
-  @Column({ name: 'user_id' })
+  @Column({ name: 'user_id', type: 'bigint' })
   userId!: number;
 
   @Column({
@@ -28,34 +28,34 @@ export class WishlistItemEntity {
   })
   itemType!: WishlistItemType;
 
-  @Column({ name: 'product_id', nullable: true })
+  @Column({ name: 'product_id', type: 'bigint', nullable: true })
   productId!: number | null;
 
-  @Column({ name: 'lens_id', nullable: true })
+  @Column({ name: 'lens_id', type: 'bigint', nullable: true })
   lensId!: number | null;
 
-  @Column({ name: 'selected_color_id', nullable: true })
+  @Column({ name: 'selected_color_id', type: 'bigint', nullable: true })
   selectedColorId!: number | null;
 
-  @Column({ name: 'added_at' })
+  @Column({ name: 'added_at', type: 'timestamp' })
   addedAt!: Date;
 
-  @Column({ name: 'created_at' })
+  @Column({ name: 'created_at', type: 'timestamp' })
   createdAt!: Date;
 
-  @Column({ name: 'created_by' })
+  @Column({ name: 'created_by', type: 'bigint' })
   createdBy!: number;
 
-  @Column({ name: 'updated_at', nullable: true })
+  @Column({ name: 'updated_at', type: 'timestamp', nullable: true })
   updatedAt!: Date | null;
 
-  @Column({ name: 'updated_by', nullable: true })
+  @Column({ name: 'updated_by', type: 'bigint', nullable: true })
   updatedBy!: number | null;
 
-  @DeleteDateColumn({ name: 'deleted_at' })
+  @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
   deletedAt!: Date | null;
 
-  @Column({ name: 'deleted_by', nullable: true })
+  @Column({ name: 'deleted_by', type: 'bigint', nullable: true })
   deletedBy!: number | null;
 
   toModel(): WishlistItemModel {
