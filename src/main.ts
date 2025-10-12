@@ -8,7 +8,12 @@ import { throwError } from './common/utils/functions';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-    origin: 'http://localhost:3002',
+    origin: [
+      'http://localhost:3002',
+      'https://matnice-ecommerce-frontend.vercel.app',
+      'http://13.54.93.54',
+      'http://matnice.id.vn',
+    ],
     credentials: true,
     methods: 'GET,POST,PUT,DELETE',
     allowedHeaders: 'Content-Type, Authorization',
