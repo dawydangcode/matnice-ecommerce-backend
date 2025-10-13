@@ -12,11 +12,13 @@ async function bootstrap() {
       'http://localhost:3002',
       'https://matnice-ecommerce-frontend.vercel.app',
       'http://13.54.93.54',
+      'https://13.54.93.54',
       'http://matnice.id.vn',
     ],
     credentials: true,
-    methods: 'GET,POST,PUT,DELETE',
-    allowedHeaders: 'Content-Type, Authorization',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    optionsSuccessStatus: 200, // Some legacy browsers choke on 204
   });
 
   setupSwagger(app);
