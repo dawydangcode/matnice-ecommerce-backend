@@ -14,6 +14,7 @@ async function bootstrap() {
       'https://matnice-ecommerce-frontend.vercel.app',
       'http://matnice.id.vn',
       'https://matnice.id.vn',
+      'https://api.matnice.id.vn',
       'http://13.54.93.54',
       'https://13.54.93.54',
     ],
