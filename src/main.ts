@@ -14,6 +14,7 @@ async function bootstrap() {
       'http://13.54.93.54',
       'https://13.54.93.54',
       'http://matnice.id.vn',
+      'https://matnice.id.vn',
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
