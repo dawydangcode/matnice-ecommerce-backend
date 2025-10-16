@@ -25,31 +25,46 @@ export class WishlistService {
   ): Promise<PageList<WishlistItemModel>> {
     const queryBuilder = this.wishlistRepository
       .createQueryBuilder('wi')
-      .leftJoinAndSelect(
-        'product',
-        'p',
-        'wi.product_id = p.id AND p.deleted_at IS NULL',
-      )
-      .leftJoinAndSelect(
+      .leftJoin('product', 'p', 'wi.product_id = p.id AND p.deleted_at IS NULL')
+      .leftJoin(
         'product_color',
         'pc',
         'wi.selected_color_id = pc.id AND pc.deleted_at IS NULL',
       )
-      .leftJoinAndSelect(
-        'brand',
-        'b',
-        'p.brand_id = b.id AND b.deleted_at IS NULL',
-      )
-      .leftJoinAndSelect(
-        'lens',
-        'l',
-        'wi.lens_id = l.id AND l.deleted_at IS NULL',
-      )
-      .leftJoinAndSelect(
+      .leftJoin('brand', 'b', 'p.brand_id = b.id AND b.deleted_at IS NULL')
+      .leftJoin('lens', 'l', 'wi.lens_id = l.id AND l.deleted_at IS NULL')
+      .leftJoin(
         'brand_lens',
         'bl',
         'l.brand_lens_id = bl.id AND bl.deleted_at IS NULL',
       )
+      // Join product_color for thumbnail when no color selected
+      .leftJoin(
+        'product_color',
+        'pc_thumb',
+        'wi.selected_color_id IS NULL AND p.id = pc_thumb.product_id AND pc_thumb.is_thumbnail = 1 AND pc_thumb.deleted_at IS NULL',
+      )
+      // Join product_image for the selected color
+      .leftJoin(
+        'product_image',
+        'pi_color',
+        "wi.selected_color_id = pi_color.product_color_id AND pi_color.deleted_at IS NULL AND pi_color.image_order = 'a'",
+      )
+      // Join product_image for thumbnail color (when no color selected)
+      .leftJoin(
+        'product_image',
+        'pi_thumb',
+        "pc_thumb.id = pi_thumb.product_color_id AND pi_thumb.deleted_at IS NULL AND pi_thumb.image_order = 'a'",
+      )
+      .addSelect('p.product_name', 'p_product_name')
+      .addSelect('p.price', 'p_price')
+      .addSelect('pc.product_variant_name', 'pc_product_variant_name')
+      .addSelect('pc.color_name', 'pc_color_name')
+      .addSelect('pi_color.image_url', 'pi_color_image_url')
+      .addSelect('pi_thumb.image_url', 'pi_thumb_image_url')
+      .addSelect('b.name', 'b_name')
+      .addSelect('l.name', 'l_name')
+      .addSelect('bl.name', 'bl_name')
       .where('wi.user_id = :userId', { userId })
       .andWhere('wi.deleted_at IS NULL');
 
@@ -64,20 +79,54 @@ export class WishlistService {
       queryBuilder.skip(query.skip).take(query.take);
     }
 
-    const [items, total] = await queryBuilder.getManyAndCount();
+    // Use getRawAndEntities to get both entity data and raw joined data
+    const { entities, raw } = await queryBuilder.getRawAndEntities();
+    const total = await queryBuilder.getCount();
 
-    const models = items.map((item: WishlistItemEntity) => {
+    console.log('[WishlistService] ==== DEBUG START ====');
+    console.log('[WishlistService] Total items:', total);
+    console.log(
+      '[WishlistService] Raw data sample (first item):',
+      JSON.stringify(raw[0], null, 2),
+    );
+    console.log('[WishlistService] Entity data sample:', entities[0]);
+    console.log('[WishlistService] ==== DEBUG END ====');
+
+    const models = entities.map((item: WishlistItemEntity, index: number) => {
       const model = item.toModel();
+      const rawItem = raw[index];
 
-      // Populate additional data from joins
-      const rawItem = item as any;
+      // Populate additional data from joins using raw data
       if (rawItem.p_product_name) {
         model.productName = rawItem.p_product_name;
         model.productPrice = rawItem.p_price;
       }
+      // Use product_variant_name as displayName (full name with color variant)
+      if (rawItem.pc_product_variant_name) {
+        model.displayName = rawItem.pc_product_variant_name;
+      } else if (rawItem.p_product_name) {
+        // Fallback to product_name if no variant name
+        model.displayName = rawItem.p_product_name;
+      }
       if (rawItem.pc_color_name) {
         model.colorName = rawItem.pc_color_name;
       }
+      // Priority: selected color image > thumbnail image
+      if (rawItem.pi_color_image_url) {
+        model.thumbnailUrl = rawItem.pi_color_image_url;
+      } else if (rawItem.pi_thumb_image_url) {
+        model.thumbnailUrl = rawItem.pi_thumb_image_url;
+      }
+
+      // Debug image URLs
+      console.log('[WishlistService] Image debug:', {
+        itemId: model.id,
+        selectedColorId: rawItem.wi_selected_color_id,
+        pi_color_image_url: rawItem.pi_color_image_url,
+        pi_thumb_image_url: rawItem.pi_thumb_image_url,
+        finalThumbnailUrl: model.thumbnailUrl,
+      });
+
       if (rawItem.b_name) {
         model.brandName = rawItem.b_name;
       }
@@ -87,6 +136,16 @@ export class WishlistService {
       if (rawItem.bl_name) {
         model.lensBrandName = rawItem.bl_name;
       }
+
+      console.log('[WishlistService] Populated model:', {
+        id: model.id,
+        displayName: model.displayName,
+        productName: model.productName,
+        brandName: model.brandName,
+        thumbnailUrl: model.thumbnailUrl,
+        colorName: model.colorName,
+        productPrice: model.productPrice,
+      });
 
       return model;
     });

@@ -22,6 +22,8 @@ export class WishlistItemModel {
   public lensName?: string;
   public brandName?: string;
   public lensBrandName?: string;
+  public thumbnailUrl?: string;
+  public displayName?: string;
 
   constructor(
     id: number,
