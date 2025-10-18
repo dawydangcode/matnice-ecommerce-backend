@@ -58,7 +58,6 @@ export class UserPrescriptionService {
 
   async createUserPrescription(
     userId: number,
-    prescriptionName: string | undefined,
     rightEyeSph: number,
     rightEyeCyl: number,
     rightEyeAxis: number,
@@ -91,7 +90,6 @@ export class UserPrescriptionService {
 
     const entity = new UserPrescriptionEntity();
     entity.userId = userId;
-    entity.prescriptionName = prescriptionName || 'Default Prescription';
     entity.rightEyeSph = rightEyeSph;
     entity.rightEyeCyl = rightEyeCyl;
     entity.rightEyeAxis = rightEyeAxis;
@@ -113,7 +111,6 @@ export class UserPrescriptionService {
 
   async updateUserPrescription(
     prescription: UserPrescriptionModel,
-    prescriptionName: string | undefined,
     rightEyeSph: number | undefined,
     rightEyeCyl: number | undefined,
     rightEyeAxis: number | undefined,
@@ -150,7 +147,6 @@ export class UserPrescriptionService {
         deletedAt: IsNull(),
       },
       {
-        prescriptionName: prescriptionName,
         rightEyeSph: rightEyeSph,
         rightEyeCyl: rightEyeCyl,
         rightEyeAxis: rightEyeAxis,

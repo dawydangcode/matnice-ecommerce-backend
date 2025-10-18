@@ -63,7 +63,6 @@ export class UserPrescriptionController {
   ) {
     return await this.userPrescriptionService.createUserPrescription(
       req.user.userId,
-      body.prescriptionName,
       body.rightEyeSph,
       body.rightEyeCyl,
       body.rightEyeAxis,
@@ -92,7 +91,6 @@ export class UserPrescriptionController {
       );
     return await this.userPrescriptionService.updateUserPrescription(
       prescription,
-      body.prescriptionName,
       body.rightEyeSph,
       body.rightEyeCyl,
       body.rightEyeAxis,
@@ -105,6 +103,33 @@ export class UserPrescriptionController {
       body.pdLeft,
       body.isDefault,
       body.notes,
+      req.user.userId,
+    );
+  }
+
+  @Put(':prescriptionId/set-default')
+  async setDefaultPrescription(
+    @Req() req: RequestModel,
+    @Param() params: UpdateUserPrescriptionParamsDto,
+  ) {
+    const prescription =
+      await this.userPrescriptionService.getUserPrescriptionById(
+        params.prescriptionId,
+      );
+    return await this.userPrescriptionService.updateUserPrescription(
+      prescription,
+      prescription.rightEyeSph,
+      prescription.rightEyeCyl,
+      prescription.rightEyeAxis,
+      prescription.rightEyeAdd,
+      prescription.leftEyeSph,
+      prescription.leftEyeCyl,
+      prescription.leftEyeAxis,
+      prescription.leftEyeAdd,
+      prescription.pdRight,
+      prescription.pdLeft,
+      true, // Set as default
+      prescription.notes,
       req.user.userId,
     );
   }

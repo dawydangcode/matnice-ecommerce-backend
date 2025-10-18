@@ -16,9 +16,6 @@ export class UserPrescriptionEntity {
   @Column({ name: 'user_id' })
   userId!: number;
 
-  @Column({ name: 'prescription_name', nullable: true })
-  prescriptionName!: string;
-
   @Column({ name: 'right_eye_sph', type: 'decimal', precision: 4, scale: 2 })
   rightEyeSph!: number;
 
@@ -93,7 +90,6 @@ export class UserPrescriptionEntity {
     return new UserPrescriptionModel(
       this.id,
       this.userId,
-      this.prescriptionName,
       this.rightEyeSph,
       this.rightEyeCyl,
       this.rightEyeAxis,

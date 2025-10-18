@@ -22,11 +22,6 @@ export class UserPrescriptionDto {
   userId!: number;
 
   @ApiProperty()
-  @IsString()
-  @IsOptional()
-  prescriptionName!: string;
-
-  @ApiProperty()
   @IsNumber()
   @Type(() => Number)
   @Min(-20)
@@ -110,6 +105,11 @@ export class UserPrescriptionDto {
   notes!: string;
 
   @ApiProperty()
+  @Type(() => Date)
+  @IsOptional()
+  createdAt!: Date;
+
+  @ApiProperty()
   @IsNumber()
   @Type(() => Number)
   page!: number;
@@ -133,7 +133,6 @@ export class GetUserPrescriptionParamsDto extends PickType(
 export class CreateUserPrescriptionBodyDto extends PickType(
   UserPrescriptionDto,
   [
-    'prescriptionName',
     'rightEyeSph',
     'rightEyeCyl',
     'rightEyeAxis',
@@ -156,7 +155,6 @@ export class UpdateUserPrescriptionParamsDto extends PickType(
 
 export class UpdateUserPrescriptionBodyDto extends PartialType(
   PickType(UserPrescriptionDto, [
-    'prescriptionName',
     'rightEyeSph',
     'rightEyeCyl',
     'rightEyeAxis',

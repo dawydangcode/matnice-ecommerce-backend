@@ -1,7 +1,6 @@
 export class UserPrescriptionModel {
   public readonly id: number;
   public readonly userId: number;
-  public readonly prescriptionName: string;
   public readonly rightEyeSph: number;
   public readonly rightEyeCyl: number;
   public readonly rightEyeAxis: number;
@@ -24,7 +23,6 @@ export class UserPrescriptionModel {
   constructor(
     id: number,
     userId: number,
-    prescriptionName: string,
     rightEyeSph: number,
     rightEyeCyl: number,
     rightEyeAxis: number,
@@ -46,7 +44,6 @@ export class UserPrescriptionModel {
   ) {
     this.id = id;
     this.userId = userId;
-    this.prescriptionName = prescriptionName;
     this.rightEyeSph = rightEyeSph;
     this.rightEyeCyl = rightEyeCyl;
     this.rightEyeAxis = rightEyeAxis;
