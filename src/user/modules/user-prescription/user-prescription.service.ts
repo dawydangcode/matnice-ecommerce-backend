@@ -72,21 +72,19 @@ export class UserPrescriptionService {
     notes: string | undefined,
     reqUserId: number,
   ): Promise<UserPrescriptionModel> {
-    // If this is set as default, unset any existing default prescription
-    if (isDefault) {
-      await this.userPrescriptionRepository.update(
-        {
-          userId: userId,
-          isDefault: true,
-          deletedAt: IsNull(),
-        },
-        {
-          isDefault: false,
-          updatedAt: new Date(),
-          updatedBy: reqUserId,
-        },
-      );
-    }
+    // Always set new prescription as default and unset any existing default prescription
+    await this.userPrescriptionRepository.update(
+      {
+        userId: userId,
+        isDefault: true,
+        deletedAt: IsNull(),
+      },
+      {
+        isDefault: false,
+        updatedAt: new Date(),
+        updatedBy: reqUserId,
+      },
+    );
 
     const entity = new UserPrescriptionEntity();
     entity.userId = userId;
@@ -100,7 +98,7 @@ export class UserPrescriptionService {
     entity.leftEyeAdd = leftEyeAdd ?? null;
     entity.pdRight = pdRight;
     entity.pdLeft = pdLeft;
-    entity.isDefault = isDefault ?? false;
+    entity.isDefault = true; // Always set new prescription as default
     entity.notes = notes ?? null;
     entity.createdAt = new Date();
     entity.createdBy = reqUserId;
