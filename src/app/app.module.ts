@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -26,6 +26,7 @@ import { StockModule } from 'src/stock/stock.module';
 import { TestModule } from 'src/test/test.module';
 import { DashboardModule } from 'src/dashboard/dashboard.module';
 import { WishlistModule } from 'src/wishlist/wishlist.module';
+import { CorsMiddleware } from 'src/middlewares/cors.middleware';
 
 @Module({
   imports: [
@@ -71,4 +72,8 @@ import { WishlistModule } from 'src/wishlist/wishlist.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(CorsMiddleware).forRoutes('*');
+  }
+}
