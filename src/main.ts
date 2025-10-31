@@ -25,8 +25,11 @@ async function bootstrap() {
       'Authorization',
       'X-Requested-With',
       'Accept',
+      'Origin',
     ],
-    optionsSuccessStatus: 200, // Some legacy browsers choke on 204
+    exposedHeaders: ['Content-Length', 'Content-Type'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   });
 
   setupSwagger(app);
