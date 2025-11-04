@@ -1,6 +1,6 @@
 services:
   app:
-    image: node:20-bullseye
+    image: node:20-bookworm
     restart: always
     ports:
       - 3000:3000
