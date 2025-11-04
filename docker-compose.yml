@@ -1,24 +1,15 @@
 services:
   app:
-    image: node:20-bookworm
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
     restart: always
     ports:
       - 3000:3000
-    command: >
-      /bin/bash -c "
-        apt-get update &&
-        apt-get install -y python3 python3-pip python3-venv build-essential libopencv-dev &&
-        python3 -m venv /var/www/.venv &&
-        source /var/www/.venv/bin/activate &&
-        pip install --upgrade pip &&
-        pip install -r /var/www/ai-models/faceshape-ai-package/requirements.txt &&
-        pip install -r /var/www/ai-models/gender-ai-package/requirements.txt 2>/dev/null || true &&
-        pip install -r /var/www/ai-models/skincolor-ai-model/requirements.txt 2>/dev/null || true &&
-        cd /var/www && npm run start:dev
-      "
+    command: /bin/bash -c "cd /var/www && npm run start:dev"
     volumes:
       - ./:/var/www
-      - /var/www/.venv # Don't mount .venv from host
+      - /var/www/node_modules
     depends_on:
       - mysql
     environment:
@@ -27,7 +18,7 @@ services:
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
-      - PYTHON_PATH=/var/www/.venv/bin/python
+      - PYTHON_PATH=/opt/venv/bin/python
     networks:
       - app-network
 
