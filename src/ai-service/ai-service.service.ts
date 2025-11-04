@@ -27,11 +27,36 @@ import { FaceShapeType } from './enum/detect-face-shape.type';
 @Injectable()
 export class AIServiceService {
   private readonly logger = new Logger(AIServiceService.name);
-  private readonly pythonPath =
-    process.env.PYTHON_PATH ||
-    '/home/dawy/KLTN/matnice-ecommerce-backend/.venv/bin/python';
+  private readonly pythonPath = this.getPythonPath();
   // Point to the ai-models folder in the project root, not in dist
   private readonly aiModelsPath = path.resolve(process.cwd(), 'ai-models');
+
+  private getPythonPath(): string {
+    // 1. Check environment variable
+    if (process.env.PYTHON_PATH) {
+      return process.env.PYTHON_PATH;
+    }
+
+    // 2. Check common venv locations
+    const projectRoot = process.cwd();
+    const possiblePaths = [
+      '/opt/venv/bin/python', // Docker container
+      path.join(projectRoot, '.venv', 'bin', 'python'), // Local venv
+      path.join(projectRoot, 'venv', 'bin', 'python'), // Alternative local venv
+      'python3', // System Python (fallback)
+    ];
+
+    for (const pythonPath of possiblePaths) {
+      if (fs.existsSync(pythonPath)) {
+        this.logger.log(`Using Python: ${pythonPath}`);
+        return pythonPath;
+      }
+    }
+
+    // 3. Fallback to system python3
+    this.logger.warn('No venv found, using system python3');
+    return 'python3';
+  }
 
   constructor(
     @InjectRepository(FaceAnalysisEntity)
@@ -256,6 +281,10 @@ export class AIServiceService {
         'gender-ai-package/gender_best.pt',
       );
       const command = `${this.pythonPath} "${scriptPath}" --source "${imageUrl}" --model "${modelPath}" --json 2>/dev/null`;
+
+      // Debug log
+      this.logger.debug(`Executing command: ${command}`);
+
       const process = spawn('bash', ['-c', command]);
 
       let output = '';
