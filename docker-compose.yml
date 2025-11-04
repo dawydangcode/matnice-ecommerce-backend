@@ -6,14 +6,14 @@ services:
       - 3000:3000
     command: /bin/bash -c "
       if [ ! -d /var/www/.venv ]; then
-        apt-get update &&
-        apt-get install -y python3 python3-pip python3-venv build-essential libopencv-dev &&
-        python3 -m venv /var/www/.venv &&
-        source /var/www/.venv/bin/activate &&
-        pip install --upgrade pip &&
-        pip install -r /var/www/ai-models/faceshape-ai-package/requirements.txt &&
-        pip install -r /var/www/ai-models/gender-ai-package/requirements.txt 2>/dev/null || true &&
-        pip install -r /var/www/ai-models/skincolor-ai-model/requirements.txt 2>/dev/null || true;
+      apt-get update &&
+      apt-get install -y python3 python3-pip python3-venv build-essential libopencv-dev &&
+      python3 -m venv /var/www/.venv &&
+      source /var/www/.venv/bin/activate &&
+      pip install --upgrade pip &&
+      pip install -r /var/www/ai-models/faceshape-ai-package/requirements.txt &&
+      pip install -r /var/www/ai-models/gender-ai-package/requirements.txt 2>/dev/null || true &&
+      pip install -r /var/www/ai-models/skincolor-ai-model/requirements.txt 2>/dev/null || true;
       fi &&
       source /var/www/.venv/bin/activate &&
       cd /var/www && npm run start:dev
