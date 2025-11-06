@@ -1,8 +1,6 @@
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
+    image: node:20-bookworm
     restart: always
     ports:
       - 3000:3000
@@ -10,6 +8,8 @@ services:
     volumes:
       - ./:/var/www
       - /var/www/node_modules
+      # Mount Python venv từ host vào container
+      - /home/ec2-user/matnice-ecommerce-backend/venv:/opt/venv:ro
     depends_on:
       - mysql
     environment:
@@ -55,7 +55,6 @@ services:
 volumes:
   mysql_data:
   nginx_logs:
-  venv_data:
 
 networks:
   app-network:
