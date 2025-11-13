@@ -75,8 +75,12 @@ RUN pip3 install --no-cache-dir --break-system-packages \
     requests>=2.25.0 \
     mediapipe>=0.10.0
 
-# Create uploads directory
-RUN mkdir -p uploads && chown -R nestjs:nodejs uploads
+# Create uploads directory and matplotlib cache dir
+RUN mkdir -p uploads /tmp/matplotlib && \
+    chown -R nestjs:nodejs uploads /tmp/matplotlib
+
+# Set matplotlib config directory to writable location
+ENV MPLCONFIGDIR=/tmp/matplotlib
 
 # Switch to non-root user
 USER nestjs

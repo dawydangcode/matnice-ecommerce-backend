@@ -347,7 +347,8 @@ export class AIServiceService {
         this.aiModelsPath,
         'skincolor-ai-model/runs/train20/weights/best.pt',
       );
-      const command = `${this.pythonPath} "${scriptPath}" --source "${imageUrl}" --model "${modelPath}" --json 2>/dev/null`;
+      // Add output directory and environment variable for matplotlib
+      const command = `export MPLCONFIGDIR=/tmp/matplotlib && ${this.pythonPath} "${scriptPath}" --source "${imageUrl}" --model "${modelPath}" --output /tmp/skin-analysis --json 2>/dev/null`;
       const process = spawn('bash', ['-c', command]);
 
       let output = '';
