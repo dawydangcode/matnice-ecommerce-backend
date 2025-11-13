@@ -60,13 +60,18 @@ COPY --chown=nestjs:nodejs ai-models ./ai-models
 COPY --chown=nestjs:nodejs .env.production .env
 
 # Install Python dependencies for AI models
+# Install CPU-only PyTorch first (smaller size ~200MB vs 2GB)
+RUN pip3 install --no-cache-dir --break-system-packages \
+    torch==2.5.1+cpu \
+    torchvision==0.20.1+cpu \
+    --index-url https://download.pytorch.org/whl/cpu
+
+# Install other AI packages
 RUN pip3 install --no-cache-dir --break-system-packages \
     ultralytics>=8.0.0 \
     opencv-python-headless>=4.5.0 \
     numpy>=1.21.0 \
     pillow>=8.0.0 \
-    torch>=1.11.0 \
-    torchvision>=0.12.0 \
     requests>=2.25.0 \
     mediapipe>=0.10.0
 

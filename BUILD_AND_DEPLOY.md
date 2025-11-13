@@ -1,6 +1,54 @@
 # Build và Deploy Docker Image
 
-## Phương án: Build trên máy local, push lên Docker Hub, pull về server
+## ✨ Phương án khuyến nghị: Sử dụng Script tự động
+
+### Trên máy local:
+
+```bash
+# 1. Đảm bảo đã login Docker Hub
+docker login
+
+# 2. Chạy script build và push (thay YOUR_USERNAME bằng Docker Hub username của bạn)
+./build-and-push.sh YOUR_DOCKERHUB_USERNAME
+
+# Ví dụ: ./build-and-push.sh dawydang
+```
+
+**Script sẽ tự động:**
+- ✅ Build production image với PyTorch CPU-only
+- ✅ Hiển thị kích thước image
+- ✅ Hỏi xác nhận trước khi push
+- ✅ Push lên Docker Hub
+- ✅ Hiển thị lệnh deploy tiếp theo
+
+### Trên EC2 Server:
+
+```bash
+# SSH vào EC2
+ssh ec2-user@your-ec2-ip
+
+# Di chuyển vào thư mục project
+cd /home/ec2-user/matnice-ecommerce-backend
+
+# Pull code mới nhất
+git pull origin main
+
+# Chạy script deploy (thay YOUR_USERNAME)
+./deploy-on-ec2.sh YOUR_DOCKERHUB_USERNAME
+
+# Ví dụ: ./deploy-on-ec2.sh dawydang
+```
+
+**Script sẽ tự động:**
+- ✅ Pull image từ Docker Hub
+- ✅ Backup và update docker-compose.prod.yml
+- ✅ Stop containers cũ
+- ✅ Start containers mới
+- ✅ Hiển thị logs và status
+
+---
+
+## 📝 Phương án thủ công (nếu script không chạy)
 
 ### Bước 1: Chuẩn bị trên máy local
 
