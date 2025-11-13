@@ -280,7 +280,8 @@ export class AIServiceService {
         this.aiModelsPath,
         'gender-ai-package/gender_best.pt',
       );
-      const command = `${this.pythonPath} "${scriptPath}" --source "${imageUrl}" --model "${modelPath}" --json 2>/dev/null`;
+      // Add output directory for writable location
+      const command = `${this.pythonPath} "${scriptPath}" --source "${imageUrl}" --model "${modelPath}" --output /tmp/gender-analysis --json 2>/dev/null`;
 
       // Debug log
       this.logger.debug(`Executing command: ${command}`);
@@ -414,7 +415,8 @@ export class AIServiceService {
         this.aiModelsPath,
         'faceshape-ai-package/faceshape_best.pt',
       );
-      const command = `${this.pythonPath} "${scriptPath}" --image "${imageUrl}" --model "${modelPath}" --confidence 0.5 --json 2>/dev/null`;
+      // Add output directory for writable location
+      const command = `${this.pythonPath} "${scriptPath}" --image "${imageUrl}" --model "${modelPath}" --confidence 0.5 --output /tmp/faceshape-analysis --json 2>/dev/null`;
       const process = spawn('bash', ['-c', command]);
 
       let output = '';
