@@ -1,0 +1,43 @@
+# Development Dockerfile
+FROM node:20-alpine
+
+# Install Python and dependencies for AI scripts
+RUN apk add --no-cache bash python3 py3-pip \
+    # Additional dependencies for OpenCV
+    py3-numpy py3-pillow \
+    libstdc++ libgomp libgcc \
+    # Build dependencies (needed for some Python packages)
+    && apk add --no-cache --virtual .build-deps \
+    gcc g++ musl-dev python3-dev \
+    # OpenCV dependencies
+    jpeg-dev zlib-dev freetype-dev lcms2-dev openjpeg-dev \
+    tiff-dev tk-dev tcl-dev harfbuzz-dev fribidi-dev
+
+# Set working directory
+WORKDIR /var/www
+
+# Install Python dependencies for AI models
+RUN echo "ultralytics>=8.0.0" > /tmp/requirements.txt && \
+    echo "opencv-python-headless>=4.5.0" >> /tmp/requirements.txt && \
+    echo "numpy>=1.21.0" >> /tmp/requirements.txt && \
+    echo "pillow>=8.0.0" >> /tmp/requirements.txt && \
+    echo "torch>=1.11.0" >> /tmp/requirements.txt && \
+    echo "torchvision>=0.12.0" >> /tmp/requirements.txt && \
+    echo "requests>=2.25.0" >> /tmp/requirements.txt && \
+    echo "mediapipe>=0.10.0" >> /tmp/requirements.txt && \
+    pip3 install --no-cache-dir -r /tmp/requirements.txt && \
+    rm /tmp/requirements.txt && \
+    # Remove build dependencies to reduce image size
+    apk del .build-deps
+
+# Copy package files
+COPY package*.json ./
+
+# Install Node.js dependencies
+RUN npm install
+
+# Expose port
+EXPOSE 3000
+
+# Start command (will be overridden by docker-compose)
+CMD ["npm", "run", "start:dev"]

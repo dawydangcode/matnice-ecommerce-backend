@@ -1,5 +1,5 @@
 # Multi-stage build for production
-FROM node:20-alpine AS builder
+FROM node:20-slim AS builder
 
 # Set working directory
 WORKDIR /app
@@ -7,8 +7,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+# Install ALL dependencies (including devDependencies needed for build)
+RUN npm ci && npm cache clean --force
 
 # Copy source code
 COPY . .
@@ -17,14 +17,28 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM node:20-alpine AS production
+FROM node:20-slim AS production
 
-# Install dumb-init, bash and Python for AI scripts
-RUN apk add --no-cache dumb-init bash python3 py3-pip
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    dumb-init \
+    bash \
+    python3 \
+    python3-pip \
+    python3-dev \
+    # OpenCV dependencies
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libgomp1 \
+    libglib2.0-0 \
+    libgl1-mesa-glx \
+    && rm -rf /var/lib/apt/lists/*
 
-# Create app user
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nestjs -u 1001
+# Create app user (Debian syntax)
+RUN groupadd -g 1001 nodejs && \
+    useradd -r -u 1001 -g nodejs nestjs
 
 # Set working directory
 WORKDIR /app
@@ -39,8 +53,22 @@ RUN npm ci --only=production && npm cache clean --force
 COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
 COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
 
+# Copy AI models directory
+COPY --chown=nestjs:nodejs ai-models ./ai-models
+
 # Copy other necessary files
 COPY --chown=nestjs:nodejs .env.production .env
+
+# Install Python dependencies for AI models
+RUN pip3 install --no-cache-dir --break-system-packages \
+    ultralytics>=8.0.0 \
+    opencv-python-headless>=4.5.0 \
+    numpy>=1.21.0 \
+    pillow>=8.0.0 \
+    torch>=1.11.0 \
+    torchvision>=0.12.0 \
+    requests>=2.25.0 \
+    mediapipe>=0.10.0
 
 # Create uploads directory
 RUN mkdir -p uploads && chown -R nestjs:nodejs uploads
@@ -59,4 +87,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 ENTRYPOINT ["dumb-init", "--"]
 
 # Start the application
-CMD ["node", "dist/main"]
+CMD ["node", "dist/src/main"]
