@@ -247,25 +247,24 @@ export class DashboardService {
           break;
 
         default: // month
-          // Last 12 months
-          for (let i = 11; i >= 0; i--) {
-            const monthStart = new Date(
-              now.getFullYear(),
-              now.getMonth() - i,
-              1,
-            );
-            const monthEnd = new Date(
-              now.getFullYear(),
-              now.getMonth() - i + 1,
-              0,
-            );
+          // Days in current month up to today
+          const year = now.getFullYear();
+          const month = now.getMonth();
+          const today = now.getDate(); // Current day of month (e.g., 15)
+
+          for (let day = 1; day <= today; day++) {
+            const dayStart = new Date(year, month, day, 0, 0, 0, 0);
+            const dayEnd = new Date(year, month, day, 23, 59, 59, 999);
+
+            // Format: "1 Nov", "2 Nov", etc.
+            const monthShort = dayStart.toLocaleDateString('en-US', {
+              month: 'short',
+            });
 
             periods.push({
-              start: monthStart,
-              end: monthEnd,
-              label: monthStart.toLocaleDateString('en-US', {
-                month: 'short',
-              }),
+              start: dayStart,
+              end: dayEnd,
+              label: `${day} ${monthShort}`,
             });
           }
       }
