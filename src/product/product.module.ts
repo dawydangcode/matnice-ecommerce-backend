@@ -4,6 +4,8 @@ import { ProductService } from './product.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProductEntity } from './entities/product.entity';
 import { ProductBestsellerEntity } from './entities/product-bestseller.entity';
+import { OrderItemEntity } from '../order/modules/order-item/entities/order-item.entity';
+import { OrderEntity } from '../order/entities/order.entity';
 import { ProductColorModule } from './modules/product-color/product-color.module';
 import { ProductDetailModule } from './modules/product-detail/product-detail.module';
 import { ProductImageModule } from './modules/product-image/product-image.module';
@@ -18,7 +20,12 @@ import { BestsellerController } from './controllers/bestseller.controller';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ProductEntity, ProductBestsellerEntity]),
+    TypeOrmModule.forFeature([
+      ProductEntity,
+      ProductBestsellerEntity,
+      OrderItemEntity,
+      OrderEntity,
+    ]),
     ProductColorModule,
     ProductDetailModule,
     ProductCategoryModule,

@@ -4,9 +4,12 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, MoreThan } from 'typeorm';
 import { ProductBestsellerEntity } from '../entities/product-bestseller.entity';
 import { ProductEntity } from '../entities/product.entity';
+import { OrderItemEntity } from '../../order/modules/order-item/entities/order-item.entity';
+import { OrderEntity } from '../../order/entities/order.entity';
+import { OrderStatus } from '../../order/enums/order.enum';
 
 export interface BestsellerProduct {
   id: number;
@@ -33,6 +36,10 @@ export class BestsellerService {
     private readonly bestsellerRepository: Repository<ProductBestsellerEntity>,
     @InjectRepository(ProductEntity)
     private readonly productRepository: Repository<ProductEntity>,
+    @InjectRepository(OrderItemEntity)
+    private readonly orderItemRepository: Repository<OrderItemEntity>,
+    @InjectRepository(OrderEntity)
+    private readonly orderRepository: Repository<OrderEntity>,
   ) {}
 
   /**
@@ -214,23 +221,92 @@ export class BestsellerService {
    * Cron Job: Sync sales data from orders
    * This should be called periodically (e.g., daily) to update sales stats
    */
+  /**
+   * Sync sales data from Order table
+   * Calculates total sales and revenue for bestseller products
+   */
   async syncSalesData(days: number = 30): Promise<void> {
-    // This is a placeholder - you'll need to implement based on your Order entity structure
-    // Query order items, group by product, calculate totals
+    console.log(
+      `[BestsellerService] Syncing sales data for last ${days} days...`,
+    );
 
-    // Example pseudo-code:
-    // const salesData = await this.orderItemRepository
-    //   .createQueryBuilder('orderItem')
-    //   .select('orderItem.product_id', 'productId')
-    //   .addSelect('SUM(orderItem.quantity)', 'totalSales')
-    //   .addSelect('SUM(orderItem.price * orderItem.quantity)', 'revenue')
-    //   .groupBy('orderItem.product_id')
-    //   .getRawMany();
+    // Calculate date threshold
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
 
-    // Update or create bestseller entries based on sales data
+    try {
+      // Get all bestseller products
+      const bestsellers = await this.bestsellerRepository.find({
+        select: ['id', 'productId'],
+      });
 
-    console.log(`Syncing sales data for last ${days} days...`);
-    // TODO: Implement actual sales data sync from Order entities
+      console.log(
+        `[BestsellerService] Found ${bestsellers.length} bestseller products to sync`,
+      );
+
+      // Sync each bestseller's sales data
+      for (const bestseller of bestsellers) {
+        await this.syncProductSalesData(
+          bestseller.id,
+          bestseller.productId,
+          startDate,
+        );
+      }
+
+      console.log(`[BestsellerService] Sales data sync completed successfully`);
+    } catch (error) {
+      console.error('[BestsellerService] Error syncing sales data:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Sync sales data for a specific product
+   */
+  private async syncProductSalesData(
+    bestsellerId: number,
+    productId: number,
+    startDate: Date,
+  ): Promise<void> {
+    // Query total sales (all time) for completed orders only
+    const totalSalesResult = await this.orderItemRepository
+      .createQueryBuilder('orderItem')
+      .innerJoin('orderItem.order', 'order')
+      .select('COALESCE(SUM(orderItem.quantity), 0)', 'totalQuantity')
+      .addSelect('COALESCE(SUM(orderItem.total_price), 0)', 'totalRevenue')
+      .where('orderItem.product_id = :productId', { productId })
+      .andWhere('order.status = :status', { status: OrderStatus.DELIVERED })
+      .andWhere('order.deleted_at IS NULL')
+      .andWhere('orderItem.deleted_at IS NULL')
+      .getRawOne();
+
+    // Query sales for last N days
+    const recentSalesResult = await this.orderItemRepository
+      .createQueryBuilder('orderItem')
+      .innerJoin('orderItem.order', 'order')
+      .select('COALESCE(SUM(orderItem.quantity), 0)', 'totalQuantity')
+      .where('orderItem.product_id = :productId', { productId })
+      .andWhere('order.status = :status', { status: OrderStatus.DELIVERED })
+      .andWhere('order.order_date >= :startDate', { startDate })
+      .andWhere('order.deleted_at IS NULL')
+      .andWhere('orderItem.deleted_at IS NULL')
+      .getRawOne();
+
+    const totalSales = parseInt(totalSalesResult?.totalQuantity || '0');
+    const salesLastNDays = parseInt(recentSalesResult?.totalQuantity || '0');
+    const revenueGenerated = parseFloat(totalSalesResult?.totalRevenue || '0');
+
+    console.log(
+      `[BestsellerService] Product ${productId}: Total Sales=${totalSales}, Sales Last ${Math.floor((Date.now() - startDate.getTime()) / (1000 * 60 * 60 * 24))}d=${salesLastNDays}, Revenue=${revenueGenerated}`,
+    );
+
+    // Update bestseller record
+    await this.bestsellerRepository.update(bestsellerId, {
+      totalSales,
+      salesLast30Days: salesLastNDays,
+      revenueGenerated,
+      updatedAt: new Date(),
+    });
   }
 
   /**
