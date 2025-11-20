@@ -3,6 +3,7 @@ import { ProductController } from './product.controller';
 import { ProductService } from './product.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProductEntity } from './entities/product.entity';
+import { ProductBestsellerEntity } from './entities/product-bestseller.entity';
 import { ProductColorModule } from './modules/product-color/product-color.module';
 import { ProductDetailModule } from './modules/product-detail/product-detail.module';
 import { ProductImageModule } from './modules/product-image/product-image.module';
@@ -12,10 +13,12 @@ import { Product3dModelModule } from './modules/product-3d-model/product-3d-mode
 import { Model3dConfigModule } from './modules/model-3d-config/model-3d-config.module';
 import { ColorSkinRecommendationModule } from './modules/color-skin-recommendation/color-skin-recommendation.module';
 import { ProductSchedulerService } from './services/product-scheduler.service';
+import { BestsellerService } from './services/bestseller.service';
+import { BestsellerController } from './controllers/bestseller.controller';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ProductEntity]),
+    TypeOrmModule.forFeature([ProductEntity, ProductBestsellerEntity]),
     ProductColorModule,
     ProductDetailModule,
     ProductCategoryModule,
@@ -25,10 +28,11 @@ import { ProductSchedulerService } from './services/product-scheduler.service';
     ColorSkinRecommendationModule,
     forwardRef(() => ProductImageModule),
   ],
-  controllers: [ProductController],
-  providers: [ProductService, ProductSchedulerService],
+  controllers: [ProductController, BestsellerController],
+  providers: [ProductService, ProductSchedulerService, BestsellerService],
   exports: [
     ProductService,
+    BestsellerService,
     ProductColorModule,
     ProductDetailModule,
     ProductImageModule,
