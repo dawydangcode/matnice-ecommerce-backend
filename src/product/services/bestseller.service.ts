@@ -50,40 +50,61 @@ export class BestsellerService {
     limit: number = 8,
     pinnedOnly: boolean = false,
   ): Promise<BestsellerProduct[]> {
-    const queryBuilder = this.bestsellerRepository
+    // Step 1: Get bestseller IDs first (without JOIN to avoid LIMIT issues)
+    const bestsellerIdsQuery = this.bestsellerRepository
+      .createQueryBuilder('bestseller')
+      .select('bestseller.id')
+      .innerJoin('bestseller.product', 'product')
+      .where('bestseller.is_active = :isActive', { isActive: true })
+      .andWhere('product.deleted_at IS NULL');
+
+    if (pinnedOnly) {
+      bestsellerIdsQuery.andWhere('bestseller.is_pinned = :isPinned', {
+        isPinned: true,
+      });
+    }
+
+    bestsellerIdsQuery
+      .orderBy('bestseller.is_pinned', 'DESC')
+      .addOrderBy('bestseller.total_sales', 'DESC')
+      .addOrderBy('bestseller.sales_last_30_days', 'DESC')
+      .addOrderBy('bestseller.created_at', 'DESC')
+      .limit(limit);
+
+    const bestsellerIds = await bestsellerIdsQuery.getRawMany();
+    const ids = bestsellerIds.map((b) => b.bestseller_id);
+
+    if (ids.length === 0) {
+      return [];
+    }
+
+    // Step 2: Get full data with relations for the selected IDs
+    const bestsellers = await this.bestsellerRepository
       .createQueryBuilder('bestseller')
       .leftJoinAndSelect('bestseller.product', 'product')
       .leftJoinAndSelect('product.brand', 'brand')
       .leftJoinAndSelect('product.productColors', 'productColors')
       .leftJoinAndSelect('productColors.productImage', 'productImage')
-      .where('bestseller.is_active = :isActive', { isActive: true })
-      .andWhere('product.deleted_at IS NULL');
-
-    if (pinnedOnly) {
-      queryBuilder.andWhere('bestseller.is_pinned = :isPinned', {
-        isPinned: true,
-      });
-    }
-
-    // Hybrid sorting logic:
-    // 1. Pinned products first (by custom_priority or display_order)
-    // 2. Then by sales performance
-    // Note: MySQL doesn't support NULLS LAST, so we use COALESCE or IS NULL workaround
-    queryBuilder
+      .where('bestseller.id IN (:...ids)', { ids })
       .orderBy('bestseller.is_pinned', 'DESC')
-      .addOrderBy('COALESCE(bestseller.custom_priority, 999999)', 'ASC')
-      .addOrderBy('COALESCE(bestseller.display_order, 999999)', 'ASC')
-      .addOrderBy('bestseller.sales_last_30_days', 'DESC')
       .addOrderBy('bestseller.total_sales', 'DESC')
-      .limit(limit);
+      .addOrderBy('bestseller.sales_last_30_days', 'DESC')
+      .addOrderBy('bestseller.created_at', 'DESC')
+      .getMany();
 
-    const bestsellers = await queryBuilder.getMany();
+    console.log(
+      `[BestsellerService] Found ${bestsellers.length} bestseller records from database`,
+    );
 
     // Transform to frontend-friendly format
     return bestsellers.map((bestseller) => {
       const product = bestseller.product;
       const firstColor = product.productColors?.[0];
       const firstImage = firstColor?.productImage?.[0];
+
+      console.log(
+        `[BestsellerService] Processing product ${product.id}: ${product.productName}, has ${product.productColors?.length || 0} colors, first image: ${firstImage?.imageUrl ? 'YES' : 'NO'}`,
+      );
 
       // For now, no discount logic (can be added later)
       let discountPrice: number | undefined;
@@ -317,8 +338,9 @@ export class BestsellerService {
       relations: ['product', 'product.brand'],
       order: {
         isPinned: 'DESC',
-        customPriority: 'ASC',
+        totalSales: 'DESC',
         salesLast30Days: 'DESC',
+        createdAt: 'DESC',
       },
     });
   }
