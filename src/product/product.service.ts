@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ProductEntity } from './entities/product.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, IsNull, Like, Repository, LessThan } from 'typeorm';
+import { In, IsNull, Like, Repository, LessThan, Brackets } from 'typeorm';
 import { PaginationParamsModel } from 'src/common/models/pagination-params.model';
 import { PageList } from 'src/common/models/page-list.model';
 import { ProductModel } from './models/product.model';
@@ -262,8 +262,12 @@ export class ProductService {
     const queryBuilder = this.productRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.brand', 'brand')
-      .leftJoinAndSelect('product.productColors', 'productColors')
       .leftJoin('product.productDetail', 'productDetail')
+      .leftJoin(
+        'product_color',
+        'productColor',
+        'productColor.product_id = product.id AND productColor.is_thumbnail = 1 AND productColor.deleted_at IS NULL',
+      )
       .leftJoin(
         'product_image',
         'thumbnailImage',
@@ -271,6 +275,11 @@ export class ProductService {
         { imageOrder: 'a' },
       )
       .addSelect(['thumbnailImage.image_url as thumbnailUrl'])
+      .addSelect([
+        'productColor.product_variant_name as variantName',
+        'productColor.color_name as colorName',
+        'productColor.stock as stock',
+      ])
       // Select thêm các trường productDetail
       .addSelect([
         'productDetail.id as productDetailId',
@@ -399,8 +408,33 @@ export class ProductService {
 
     if (searchQuery) {
       queryBuilder.andWhere(
-        '(product.productName LIKE :search OR product.description LIKE :search OR brand.name LIKE :search)',
-        { search: `%${searchQuery}%` },
+        new Brackets((qb) => {
+          qb.where('product.productName LIKE :search', {
+            search: `%${searchQuery}%`,
+          })
+            .orWhere('product.description LIKE :search', {
+              search: `%${searchQuery}%`,
+            })
+            .orWhere('brand.name LIKE :search', { search: `%${searchQuery}%` })
+            .orWhere('productDetail.frame_material LIKE :search', {
+              search: `%${searchQuery}%`,
+            })
+            .orWhere('productDetail.frame_shape LIKE :search', {
+              search: `%${searchQuery}%`,
+            })
+            .orWhere('productDetail.frame_type LIKE :search', {
+              search: `%${searchQuery}%`,
+            })
+            .orWhere('productDetail.spring_hinges LIKE :search', {
+              search: `%${searchQuery}%`,
+            })
+            .orWhere('productDetail.weight LIKE :search', {
+              search: `%${searchQuery}%`,
+            })
+            .orWhere('productDetail.multifocal LIKE :search', {
+              search: `%${searchQuery}%`,
+            });
+        }),
       );
     }
 
@@ -428,9 +462,9 @@ export class ProductService {
     // Get total count first
     const totalQueryBuilder = this.productRepository
       .createQueryBuilder('product')
-      .leftJoin('product.productColors', 'productColors')
       .leftJoin('product.productDetail', 'productDetail')
-      .where('product.deletedAt IS NULL');
+      .where('product.deletedAt IS NULL')
+      .distinct(true);
 
     // Apply same filters for count
     if (productTypeIds && productTypeIds.length > 0) {
@@ -496,12 +530,37 @@ export class ProductService {
     }
 
     if (searchQuery) {
-      totalQueryBuilder
-        .leftJoin('product.brand', 'brandForSearch')
-        .andWhere(
-          '(product.productName LIKE :search OR product.description LIKE :search OR brandForSearch.name LIKE :search)',
-          { search: `%${searchQuery}%` },
-        );
+      totalQueryBuilder.leftJoin('product.brand', 'brandForSearch').andWhere(
+        new Brackets((qb) => {
+          qb.where('product.productName LIKE :search', {
+            search: `%${searchQuery}%`,
+          })
+            .orWhere('product.description LIKE :search', {
+              search: `%${searchQuery}%`,
+            })
+            .orWhere('brandForSearch.name LIKE :search', {
+              search: `%${searchQuery}%`,
+            })
+            .orWhere('productDetail.frame_material LIKE :search', {
+              search: `%${searchQuery}%`,
+            })
+            .orWhere('productDetail.frame_shape LIKE :search', {
+              search: `%${searchQuery}%`,
+            })
+            .orWhere('productDetail.frame_type LIKE :search', {
+              search: `%${searchQuery}%`,
+            })
+            .orWhere('productDetail.spring_hinges LIKE :search', {
+              search: `%${searchQuery}%`,
+            })
+            .orWhere('productDetail.weight LIKE :search', {
+              search: `%${searchQuery}%`,
+            })
+            .orWhere('productDetail.multifocal LIKE :search', {
+              search: `%${searchQuery}%`,
+            });
+        }),
+      );
     }
 
     const total = await totalQueryBuilder.getCount();
@@ -515,13 +574,22 @@ export class ProductService {
       console.log('First raw result:', rawResults[0]);
     }
 
+    // Remove duplicates based on product ID
+    const uniqueRawResults = rawResults.filter(
+      (row, index, self) =>
+        index === self.findIndex((r) => r.product_id === row.product_id),
+    );
+
+    console.log(
+      `Total raw results: ${rawResults.length}, Unique results: ${uniqueRawResults.length}`,
+    );
+
     // Transform raw results to proper format
-    const productCards = rawResults.map((row: any) => {
-      const displayName =
-        row.productColors_productVariantName ||
-        row.productColors_product_variant_name
-          ? `${row.product_productName || row.product_product_name} ${row.productColors_productVariantName || row.productColors_product_variant_name}`
-          : row.product_productName || row.product_product_name;
+    const productCards = uniqueRawResults.map((row: any) => {
+      const variantName = row.variantName || row.variant_name || null;
+      const displayName = variantName
+        ? `${row.product_productName || row.product_product_name} ${variantName}`
+        : row.product_productName || row.product_product_name;
 
       return {
         id: row.product_id,
@@ -537,13 +605,9 @@ export class ProductService {
         isBoutique: row.product_isBoutique || row.product_is_boutique,
         isSustainable: row.product_isSustainable || row.product_is_sustainable,
         // Variant info
-        variantName:
-          row.productColors_productVariantName ||
-          row.productColors_product_variant_name ||
-          null,
-        colorName:
-          row.productColors_colorName || row.productColors_color_name || null,
-        stock: row.productColors_stock || 0,
+        variantName: variantName,
+        colorName: row.colorName || row.color_name || null,
+        stock: row.stock || 0,
         totalVariants: 1, // We'll calculate this properly later
         // Thông tin productDetail
         productDetail: {
