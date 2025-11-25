@@ -95,19 +95,30 @@ export class UserDetailService {
     userId: number | undefined,
     reqUserId: number,
   ): Promise<UserDetailModel> {
+    // Build update object - only update fields that are provided
+    const updateData: any = {
+      updatedAt: new Date(),
+      updatedBy: reqUserId || userDetail.userId,
+    };
+
+    // Only add fields if they are defined
+    if (name !== undefined) {
+      updateData.name = name;
+    }
+    if (dob !== undefined) {
+      updateData.dob = dob;
+    }
+    if (gender !== undefined) {
+      updateData.gender = gender;
+    }
+    // Note: Do NOT update userId as it's a foreign key and should not change
+
     await this.userDetailRepository.update(
       {
         id: userDetail.id,
         deletedAt: IsNull(),
       },
-      {
-        name: name,
-        dob: dob,
-        gender: gender,
-        userId: userId,
-        updatedAt: new Date(),
-        updatedBy: reqUserId || userDetail.userId,
-      },
+      updateData,
     );
     return this.getUserDetail(userDetail.id);
   }

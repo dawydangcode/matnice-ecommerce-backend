@@ -26,6 +26,7 @@ export class UserDetailDto {
 
   @ApiProperty()
   @IsDate()
+  @Type(() => Date)
   dob!: Date;
 
   @ApiProperty()
@@ -49,23 +50,22 @@ export class UserDetailDto {
   q!: string;
 }
 
-export class CreateUserDetailBodyDto extends PickType(UserDetailDto, [
-  'userId',
-  'name',
-  'dob',
-  'gender',
-]) {}
+export class CreateUserDetailBodyDto extends PartialType(
+  PickType(UserDetailDto, ['userId', 'name', 'dob', 'gender']),
+) {
+  @ApiProperty()
+  @IsNumber()
+  @Type(() => Number)
+  userId!: number; // userId is required for create
+}
 
 export class GetUserDetailParamsDto extends PickType(UserDetailDto, [
   'userDetailId',
 ]) {}
 
-export class UpdateUserDetailBodyDto extends PickType(UserDetailDto, [
-  'userId',
-  'name',
-  'dob',
-  'gender',
-]) {}
+export class UpdateUserDetailBodyDto extends PartialType(
+  PickType(UserDetailDto, ['userId', 'name', 'dob', 'gender']),
+) {}
 
 export class UpdateUserDetailParamsDto extends PickType(UserDetailDto, [
   'userDetailId',
