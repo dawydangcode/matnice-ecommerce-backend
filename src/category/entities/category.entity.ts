@@ -10,7 +10,7 @@ import { CategoryModel } from '../models/category.model';
 export class CategoryEntity {
   @PrimaryGeneratedColumn({ name: 'id' })
   id!: number;
-  z;
+
   @Column({ name: 'name' })
   name!: string;
 
