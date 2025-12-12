@@ -106,7 +106,9 @@ export class UserAddressController {
 
   @Put('user-address/:userAddressId/set-default')
   @Roles(RoleType.User, RoleType.Admin)
-  async setDefault(@Param('id', ParseIntPipe) id: number) {
-    return await this.userAddressService.setDefault(id);
+  async setDefault(
+    @Param('userAddressId', ParseIntPipe) userAddressId: number,
+  ) {
+    return await this.userAddressService.setDefault(userAddressId);
   }
 }

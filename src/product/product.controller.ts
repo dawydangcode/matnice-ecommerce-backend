@@ -74,7 +74,11 @@ export class ProductController {
       query.frameWidthMin,
       query.frameWidthMax,
       query.productType,
-      query.boutique === 'true' ? true : query.boutique === 'false' ? false : undefined,
+      query.boutique === 'true'
+        ? true
+        : query.boutique === 'false'
+          ? false
+          : undefined,
     );
   }
 

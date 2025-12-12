@@ -530,7 +530,7 @@ export class OrderService {
     try {
       const orders = await this.orderRepository.find({
         where: { userId, deletedAt: IsNull() },
-        order: { createdAt: 'DESC' },
+        order: { orderDate: 'DESC', createdAt: 'DESC' },
       });
 
       return orders.map((order) => order.toModel());
