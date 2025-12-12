@@ -37,13 +37,17 @@ INSERT INTO `email_template` (
     .header {
       text-align: center;
       padding-bottom: 20px;
-      border-bottom: 2px solid #4CAF50;
+      border-bottom: 2px solid #333;
       margin-bottom: 30px;
     }
     .header h1 {
-      color: #4CAF50;
+      color: #333;
       margin: 0;
       font-size: 28px;
+    }
+    .header p {
+      color: #666;
+      margin: 10px 0 0 0;
     }
     .order-info {
       background-color: #f9f9f9;
@@ -78,7 +82,7 @@ INSERT INTO `email_template` (
       margin: 20px 0;
     }
     th {
-      background-color: #4CAF50;
+      background-color: #333;
       color: white;
       padding: 12px;
       text-align: left;
@@ -93,10 +97,16 @@ INSERT INTO `email_template` (
       font-size: 16px;
     }
     .shipping-address {
-      background-color: #f0f8ff;
+      background-color: #f9f9f9;
       padding: 15px;
       border-radius: 5px;
       margin: 20px 0;
+      border-left: 4px solid #333;
+    }
+    .shipping-address h2 {
+      color: #333;
+      font-size: 18px;
+      margin-top: 0;
     }
     .footer {
       text-align: center;
@@ -109,15 +119,18 @@ INSERT INTO `email_template` (
     .button {
       display: inline-block;
       padding: 12px 30px;
-      background-color: #4CAF50;
+      background-color: #333;
       color: white;
       text-decoration: none;
       border-radius: 5px;
       margin: 20px 0;
       font-weight: bold;
     }
+    .button:hover {
+      background-color: #555;
+    }
     .highlight {
-      color: #4CAF50;
+      color: #333;
       font-weight: bold;
     }
   </style>
@@ -125,7 +138,7 @@ INSERT INTO `email_template` (
 <body>
   <div class="container">
     <div class="header">
-      <h1>🎉 Đặt hàng thành công!</h1>
+      <h1>Đặt hàng thành công!</h1>
       <p>Cảm ơn bạn đã mua sắm tại Mat Nice Store</p>
     </div>
 
@@ -134,7 +147,7 @@ INSERT INTO `email_template` (
     <p>Chúng tôi đã nhận được đơn hàng của bạn và đang xử lý. Dưới đây là thông tin chi tiết đơn hàng:</p>
 
     <div class="order-info">
-      <h2>📋 Thông tin đơn hàng</h2>
+      <h2>Thông tin đơn hàng</h2>
       <div class="info-row">
         <span class="info-label">Mã đơn hàng:</span>
         <span class="info-value highlight">#{{orderId}}</span>
@@ -149,7 +162,7 @@ INSERT INTO `email_template` (
       </div>
     </div>
 
-    <h2>📦 Sản phẩm trong đơn hàng</h2>
+    <h2 style="color: #333;">Sản phẩm trong đơn hàng</h2>
     <table>
       <thead>
         <tr>
@@ -172,13 +185,13 @@ INSERT INTO `email_template` (
         </tr>
         <tr class="total-row">
           <td colspan="2" style="text-align: right; padding-right: 12px;">Tổng cộng:</td>
-          <td style="text-align: right; color: #4CAF50; font-size: 18px;">{{totalPrice}}</td>
+          <td style="text-align: right; color: #333; font-size: 18px;">{{totalPrice}}</td>
         </tr>
       </tfoot>
     </table>
 
     <div class="shipping-address">
-      <h2>🚚 Địa chỉ giao hàng</h2>
+      <h2>Địa chỉ giao hàng</h2>
       <p style="margin: 5px 0;"><strong>Người nhận:</strong> {{shippingFullName}}</p>
       <p style="margin: 5px 0;"><strong>Số điện thoại:</strong> {{shippingPhone}}</p>
       <p style="margin: 5px 0;"><strong>Địa chỉ:</strong> {{shippingAddress}}</p>
@@ -191,9 +204,10 @@ INSERT INTO `email_template` (
 
     <div class="footer">
       <p><strong>Mat Nice Store</strong></p>
-      <p>Email: support@matnice.com | Hotline: 1900 xxxx</p>
-      <p>Địa chỉ: [Địa chỉ cửa hàng]</p>
+      <p>Email: support@matnice.com | Hotline: 1900-xxxx</p>
+      <p>Địa chỉ: Số 1, Võ Văn Ngân, Thủ Đức, TP.HCM</p>
       <p style="font-size: 12px; color: #999; margin-top: 15px;">
+        © 2024 Mat Nice Store. All rights reserved.<br>
         Email này được gửi tự động, vui lòng không trả lời email này.
       </p>
     </div>

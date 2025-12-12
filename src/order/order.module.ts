@@ -7,6 +7,7 @@ import { OrderItemModule } from './modules/order-item/order-item.module';
 import { OrderLensDetailModule } from './modules/order-lens-detail/order-lens-detail.module';
 import { CartModule } from '../cart/cart.module';
 import { StockModule } from '../stock/stock.module';
+import { MailerModule } from '../mailer/mailer.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { StockModule } from '../stock/stock.module';
     OrderLensDetailModule,
     CartModule,
     StockModule,
+    MailerModule,
   ],
   controllers: [OrderController],
   providers: [OrderService],

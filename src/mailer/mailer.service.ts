@@ -22,8 +22,12 @@ export class MailerService {
     const template = await this.templateService.getTemplateByName(templateName);
 
     let htmlContent = template.html;
+    let subject = template.subject;
+
+    // Replace variables in both subject and HTML content
     for (const [key, value] of Object.entries(variables)) {
       htmlContent = htmlContent.replace(new RegExp(`{{${key}}}`, 'g'), value);
+      subject = subject.replace(new RegExp(`{{${key}}}`, 'g'), value);
     }
 
     const fromEmail = `${this.configService.get<string>('MAILER_DEFAULT_NAME')} <${this.configService.get<string>('MAILER_DEFAULT_EMAIL')}>`;
@@ -31,7 +35,7 @@ export class MailerService {
     const mailData = new MailOptionsModel(
       fromEmail,
       email,
-      template.subject,
+      subject,
       template.html,
       htmlContent,
     );
@@ -103,6 +107,44 @@ export class MailerService {
     return this.sendMailWithTemplate(
       email,
       EmailTemplateType.ORDER_CONFIRMATION,
+      variables,
+    );
+  }
+
+  async sendOrderStatusUpdateEmail(
+    email: string,
+    orderData: {
+      customerName: string;
+      orderId: number;
+      oldStatus: string;
+      newStatus: string;
+      orderDate: string;
+      trackingNumber?: string;
+      estimatedDelivery?: string;
+    },
+  ): Promise<MailOptionsModel> {
+    // Map status to Vietnamese display names
+    const statusDisplayNames: Record<string, string> = {
+      pending: 'Chờ xử lý',
+      processing: 'Đang xử lý',
+      shipped: 'Đã gửi hàng',
+      delivered: 'Đã giao hàng',
+      cancelled: 'Đã hủy',
+    };
+
+    const variables: Record<string, string> = {
+      customerName: orderData.customerName,
+      orderId: orderData.orderId.toString(),
+      oldStatus: statusDisplayNames[orderData.oldStatus] || orderData.oldStatus,
+      newStatus: statusDisplayNames[orderData.newStatus] || orderData.newStatus,
+      orderDate: orderData.orderDate,
+      trackingNumber: orderData.trackingNumber || 'Chưa cập nhật',
+      estimatedDelivery: orderData.estimatedDelivery || 'Đang cập nhật',
+    };
+
+    return this.sendMailWithTemplate(
+      email,
+      EmailTemplateType.ORDER_STATUS_UPDATE,
       variables,
     );
   }

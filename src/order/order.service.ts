@@ -17,6 +17,7 @@ import { CartCombinedService } from '../cart/modules/cart-combined.service';
 import { OrderItemService } from './modules/order-item/order-item.service';
 import { OrderLensDetailService } from './modules/order-lens-detail/order-lens-detail.service';
 import { StockService } from '../stock/stock.service';
+import { MailerService } from '../mailer/mailer.service';
 
 @Injectable()
 export class OrderService {
@@ -30,6 +31,7 @@ export class OrderService {
     private readonly orderItemService: OrderItemService,
     private readonly orderLensDetailService: OrderLensDetailService,
     private readonly stockService: StockService,
+    private readonly mailerService: MailerService,
   ) {}
 
   async createOrder(
@@ -598,7 +600,56 @@ export class OrderService {
         }
       }
 
-      return await this.getOrderById(id);
+      const updatedOrder = await this.getOrderById(id);
+
+      // Send email notification about status change
+      try {
+        this.logger.log(`Sending status update email for order ${id}`);
+
+        const orderDate = new Date(updatedOrder.orderDate).toLocaleDateString(
+          'vi-VN',
+          {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+          },
+        );
+
+        const estimatedDelivery = updatedOrder.deliveryDate
+          ? new Date(updatedOrder.deliveryDate).toLocaleDateString('vi-VN', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+            })
+          : undefined;
+
+        await this.mailerService.sendOrderStatusUpdateEmail(
+          updatedOrder.email,
+          {
+            customerName: updatedOrder.fullName,
+            orderId: updatedOrder.id,
+            oldStatus: previousStatus,
+            newStatus: status,
+            orderDate: orderDate,
+            trackingNumber: updatedOrder.trackingNumber,
+            estimatedDelivery: estimatedDelivery,
+          },
+        );
+
+        this.logger.log(
+          `Status update email sent successfully for order ${id}`,
+        );
+      } catch (emailError) {
+        this.logger.error(
+          `Failed to send status update email for order ${id}:`,
+          emailError,
+        );
+        // Don't throw - order update should succeed even if email fails
+      }
+
+      return updatedOrder;
     } catch (error) {
       throw new HttpException(
         'Failed to update order status',
