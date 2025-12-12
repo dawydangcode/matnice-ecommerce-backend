@@ -33,6 +33,7 @@ import {
 import { RequestModel } from 'src/common/models/request.model';
 import { Public } from 'src/middlewares/guards/jwt-auth.guard';
 import { type Webhook } from '@payos/node';
+import { MailerService } from 'src/mailer/mailer.service';
 
 @ApiTags('PayOS Payment')
 @Controller('api/payment/payos')
@@ -43,6 +44,7 @@ export class PayOSController {
     private readonly cartCombinedService: CartCombinedService,
     private readonly cartService: CartService,
     private readonly orderService: OrderService,
+    private readonly mailerService: MailerService,
   ) {}
 
   @Post('create-payment-link')
@@ -521,6 +523,29 @@ export class PayOSController {
         `🚚 Shipping cost: ${shippingCost} (hasLenses: ${hasLenses})`,
       );
 
+      // Log cart items before creating order
+      if (cartItems.length === 0) {
+        console.error(
+          '❌ CRITICAL: Cart is empty! Cannot create order with items.',
+        );
+        return res.status(HttpStatus.BAD_REQUEST).json({
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: 'Cannot create order: Cart is empty',
+        });
+      }
+
+      console.log(
+        `✅ Cart has ${cartItems.length} items, proceeding to create order...`,
+      );
+      cartItems.forEach((item, index) => {
+        console.log(`  Item ${index + 1}:`, {
+          frameId: item.frame?.id,
+          productId: item.frame?.productId,
+          quantity: item.frame?.quantity,
+          hasLens: !!item.lensDetail,
+        });
+      });
+
       // 4. Create order
       let order;
       try {
@@ -542,6 +567,18 @@ export class PayOSController {
           userId,
         );
         console.log(`📋 Order created with ID: ${order.id}`);
+
+        // Immediately verify order was created with items
+        const verifyOrder = await this.orderService.getOrderById(order.id);
+        console.log(
+          `✅ Order verification: ${verifyOrder.orderItems?.length || 0} items in order`,
+        );
+        if (!verifyOrder.orderItems || verifyOrder.orderItems.length === 0) {
+          console.error('❌ CRITICAL: Order created but has NO ITEMS!');
+          console.error(
+            'This means createOrder did not create order items from cart.',
+          );
+        }
       } catch (error) {
         console.error('❌ Error creating order:', error);
         return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
@@ -585,6 +622,108 @@ export class PayOSController {
       } catch (error) {
         console.error('❌ Error clearing cart:', error);
         // Don't fail the whole process if cart clearing fails
+      }
+
+      // 8. Send order confirmation email
+      try {
+        console.log('📧 Preparing to send order confirmation email...');
+
+        // Get full order details with items
+        const orderDetails = await this.orderService.getOrderById(order.id);
+
+        console.log('📦 Order details:', {
+          orderId: orderDetails.id,
+          itemCount: orderDetails.orderItems?.length || 0,
+          subtotal: orderDetails.subtotal,
+          shippingCost: orderDetails.shippingCost,
+          totalPrice: orderDetails.totalPrice,
+        });
+
+        // Check if order items exist
+        if (!orderDetails.orderItems || orderDetails.orderItems.length === 0) {
+          console.warn(
+            '⚠️ Warning: Order has no items! Email will show empty product list.',
+          );
+        } else {
+          console.log(
+            `📦 Found ${orderDetails.orderItems.length} order items for email`,
+          );
+        }
+
+        // Helper function to format currency
+        const formatCurrency = (amount: number): string => {
+          return (
+            new Intl.NumberFormat('vi-VN', {
+              style: 'decimal',
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0,
+            }).format(Math.round(amount)) + ' ₫'
+          );
+        };
+
+        // Format products for email
+        const products = (orderDetails.orderItems || []).map((item) => {
+          let lensInfo = '';
+          if (item.lensDetails && item.lensDetails.length > 0) {
+            const lens = item.lensDetails[0];
+            lensInfo = `Lens: ${lens.lensType || 'N/A'} | SPH: R ${lens.rightSphere} L ${lens.leftSphere} | CYL: R ${lens.rightCylinder} L ${lens.leftCylinder}`;
+          }
+
+          console.log(`📦 Formatting product for email:`, {
+            productId: item.productId,
+            quantity: item.quantity,
+            totalPrice: item.totalPrice,
+            hasLensDetails: !!item.lensDetails,
+          });
+
+          return {
+            name: `Product #${item.productId}`, // You may want to fetch product name from product service
+            quantity: item.quantity,
+            price: formatCurrency(item.totalPrice),
+            lensInfo: lensInfo || undefined,
+          };
+        });
+
+        // Format order date
+        const orderDate = new Date(orderDetails.orderDate).toLocaleString(
+          'vi-VN',
+          {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+          },
+        );
+
+        await this.mailerService.sendOrderConfirmationEmail(
+          customerInfo.email,
+          {
+            orderId: order.id,
+            payosOrderCode: transactionId,
+            customerName: customerInfo.fullName,
+            orderDate: orderDate,
+            totalPrice: formatCurrency(orderDetails.totalPrice),
+            shippingCost: formatCurrency(orderDetails.shippingCost),
+            subtotal: formatCurrency(orderDetails.subtotal),
+            products: products,
+            shippingAddress: {
+              fullName: customerInfo.fullName,
+              phone: customerInfo.phone,
+              province: customerInfo.province,
+              district: customerInfo.district,
+              ward: customerInfo.ward,
+              addressDetail: customerInfo.addressDetail,
+            },
+          },
+        );
+
+        console.log(
+          `📧 Order confirmation email sent to: ${customerInfo.email}`,
+        );
+      } catch (error) {
+        console.error('❌ Error sending order confirmation email:', error);
+        // Don't fail the whole process if email sending fails
       }
 
       console.log(`✅ Order created successfully - Order ID: ${order.id}`);

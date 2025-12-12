@@ -251,7 +251,24 @@ export class OrderService {
         );
       }
 
-      return savedOrder.toModel();
+      // Reload order with relations to include order items
+      const orderWithItems = await this.orderRepository.findOne({
+        where: { id: savedOrder.id },
+        relations: ['orderItems', 'orderItems.lensDetails'],
+      });
+
+      if (!orderWithItems) {
+        throw new HttpException(
+          'Order created but could not be retrieved',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+
+      console.log(
+        `[OrderService] Returning order ${orderWithItems.id} with ${orderWithItems.orderItems?.length || 0} items`,
+      );
+
+      return orderWithItems.toModel();
     } catch (error) {
       throw new HttpException(
         'Failed to create order',
@@ -301,8 +318,22 @@ export class OrderService {
         queryBuilder.skip(paginationQuery.skip).take(paginationQuery.take);
       }
 
-      // Order by created date descending
-      queryBuilder.orderBy('order.createdAt', 'DESC');
+      // Add sorting
+      const sortField = params.sortBy || 'id';
+      const sortDirection = (params.sortOrder?.toUpperCase() || 'DESC') as
+        | 'ASC'
+        | 'DESC';
+
+      // Map sortBy fields to database columns
+      const sortColumnMap: Record<string, string> = {
+        id: 'order.id',
+        orderDate: 'order.orderDate',
+        totalPrice: 'order.totalPrice',
+        status: 'order.status',
+      };
+
+      const sortColumn = sortColumnMap[sortField] || 'order.id';
+      queryBuilder.orderBy(sortColumn, sortDirection);
 
       const [orders, total] = await queryBuilder.getManyAndCount();
 
@@ -358,8 +389,22 @@ export class OrderService {
         queryBuilder.skip(paginationQuery.skip).take(paginationQuery.take);
       }
 
-      // Order by created date descending
-      queryBuilder.orderBy('order.createdAt', 'DESC');
+      // Add sorting
+      const sortField = params.sortBy || 'id';
+      const sortDirection = (params.sortOrder?.toUpperCase() || 'DESC') as
+        | 'ASC'
+        | 'DESC';
+
+      // Map sortBy fields to database columns
+      const sortColumnMap: Record<string, string> = {
+        id: 'order.id',
+        orderDate: 'order.orderDate',
+        totalPrice: 'order.totalPrice',
+        status: 'order.status',
+      };
+
+      const sortColumn = sortColumnMap[sortField] || 'order.id';
+      queryBuilder.orderBy(sortColumn, sortDirection);
 
       const [orders, total] = await queryBuilder.getManyAndCount();
 

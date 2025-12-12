@@ -8,6 +8,7 @@ import { PayOSController } from './controllers/payos.controller';
 import { PayOSService } from './services/payos.service';
 import { CartModule } from '../cart/cart.module';
 import { OrderModule } from '../order/order.module';
+import { MailerModule } from '../mailer/mailer.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { OrderModule } from '../order/order.module';
     ConfigModule,
     CartModule,
     OrderModule,
+    MailerModule,
   ],
   controllers: [PaymentController, PayOSController],
   providers: [PaymentService, PayOSService],

@@ -40,4 +40,70 @@ export class MailerService {
 
     return mailData;
   }
+
+  /**
+   * Send order confirmation email with order details
+   */
+  async sendOrderConfirmationEmail(
+    email: string,
+    orderData: {
+      orderId: number;
+      payosOrderCode: string;
+      customerName: string;
+      orderDate: string;
+      totalPrice: string;
+      shippingCost: string;
+      subtotal: string;
+      products: Array<{
+        name: string;
+        quantity: number;
+        price: string;
+        lensInfo?: string;
+      }>;
+      shippingAddress: {
+        fullName: string;
+        phone: string;
+        province: string;
+        district: string;
+        ward: string;
+        addressDetail: string;
+      };
+    },
+  ): Promise<MailOptionsModel> {
+    // Build product list HTML
+    const productListHtml = orderData.products
+      .map(
+        (product) => `
+        <tr>
+          <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">
+            ${product.name}
+            ${product.lensInfo ? `<br><span style="font-size: 12px; color: #6b7280;">${product.lensInfo}</span>` : ''}
+          </td>
+          <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">${product.quantity}</td>
+          <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right;">${product.price}</td>
+        </tr>
+      `,
+      )
+      .join('');
+
+    const variables: Record<string, string> = {
+      customerName: orderData.customerName,
+      orderId: orderData.orderId.toString(),
+      payosOrderCode: orderData.payosOrderCode,
+      orderDate: orderData.orderDate,
+      productList: productListHtml,
+      subtotal: orderData.subtotal,
+      shippingCost: orderData.shippingCost,
+      totalPrice: orderData.totalPrice,
+      shippingFullName: orderData.shippingAddress.fullName,
+      shippingPhone: orderData.shippingAddress.phone,
+      shippingAddress: `${orderData.shippingAddress.addressDetail}, ${orderData.shippingAddress.ward}, ${orderData.shippingAddress.district}, ${orderData.shippingAddress.province}`,
+    };
+
+    return this.sendMailWithTemplate(
+      email,
+      EmailTemplateType.ORDER_CONFIRMATION,
+      variables,
+    );
+  }
 }

@@ -219,6 +219,19 @@ export class GetOrdersQueryDto extends PartialType(
   @IsNumber()
   @Type(() => Number)
   userId?: number;
+
+  @ApiProperty({
+    required: false,
+    enum: ['id', 'orderDate', 'totalPrice', 'status'],
+  })
+  @IsOptional()
+  @IsString()
+  sortBy?: 'id' | 'orderDate' | 'totalPrice' | 'status';
+
+  @ApiProperty({ required: false, enum: ['asc', 'desc'] })
+  @IsOptional()
+  @IsString()
+  sortOrder?: 'asc' | 'desc';
 }
 
 // Get Order by ID Params DTO

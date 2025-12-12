@@ -105,6 +105,9 @@ export class OrderEntity {
   orderItems!: OrderItemEntity[];
 
   toModel(): OrderModel {
+    // Map orderItems to model if they exist
+    const orderItemsModel = this.orderItems?.map((item) => item.toModel());
+
     return new OrderModel(
       this.id,
       this.userId,
@@ -132,6 +135,7 @@ export class OrderEntity {
       this.updatedBy,
       this.deletedAt,
       this.deletedBy,
+      orderItemsModel,
     );
   }
 }
