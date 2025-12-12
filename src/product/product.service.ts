@@ -258,6 +258,7 @@ export class ProductService {
     frameWidthMin?: number,
     frameWidthMax?: number,
     productType?: ProductType,
+    boutique?: boolean,
   ): Promise<PageList<any>> {
     const queryBuilder = this.productRepository
       .createQueryBuilder('product')
@@ -319,6 +320,13 @@ export class ProductService {
     if (productType) {
       queryBuilder.andWhere('product.productType = :productType', {
         productType: productType,
+      });
+    }
+
+    // Add boutique filter
+    if (boutique !== undefined) {
+      queryBuilder.andWhere('product.isBoutique = :boutique', {
+        boutique: boutique,
       });
     }
 
