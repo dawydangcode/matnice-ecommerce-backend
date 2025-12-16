@@ -305,7 +305,8 @@ export class ProductService {
         'productDetail.deleted_at as deletedAt',
         'productDetail.deleted_by as deletedBy',
       ])
-      .where('product.deletedAt IS NULL');
+      .where('product.deletedAt IS NULL')
+      .distinct(true);
 
     // Remove the productColors.deletedAt IS NULL condition as it might be filtering out products without colors
 
