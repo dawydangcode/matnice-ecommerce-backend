@@ -170,6 +170,10 @@ export class UserService {
     return true;
   }
 
+  async verifyUserEmail(userId: number): Promise<void> {
+    await this.userRepository.update(userId, { isVerified: true });
+  }
+
   async getUserByUsername(
     username: string,
     isHiddenPassword: boolean,

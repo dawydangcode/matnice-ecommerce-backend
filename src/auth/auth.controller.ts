@@ -49,7 +49,9 @@ export class AuthController {
 
   @Public()
   @Post('register')
-  async signUp(@Req() req: RequestModel, @Body() body: AuthSignUpBodyDto) {
+  async signUp(@Req() req: any, @Body() body: AuthSignUpBodyDto) {
+    const userAgent = req.get('User-Agent');
+    const ipAddress = req.ip || req.get('X-Forwarded-For');
     const role = await this.roleService.getRoleByName(RoleType.User);
     const user = await this.authService.register(
       body.username,
@@ -57,8 +59,43 @@ export class AuthController {
       body.email,
       role,
       0,
+      userAgent,
+      ipAddress,
     );
     return user;
+  }
+
+  @Public()
+  @Post('verify-email')
+  async verifyEmail(@Body() body: { token: string }) {
+    const result = await this.authService.verifyEmail(body.token);
+    return {
+      success: result,
+      message: result ? 'Email verified successfully' : 'Verification failed',
+    };
+  }
+
+  @Public()
+  @Post('resend-verification-email')
+  async resendVerificationEmail(@Req() req: any, @Body() body: { email: string }) {
+    const userAgent = req.get('User-Agent');
+    const ipAddress = req.ip || req.get('X-Forwarded-For');
+    
+    const user = await this.userService.getUserByEmail(body.email, true);
+    
+    if (user.isVerified) {
+      return {
+        success: false,
+        message: 'Email is already verified',
+      };
+    }
+
+    await this.authService.sendVerificationEmail(user, userAgent, ipAddress);
+    
+    return {
+      success: true,
+      message: 'Verification email has been resent. Please check your inbox.',
+    };
   }
 
   @Public()

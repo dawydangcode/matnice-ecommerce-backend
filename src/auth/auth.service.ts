@@ -96,6 +96,14 @@ export class AuthService {
     if (!isMatch) {
       throw new UnauthorizedException('Username/Email or password is invalid');
     }
+
+    // Check if email is verified
+    if (!account.isVerified) {
+      throw new UnauthorizedException(
+        'Please verify your email address before logging in. Check your inbox for the verification link.',
+      );
+    }
+
     const type = SessionType.LOGIN;
     const session = await this.sessionService.createSession(
       account,
@@ -131,6 +139,8 @@ export class AuthService {
     email: string,
     role: RoleModel,
     reqUserId: number,
+    userAgent: string,
+    ipAddress: string,
   ): Promise<UserModel> {
     const newUser = await this.userService.createUser(
       username,
@@ -151,7 +161,110 @@ export class AuthService {
       undefined,
     );
 
+    // Send verification email
+    await this.sendVerificationEmail(newUser, userAgent, ipAddress);
+
     return await this.userService.getUserById(newUser.id, true);
+  }
+
+  async sendVerificationEmail(
+    user: UserModel,
+    userAgent: string,
+    ipAddress: string,
+  ): Promise<void> {
+    try {
+      console.log('📧 Starting email verification process for:', user.email);
+      
+      // Create session for verification
+      const session = await this.sessionService.createSession(
+        user,
+        userAgent,
+        ipAddress,
+        SessionType.EMAIL_VERIFICATION,
+        user.id,
+      );
+      console.log('✅ Session created:', session.id);
+
+      // Generate verification token
+      const verifyToken = await this.generateTokenWithConfig(
+        new PayloadModel(
+          user.id,
+          session.id,
+          user.email,
+          user.roleId,
+          (await this.roleService.getRole(user.roleId)).name,
+        ),
+        this.verifyTokenConfig,
+      );
+      console.log('✅ Token generated, expires:', verifyToken.expireDate);
+
+      // Create verification URL
+      const verifyUrl = `${this.configService.get('EMAIL_VERIFICATION_URL')}?token=${verifyToken.token}`;
+      const expiresIn = moment
+        .duration(moment(verifyToken.expireDate).diff(moment()))
+        .humanize();
+      
+      console.log('📧 Verification URL:', verifyUrl);
+      console.log('⏰ Expires in:', expiresIn);
+
+      // Send email
+      console.log('📤 Sending email to:', user.email);
+      console.log('📧 Template type:', EmailTemplateType.EMAIL_VERIFICATION);
+      console.log('📧 Template variables:', { username: user.username, expiresIn });
+      
+      await this.mailerService.sendMailWithTemplate(
+        user.email, 
+        EmailTemplateType.EMAIL_VERIFICATION, 
+        {
+          verifyUrl,
+          username: user.username,
+          expiresIn,
+        }
+      );
+      
+      console.log('✅ Verification email sent successfully to:', user.email);
+    } catch (error: any) {
+      console.error('❌ Failed to send verification email:', error);
+      console.error('Error details:', error.message);
+      console.error('Stack trace:', error.stack);
+      throw new Error(`Failed to send verification email: ${error.message}`);
+    }
+  }
+
+  async verifyEmail(token: string): Promise<boolean> {
+    try {
+      console.log('Verifying email token:', token);
+
+      // Verify token
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: this.verifyTokenConfig.secret,
+      });
+
+      console.log('Decoded payload:', payload);
+
+      // Get user
+      const user = await this.userService.getUserById(payload.userId, false);
+      
+      if (user.isVerified) {
+        throw new UnauthorizedException('Email already verified');
+      }
+
+      // Update user verification status
+      await this.userService.verifyUserEmail(user.id);
+
+      // Invalidate verification session
+      await this.sessionService.updateSession(
+        await this.sessionService.getSessionById(payload.sessionId, true),
+        false,
+        SessionType.EMAIL_VERIFICATION,
+        user.id,
+      );
+
+      return true;
+    } catch (error) {
+      console.error('Email verification error:', error);
+      throw new UnauthorizedException('Invalid or expired verification token');
+    }
   }
 
   async generateToken(payload: PayloadModel): Promise<LoginTokenModel> {

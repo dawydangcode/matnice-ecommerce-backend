@@ -27,6 +27,9 @@ export class UserEntity {
   @Column({ name: 'email' })
   email!: string;
 
+  @Column({ name: 'is_verified', default: false })
+  isVerified!: boolean;
+
   @Column({ name: 'created_at' })
   createdAt!: Date;
 
@@ -58,6 +61,7 @@ export class UserEntity {
       this.roleId,
       this.email,
       !isHiddenPassword ? this.password : undefined,
+      this.isVerified,
       this.createdAt,
       this.createdBy,
       this.updatedAt,

@@ -4,6 +4,7 @@ export class UserModel {
   public readonly roleId: number;
   public readonly email: string;
   public readonly password: string | undefined;
+  public readonly isVerified: boolean;
   public readonly createdAt: Date | undefined;
   public readonly createdBy: number | undefined;
   public readonly updatedAt: Date | undefined;
@@ -17,6 +18,7 @@ export class UserModel {
     roleId: number,
     email: string,
     password: string | undefined,
+    isVerified: boolean,
     createdAt: Date | undefined,
     createdBy: number | undefined,
     updatedAt: Date | undefined,
@@ -29,6 +31,7 @@ export class UserModel {
     this.roleId = roleId;
     this.email = email;
     this.password = password;
+    this.isVerified = isVerified;
     this.createdAt = createdAt;
     this.createdBy = createdBy;
     this.updatedAt = updatedAt;
