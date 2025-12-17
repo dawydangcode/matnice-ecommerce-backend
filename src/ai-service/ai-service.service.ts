@@ -349,7 +349,7 @@ export class AIServiceService {
         'skincolor-ai-model/runs/train20/weights/best.pt',
       );
       // Add output directory and environment variable for matplotlib
-      const command = `export MPLCONFIGDIR=/tmp/matplotlib && ${this.pythonPath} "${scriptPath}" --source "${imageUrl}" --model "${modelPath}" --output /tmp/skin-analysis --json 2>/dev/null`;
+      const command = `export MPLCONFIGDIR=/tmp/matplotlib && ${this.pythonPath} "${scriptPath}" --source "${imageUrl}" --model "${modelPath}" --output /tmp/skin-analysis --json`;
       const process = spawn('bash', ['-c', command]);
 
       let output = '';
@@ -384,7 +384,9 @@ export class AIServiceService {
             );
           }
         } else {
-          reject(new Error(`Skin tone analysis process failed: ${error}`));
+          this.logger.error(`Skin tone stderr: ${error}`);
+          this.logger.error(`Skin tone stdout: ${output}`);
+          reject(new Error(`Skin tone analysis process failed with code ${code}: ${error || 'No error message'}`));
         }
       });
 

@@ -73,7 +73,7 @@ RUN pip3 install --no-cache-dir --break-system-packages \
     numpy>=1.21.0 \
     pillow>=8.0.0 \
     requests>=2.25.0 \
-    mediapipe>=0.10.0
+    mediapipe==0.10.9
 
 # Create uploads directory and matplotlib cache dir
 RUN mkdir -p uploads /tmp/matplotlib && \
