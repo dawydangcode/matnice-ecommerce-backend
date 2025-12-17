@@ -188,8 +188,6 @@ export class ProductRecommendationService {
     // Build query for products
     const queryBuilder = this.productRepository
       .createQueryBuilder('product')
-      .leftJoinAndSelect('product.brand', 'brand')
-      .addSelect(['brand.id', 'brand.name']) // Explicitly select brand fields
       .leftJoinAndSelect('product.productColors', 'productColor')
       .leftJoinAndSelect(
         'productColor.productImage',
@@ -250,7 +248,7 @@ export class ProductRecommendationService {
    * Get products with custom filters
    */
   async getFilteredProducts(filters: ProductRecommendationFilter): Promise<{
-    products: any[]; // Changed from ProductEntity[] to support brand serialization
+    products: ProductEntity[];
     total: number;
     page: number;
     limit: number;
@@ -260,8 +258,6 @@ export class ProductRecommendationService {
 
     const queryBuilder = this.productRepository
       .createQueryBuilder('product')
-      .leftJoinAndSelect('product.brand', 'brand')
-      .addSelect(['brand.id', 'brand.name']) // Explicitly select brand fields
       .leftJoinAndSelect('product.productColors', 'productColor')
       .leftJoinAndSelect(
         'productColor.productImage',
@@ -319,20 +315,8 @@ export class ProductRecommendationService {
 
     const [products, total] = await queryBuilder.getManyAndCount();
 
-    // Debug: Check if brand is loaded
-    console.log('🔍 Backend - First product brand:', products[0]?.brand);
-    console.log('🔍 Backend - First product brandId:', products[0]?.brandId);
-
-    // Manually ensure brand is serialized in response
-    const productsWithBrand = products.map((product) => ({
-      ...product,
-      brand: product.brand
-        ? { id: product.brand.id, name: product.brand.name }
-        : null,
-    }));
-
     return {
-      products: productsWithBrand,
+      products,
       total,
       page,
       limit,
