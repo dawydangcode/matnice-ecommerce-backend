@@ -2,7 +2,7 @@
 -- This script will run when the MySQL container starts for the first time
 
 -- Set character set and collation
-ALTER DATABASE matnice_ecommerce CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER DATABASE mat_nice_ecommerce CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- Create application user (if not using root)
 -- CREATE USER IF NOT EXISTS 'appuser'@'%' IDENTIFIED BY 'your_password_here';

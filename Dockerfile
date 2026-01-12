@@ -58,6 +58,7 @@ COPY --chown=nestjs:nodejs ai-models ./ai-models
 
 # Copy other necessary files
 COPY --chown=nestjs:nodejs .env.production .env
+COPY --chown=nestjs:nodejs healthcheck.js ./healthcheck.js
 
 # Install Python dependencies for AI models
 # Install CPU-only PyTorch first (smaller size ~200MB vs 2GB)
