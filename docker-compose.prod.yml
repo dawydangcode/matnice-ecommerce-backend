@@ -24,13 +24,13 @@ services:
         condition: service_healthy
     networks:
       - app-network
-    # Temporarily disable healthcheck
-    # healthcheck:
-    #   test: ["CMD", "node", "healthcheck.js"]
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 3
-    #   start_period: 40s
+    # Temporarily disable healthcheck:
+    healthcheck:
+      test: ["CMD", "node", "healthcheck.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   mysql:
     image: mysql:8.0
@@ -79,8 +79,7 @@ services:
       - ./nginx/ssl:/etc/nginx/ssl
       - nginx_logs:/var/log/nginx
     depends_on:
-      app:
-        condition: service_healthy
+      - app
     networks:
       - app-network
 
